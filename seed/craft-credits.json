@@ -1,0 +1,42 @@
+{
+ "embroidery": {
+  "artist": "Joey Berzowska",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Chikan_embroidery,_Lucknow.jpg",
+  "size": [
+   1400,
+   1050
+  ]
+ },
+ "crochet": {
+  "artist": "Dnor",
+  "license": "Public domain",
+  "licenseUrl": "",
+  "page": "https://commons.wikimedia.org/wiki/File:Crochet_small_Swedish_tablecloth_about_1930_detail.jpg",
+  "size": [
+   1400,
+   1050
+  ]
+ },
+ "block-print": {
+  "artist": "Ketayun, Katz",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "page": "https://commons.wikimedia.org/wiki/File:Printing_with_Hand_Carved_Block.jpg",
+  "size": [
+   1400,
+   1073
+  ]
+ },
+ "cotton": {
+  "artist": "rajaraman sundaram",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "page": "https://commons.wikimedia.org/wiki/File:COTTON_FLOWER,JAMMALAMEDUGU.KADAPA,A.P_-_panoramio.jpg",
+  "size": [
+   1400,
+   1050
+  ]
+ }
+}

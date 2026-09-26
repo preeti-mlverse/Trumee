@@ -1,26 +1,101 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* Storefront palette: plum-black & bone, inverted section by section,
+     lit with marigold; olive and warm taupe as quiet supporting notes. */
+  --color-cream: #f4efe7; /* bone — page background */
+  --color-sand: #eae1d3; /* deeper bone — cards, image wells */
+  --color-ink: #22101e; /* plum-black — text & dark sections */
+  --color-ink-soft: #3e2839;
+  --color-muted: #776655; /* warm taupe */
+  --color-line: #ddd1c0;
+  --color-plum: #6b2a5a; /* accent on light */
+  --color-plum-dark: #4b1b3f;
+  --color-marigold: #e2a631; /* accent on dark, highlights */
+  --color-marigold-soft: #f2d38c;
+  --color-sage: #5f7524; /* olive — success, positive */
+  --color-blush: #f2d38c;
+  --color-sale: #b0362a;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Admin palette */
+  --color-admin-bg: #f1f1f1;
+  --color-admin-card: #ffffff;
+  --color-admin-line: #e3e3e3;
+  --color-admin-text: #303030;
+  --color-admin-muted: #616161;
+  --color-admin-accent: #1a1a1a;
+  --color-admin-brand: #b4532a;
+  --color-admin-green: #0c7a43;
+  --color-admin-green-bg: #cdfee1;
+  --color-admin-yellow: #8a6116;
+  --color-admin-yellow-bg: #ffeb78;
+  --color-admin-red: #8e1f0b;
+  --color-admin-red-bg: #fedad9;
+  --color-admin-blue: #00527c;
+  --color-admin-blue-bg: #d5ebff;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --font-display: var(--font-bodoni), "Bodoni Moda", Didot, Georgia, serif;
+  --font-sans: var(--font-archivo), "Archivo", system-ui, sans-serif;
+  --font-ui: var(--font-inter), "Inter", system-ui, sans-serif;
+
+  --animate-fade-in: fade-in 0.4s ease-out both;
+  --animate-slide-in: slide-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-grow: grow 7s linear forwards;
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes slide-in {
+    from { transform: translateX(100%); }
+    to { transform: none; }
+  }
+  @keyframes grow {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
   }
 }
 
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+img, video { max-width: 100%; }
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-ink);
+}
+
+/* Rich text from the CMS (product descriptions, pages, blog) */
+.prose-trumee {
+  line-height: 1.75;
+  color: var(--color-ink-soft);
+}
+.prose-trumee > * + * { margin-top: 0.9em; }
+.prose-trumee h2 { font-family: var(--font-display); font-size: 1.9rem; line-height: 1.2; color: var(--color-ink); margin-top: 1.6em; }
+.prose-trumee h3 { font-family: var(--font-display); font-size: 1.45rem; line-height: 1.25; color: var(--color-ink); margin-top: 1.4em; font-weight: 600; }
+.prose-trumee h4 { font-weight: 600; color: var(--color-ink); margin-top: 1.2em; }
+.prose-trumee ul { list-style: disc; padding-left: 1.25rem; }
+.prose-trumee ol { list-style: decimal; padding-left: 1.25rem; }
+.prose-trumee li + li { margin-top: 0.35em; }
+.prose-trumee a { color: var(--color-plum); text-decoration: underline; text-underline-offset: 3px; }
+.prose-trumee strong { color: var(--color-ink); font-weight: 600; }
+.prose-trumee img { border-radius: 4px; margin: 1.5em 0; }
+/* Wide tables (size charts) scroll inside their own box on small screens */
+.prose-trumee table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-size: 0.9rem; -webkit-overflow-scrolling: touch; }
+.prose-trumee th, .prose-trumee td { border: 1px solid var(--color-line); padding: 0.5rem 0.75rem; text-align: left; }
+.prose-trumee th { background: var(--color-sand); font-weight: 600; }
+.prose-trumee > :first-child { margin-top: 0; }
+
+.scrollbar-none { scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

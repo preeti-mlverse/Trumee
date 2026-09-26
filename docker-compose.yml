@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: trumee-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: trumee
+      POSTGRES_PASSWORD: trumee
+      POSTGRES_DB: trumee
+    ports:
+      - "5434:5432"
+    volumes:
+      - trumee-pg:/var/lib/postgresql/data
+volumes:
+  trumee-pg:
