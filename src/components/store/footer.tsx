@@ -40,12 +40,14 @@ const COLS = [
 
 export function Footer({ store }: { store: StoreSettings }) {
   return (
-    <footer className="bg-ink text-cream mt-28">
-      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10 pt-16 pb-10">
+    <footer className="mt-28 px-2 sm:px-4 lg:px-6 pb-2 sm:pb-4">
+      <div className="mx-auto max-w-[1400px] rounded-panel bg-ink text-cream overflow-hidden px-5 sm:px-10 lg:px-14 pt-16 pb-8">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.3fr)_2fr]">
           <div>
-            <Wordmark className="text-3xl text-marigold" />
-            <p className="mt-3 text-sm text-cream/60 max-w-sm">{store.tagline}. Designed in Gurgaon for spontaneous getaways and barefoot evenings.</p>
+            <p className="font-display text-4xl sm:text-5xl leading-[1]">
+              Dressed for days that <em className="font-normal text-marigold-soft">don’t follow a plan.</em>
+            </p>
+            <p className="mt-4 text-sm text-cream/60 max-w-sm">{store.tagline}. Designed in Gurgaon for spontaneous getaways and barefoot evenings.</p>
             <div className="mt-8">
               <p className="text-[11px] tracking-[0.26em] uppercase mb-3 text-marigold">Join the list</p>
               <p className="text-sm text-cream/60 mb-4">New drops, styling notes and members-only offers. No spam, ever.</p>
@@ -80,8 +82,16 @@ export function Footer({ store }: { store: StoreSettings }) {
             </div>
           </div>
         </div>
-        <div className="mt-14 pt-6 border-t border-cream/15 flex flex-col sm:flex-row gap-4 items-center justify-between text-xs text-cream/50">
-          <p>© {new Date().getFullYear()} {store.legalName}. All rights reserved.</p>
+        <Link href="/" aria-label="Trumee home" className="block mt-16 -mb-[0.08em] text-center select-none">
+          <Wordmark className="block text-[17vw] lg:text-[208px] tracking-[0.12em] [padding-left:0.12em] text-cream/95 hover:text-marigold transition-colors duration-500" />
+        </Link>
+        <div className="mt-8 pt-6 border-t border-cream/15 flex flex-col sm:flex-row gap-4 items-center justify-between text-xs text-cream/50">
+          <p>
+            © {new Date().getFullYear()} {store.legalName}. All rights reserved. ·{" "}
+            <Link href="/credits" className="inline-block py-1.5 hover:text-cream">
+              Image credits
+            </Link>
+          </p>
           <div className="flex flex-wrap items-center justify-center gap-5">
             {store.social.instagram && (
               <a href={store.social.instagram} target="_blank" rel="noopener" aria-label="Instagram" className="p-2 -m-2 inline-flex">

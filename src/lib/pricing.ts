@@ -24,6 +24,16 @@ export type PricingDiscount = {
   targetIds: number[];
 };
 
+/** Online-payment incentive (Admin → Settings → Payments). */
+export type PrepaidRule = { percent: number; max: number | null; minOrder: number };
+
+/** Saving for paying online on `base` paise (after code discounts, before shipping). */
+export function prepaidSaving(base: number, rule: PrepaidRule | null | undefined) {
+  if (!rule || rule.percent <= 0 || base <= 0 || base < rule.minOrder) return 0;
+  const v = Math.round((base * Math.min(rule.percent, 100)) / 100);
+  return rule.max != null && rule.max > 0 ? Math.min(v, rule.max) : v;
+}
+
 export type PricedLine = PricingLine & {
   lineTotal: number;
   discount: number;
@@ -35,6 +45,12 @@ export type Totals = {
   lines: PricedLine[];
   subtotal: number;
   discountTotal: number;
+  /** Prepaid saving actually applied (only when paymentMethod is "razorpay"). */
+  prepaidDiscount: number;
+  /** What paying online would save on this cart, whatever method is selected. */
+  prepaidAvailable: number;
+  /** Grand total if the shopper pays online. */
+  onlineTotal: number;
   shipping: number;
   codFee: number;
   tax: number;
@@ -61,6 +77,7 @@ export function priceCart(
     shipping: ShippingSettings;
     tax: TaxSettings;
     paymentMethod?: "razorpay" | "cod";
+    prepaid?: PrepaidRule | null;
   },
 ): Totals {
   const lines: PricedLine[] = input.map((l) => ({
@@ -112,6 +129,21 @@ export function priceCart(
   const discountTotal = lines.reduce((s, l) => s + l.discount, 0);
   const afterDiscount = subtotal - discountTotal;
 
+  // Prepaid saving: on the discounted goods value, spread across lines so per-line GST stays exact.
+  const prepaidAvailable = prepaidSaving(afterDiscount, opts.prepaid);
+  const prepaidDiscount = opts.paymentMethod === "razorpay" ? prepaidAvailable : 0;
+  if (prepaidDiscount) {
+    let left = prepaidDiscount;
+    const payable = lines.filter((l) => l.lineTotal - l.discount > 0);
+    payable.forEach((l, i) => {
+      const net = l.lineTotal - l.discount;
+      const share = i === payable.length - 1 ? left : Math.round((prepaidDiscount * net) / afterDiscount);
+      const take = Math.min(share, net);
+      l.discount += take;
+      left -= take;
+    });
+  }
+
   for (const l of lines) {
     l.taxRate = gstRate(l.unitPrice, opts.tax);
     const net = l.lineTotal - l.discount;
@@ -125,12 +157,17 @@ export function priceCart(
   const meetsFree = s.freeShippingThreshold != null && afterDiscount >= s.freeShippingThreshold;
   const shipping = !lines.length || freeShipping || meetsFree ? 0 : s.flatRate;
   const codFee = opts.paymentMethod === "cod" ? s.codFee : 0;
-  const total = afterDiscount + shipping + codFee + (opts.tax.pricesIncludeTax ? 0 : tax);
+  const total = afterDiscount - prepaidDiscount + shipping + codFee + (opts.tax.pricesIncludeTax ? 0 : tax);
+  const onlineTotal =
+    opts.paymentMethod === "razorpay" || !prepaidAvailable ? (opts.paymentMethod === "cod" ? total - codFee : total) : priceCart(input, { ...opts, paymentMethod: "razorpay" }).total;
 
   return {
     lines,
     subtotal,
     discountTotal,
+    prepaidDiscount,
+    prepaidAvailable,
+    onlineTotal,
     shipping,
     codFee,
     tax,

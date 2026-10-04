@@ -34,13 +34,22 @@
   --color-admin-blue: #00527c;
   --color-admin-blue-bg: #d5ebff;
 
-  --font-display: var(--font-bodoni), "Bodoni Moda", Didot, Georgia, serif;
-  --font-sans: var(--font-archivo), "Archivo", system-ui, sans-serif;
-  --font-ui: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-display: var(--font-cormorant), "Cormorant Garamond", Garamond, Georgia, serif;
+  --font-sans: var(--font-jost), "Jost", system-ui, sans-serif;
+  --font-ui: var(--font-jost), "Jost", system-ui, sans-serif;
+
+  /* Soft, premium geometry: rounded media, pill controls */
+  --radius-card: 1.25rem;
+  --radius-panel: 2rem;
 
   --animate-fade-in: fade-in 0.4s ease-out both;
   --animate-slide-in: slide-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-marquee: marquee 40s linear infinite;
+  --animate-marquee-slow: marquee 60s linear infinite;
+  --animate-kenburns: kenburns 14s ease-out both;
+  --animate-word: word 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-drift: drift 9s ease-in-out infinite;
+  --animate-ribbon: marquee 55s linear infinite;
   --animate-grow: grow 7s linear forwards;
 
   @keyframes fade-in {
@@ -54,6 +63,18 @@
   @keyframes grow {
     from { width: 0; }
     to { width: 100%; }
+  }
+  @keyframes kenburns {
+    from { transform: scale(1.08); }
+    to { transform: scale(1); }
+  }
+  @keyframes drift {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(6deg); }
+  }
+  @keyframes word {
+    from { opacity: 0; transform: translateY(40%); }
+    to { opacity: 1; transform: none; }
   }
   @keyframes marquee {
     from { transform: translateX(0); }
@@ -71,6 +92,59 @@ body {
   background: var(--color-cream);
   color: var(--color-ink);
 }
+/* Cormorant is a light, small-eyed face: give display type a touch more weight everywhere */
+.font-display { font-weight: 500; letter-spacing: -0.01em; }
+
+/* Glass panel (floating header, info cards) */
+.glass {
+  background: rgb(255 253 248 / 0.62);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+}
+.glass-dark {
+  background: rgb(34 16 30 / 0.42);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+
+/* Scroll reveal (see components/store/reveal.tsx) */
+.reveal { transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.reveal[data-reveal="out"] { opacity: 0; transform: translateY(28px); }
+.reveal-stagger > * { transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.reveal-stagger[data-reveal="out"] > * { opacity: 0; transform: translateY(32px) scale(0.98); }
+.reveal-stagger > *:nth-child(2) { transition-delay: 0.08s; }
+.reveal-stagger > *:nth-child(3) { transition-delay: 0.16s; }
+.reveal-stagger > *:nth-child(4) { transition-delay: 0.24s; }
+.reveal-stagger > *:nth-child(5) { transition-delay: 0.32s; }
+.reveal-stagger > *:nth-child(6) { transition-delay: 0.4s; }
+.reveal-stagger > *:nth-child(n + 7) { transition-delay: 0.48s; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal[data-reveal="out"], .reveal-stagger[data-reveal="out"] > * { opacity: 1; transform: none; }
+}
+
+/* Photograph showing through the letterforms */
+.text-image {
+  background-size: cover;
+  background-position: center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Sunlit backdrop (storefront) — dawn defaults; SkyBackdrop moves them toward dusk on scroll */
+:root {
+  --sky-top: #efdfc4;
+  --sky-bottom: #f5ecdd;
+  --sky-head: rgb(239 223 196 / 0.86);
+  --sun: rgb(243 201 140 / 0.55);
+  --sun-x: 12%;
+  --sun-y: 88%;
+}
+.sky-backdrop {
+  background:
+    radial-gradient(circle at var(--sun-x) var(--sun-y), var(--sun) 0, transparent 34vmax),
+    linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+}
 
 /* Rich text from the CMS (product descriptions, pages, blog) */
 .prose-trumee {
@@ -78,15 +152,15 @@ body {
   color: var(--color-ink-soft);
 }
 .prose-trumee > * + * { margin-top: 0.9em; }
-.prose-trumee h2 { font-family: var(--font-display); font-size: 1.9rem; line-height: 1.2; color: var(--color-ink); margin-top: 1.6em; }
-.prose-trumee h3 { font-family: var(--font-display); font-size: 1.45rem; line-height: 1.25; color: var(--color-ink); margin-top: 1.4em; font-weight: 600; }
+.prose-trumee h2 { font-family: var(--font-display); font-weight: 500; font-size: 2.2rem; line-height: 1.2; color: var(--color-ink); margin-top: 1.6em; }
+.prose-trumee h3 { font-family: var(--font-display); font-size: 1.7rem; line-height: 1.25; color: var(--color-ink); margin-top: 1.4em; font-weight: 600; }
 .prose-trumee h4 { font-weight: 600; color: var(--color-ink); margin-top: 1.2em; }
 .prose-trumee ul { list-style: disc; padding-left: 1.25rem; }
 .prose-trumee ol { list-style: decimal; padding-left: 1.25rem; }
 .prose-trumee li + li { margin-top: 0.35em; }
 .prose-trumee a { color: var(--color-plum); text-decoration: underline; text-underline-offset: 3px; }
 .prose-trumee strong { color: var(--color-ink); font-weight: 600; }
-.prose-trumee img { border-radius: 4px; margin: 1.5em 0; }
+.prose-trumee img { border-radius: var(--radius-card); margin: 1.5em 0; }
 /* Wide tables (size charts) scroll inside their own box on small screens */
 .prose-trumee table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-size: 0.9rem; -webkit-overflow-scrolling: touch; }
 .prose-trumee th, .prose-trumee td { border: 1px solid var(--color-line); padding: 0.5rem 0.75rem; text-align: left; }

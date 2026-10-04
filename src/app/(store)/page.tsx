@@ -1,14 +1,17 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { ArrowUpRight, Quote, RotateCcw, ShieldCheck, Truck, Wallet } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { db, schema } from "@/db";
-import { Hero, type HeroClip } from "@/components/store/hero";
+import { EditSpotlight } from "@/components/store/edit-spotlight";
+import { Hero, type HeroClip, type HeroProduct } from "@/components/store/hero";
 import { LoopVideo } from "@/components/store/loop-video";
-import { ProductGrid } from "@/components/store/product-card";
-import { CategoryTile, ReelRail } from "@/components/store/reels";
-import { Container, SectionHeading } from "@/components/store/ui";
+import { blockPrint, Doodle, ScallopEdge } from "@/components/store/motifs";
+import { ProductRail } from "@/components/store/product-rail";
+import { CategoryTile, ImageWord, ReelRail } from "@/components/store/reels";
+import { CountUp, Reveal } from "@/components/store/reveal";
+import { Container, DotLink, PillLink, SectionHeading } from "@/components/store/ui";
 import { listCollections, listProducts } from "@/lib/catalog";
 import { getSettings } from "@/lib/settings";
 import { CRAFT_IMAGES } from "@/lib/trust";
@@ -31,48 +34,122 @@ const CATEGORY_MEDIA: Record<string, { image: string; video?: string }> = {
   "co-ord-sets": { image: "/videos/trmcs01.webp", video: "/videos/trmcs01.mp4" },
 };
 
+const CRAFT_WORDS = ["Crochet lace", "Schiffli embroidery", "Sanganeri prints", "Breathable cotton", "Designed in India", "Made for getaways", "Cash on delivery"];
+
+const PROMISES = [
+  [Truck, "Pan-India delivery", "Flat ₹29 shipping, 2–8 days"],
+  [RotateCcw, "Easy returns", "7-day return window"],
+  [Wallet, "Cash on delivery", "Pay when it arrives"],
+  [ShieldCheck, "Secure checkout", "UPI, cards & netbanking"],
+] as const;
+
+/** Full-width rounded panel inset from the viewport edges. */
+function Panel({ className, style, children }: { className?: string; style?: React.CSSProperties; children: React.ReactNode }) {
+  return (
+    <section className="mt-16 sm:mt-24 px-2 sm:px-4 lg:px-6">
+      <div className={`relative mx-auto max-w-[1400px] rounded-panel ${className ?? ""}`} style={style}>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+/** "Shop by mood": occasion and craft tags that already power the collection filters. */
+const MOODS = [
+  { key: "vacation", group: "occasion", title: "Getaway", sub: "Vacation-ready", tint: "from-[#f2c27b] to-[#e88d67]" },
+  { key: "casuals", group: "occasion", title: "Everyday", sub: "Easy casuals", tint: "from-[#f3dcb2] to-[#d9b38c]" },
+  { key: "office", group: "occasion", title: "Nine to five", sub: "Office-ready", tint: "from-[#c9b6d9] to-[#8e6aa6]" },
+  { key: "crochet", group: "detail", title: "Crochet", sub: "Hand-finished lace", tint: "from-[#f6e6d0] to-[#e2c6a1]" },
+  { key: "embroidery", group: "detail", title: "Embroidered", sub: "Thread-work florals", tint: "from-[#f5c7c0] to-[#d9757a]" },
+  { key: "schiffli", group: "detail", title: "Schiffli", sub: "Scallops & eyelets", tint: "from-[#cfe0dc] to-[#7fa59e]" },
+] as const;
+
 export default async function Home() {
-  const [home, categories, edits, bestsellers, fresh, withVideo, posts] = await Promise.all([
+  const [home, categories, edits, bestsellers, fresh, underPrice, withVideo, posts] = await Promise.all([
     getSettings("home"),
     listCollections("category"),
     listCollections("edit"),
-    listProducts({ featured: true, limit: 8 }),
-    listProducts({ sort: "newest", limit: 4 }),
+    listProducts({ featured: true, limit: 10 }),
+    listProducts({ sort: "newest", limit: 10 }),
+    listProducts({ maxPrice: 99900, sort: "best-selling", limit: 10 }),
     listProducts({ withVideo: true, limit: 24, sort: "best-selling" }),
     db.select().from(schema.blogPosts).where(eq(schema.blogPosts.published, true)).orderBy(desc(schema.blogPosts.publishedAt)).limit(3),
   ]);
 
   const clips: HeroClip[] = withVideo.items.map((p) => ({ handle: p.handle, title: p.title, price: p.price, video: p.video!.url, poster: p.video!.poster }));
-  // Hero pairs: lead with the most striking full-length looks
+  // Hero glass card: lead with the most striking full-length looks
   const heroOrder = ["floral-spaghetti-strap-fit-and-flare-dress", "mustard-artistic-print-cord-set-with-crochet-lace-accents", "schiffli-embroidered-and-printed-rayon-tiered-midi-dress", "red-cotton-check-shirt-with-schiffli-embroidery-and-hood", "paisley-print-cotton-moss-boho-dress", "floral-crochet-lace-up-boho-top"];
   const heroClips = [...heroOrder.map((h) => clips.find((c) => c.handle === h)).filter(Boolean), ...clips.filter((c) => !heroOrder.includes(c.handle))] as HeroClip[];
-  // 1 hero tile (2×2) + 4 tiles fills the 4×2 grid exactly
-  const featuredEdits = (home.featuredCollections.map((h) => edits.find((e) => e.handle === h)).filter(Boolean) as typeof edits).slice(0, 5);
+  const spotlightEdits = home.featuredCollections
+    .map((h) => edits.find((e) => e.handle === h))
+    .filter((e): e is (typeof edits)[number] => !!e)
+    .map((e) => ({ handle: e.handle, title: e.title, image: e.imageUrl, text: stripHtml(e.descriptionHtml) }));
   const escape = clips.find((c) => c.handle === "boho-handkerchief-hem-vacation-dress");
+  const bento = ["dresses", "tops", "skirts", "co-ord-sets", "jumpsuit", "shirts"]
+    .map((h) => categories.find((c) => c.handle === h))
+    .filter((c): c is (typeof categories)[number] => !!c);
+  // Shoppable strip under each banner slide: the pictured piece first, then the rest of its collection
+  const shop: HeroProduct[][] = await Promise.all(
+    home.heroSlides.map(async (s) => {
+      const col = s.collection && categories.find((c) => c.handle === s.collection);
+      if (!col) return [];
+      const { items } = await listProducts({ collectionId: col.id, limit: 12 });
+      const lead = (s.featured ?? []).map((h) => items.find((p) => p.handle === h)).filter((p) => !!p);
+      return [...lead, ...items.filter((p) => !lead.includes(p))]
+        .slice(0, 3)
+        .map((p) => ({ handle: p.handle, title: p.title, price: p.price, compareAtPrice: p.compareAtPrice, image: p.images[0]?.url ?? null }));
+    }),
+  );
+  // Each mood card gets a different product photo (bestsellers overlap across tags)
+  const moodLists = await Promise.all(MOODS.map((m) => listProducts({ tagGroups: [[m.key]], limit: 8, sort: "best-selling" })));
+  const used = new Set<number>();
+  const moods = MOODS.map((m, i) => {
+    const pick = moodLists[i].items.find((p) => !used.has(p.id) && p.images[0]) ?? moodLists[i].items[0];
+    if (pick) used.add(pick.id);
+    return { ...m, total: moodLists[i].total, image: pick?.images[0]?.url ?? null };
+  });
+  const [{ styles }] = await db.select({ styles: sql<number>`count(*)::int` }).from(schema.products).where(eq(schema.products.status, "active"));
+  const shippingS = await getSettings("shipping");
+  const tabs = [
+    { label: "Bestsellers", items: bestsellers.items, href: "/collections/all?sort=best-selling" },
+    { label: "New in", items: fresh.items, href: "/collections/all?sort=newest" },
+    { label: "Under ₹999", items: underPrice.items, href: "/collections/all?max=999" },
+  ].filter((t) => t.items.length);
 
   return (
     <>
-      <Hero slides={home.heroSlides} clips={heroClips} />
+      <Hero slides={home.heroSlides} clips={heroClips} shop={shop} />
 
-      <div className="bg-marigold text-ink overflow-hidden py-3">
-        <div className="flex w-max animate-marquee whitespace-nowrap text-[11px] font-medium tracking-[0.3em] uppercase">
-          {[0, 1].map((k) => (
-            <span key={k} className="flex" aria-hidden={k === 1}>
-              {["Crochet lace", "Schiffli embroidery", "Sanganeri prints", "Breathable cotton", "Designed in India", "Made for getaways", "Cash on delivery"].map((t) => (
-                <span key={t} className="px-7 flex items-center gap-7">
-                  {t} <span className="size-1.5 rotate-45 bg-ink inline-block" />
-                </span>
-              ))}
-            </span>
-          ))}
+      {/* Craft words — slim marigold ribbon tucked under the hero, same width */}
+      <div className="px-2 sm:px-4 lg:px-6 mt-2 sm:mt-3" aria-hidden>
+        <div className="mx-auto max-w-[1400px] rounded-full bg-marigold text-ink overflow-hidden py-2 sm:py-2.5">
+          <div className="flex w-max animate-marquee-slow whitespace-nowrap font-display italic text-[17px] sm:text-[21px] leading-none">
+            {[0, 1].map((k) => (
+              <span key={k} className="flex">
+                {CRAFT_WORDS.map((t) => (
+                  <span key={t} className="px-4 sm:px-6 flex items-center gap-8 sm:gap-12">
+                    {t} <span className="not-italic text-[0.5em] text-plum">✦</span>
+                  </span>
+                ))}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Categories */}
-      <Container className="pt-24 sm:pt-28">
-        <SectionHeading eyebrow="Discover" title="Shop by category" href="/collections/all" linkLabel="Shop all" />
-        <div className="grid grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-5">
-          {categories.map((c, i) => {
+      {/* Categories — bento mosaic */}
+      <Container className="relative pt-10 sm:pt-14">
+        <Doodle kind="sprig" className="hidden md:block absolute right-[38%] top-6 size-24 text-plum/25" />
+        <SectionHeading
+          eyebrow="Discover"
+          title="Shop by"
+          accent="category"
+          text="Six silhouettes, one easy spirit — from breezy dresses to crochet-trimmed tops."
+          href="/collections/all"
+          linkLabel="Shop all clothing"
+        />
+        <Reveal stagger className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:auto-rows-[340px] xl:auto-rows-[380px]">
+          {bento.map((c) => {
             const m = CATEGORY_MEDIA[c.handle];
             return (
               <CategoryTile
@@ -82,195 +159,246 @@ export default async function Home() {
                 image={m?.image ?? c.imageUrl ?? ""}
                 video={m?.video}
                 poster={m?.image}
+                className="aspect-[3/4] lg:aspect-auto"
               />
             );
           })}
-        </div>
+          <ImageWord word="Boho" image="/images/lifestyle/hero-pink-wall.webp" href="/collections/free-spirited" className="col-span-2 py-10 lg:py-0 bg-[#fffdf8]/70" />
+        </Reveal>
       </Container>
 
-      {/* Bestsellers */}
-      <Container className="pt-28">
-        <SectionHeading eyebrow="Top of the game" title="Bestsellers" href="/collections/all?sort=best-selling" />
-        <ProductGrid items={bestsellers.items} list="Home – Bestsellers" />
-      </Container>
-
-      {/* Reels — inverted */}
-      {clips.length > 0 && (
-        <section className="mt-28 bg-ink text-cream py-20 sm:py-24">
-          <Container>
-            <SectionHeading dark eyebrow="Watch & shop" title="See it move" />
-            <ReelRail clips={clips} />
-          </Container>
-        </section>
-      )}
-
-      {/* Edits */}
-      <Container className="pt-28">
-        <SectionHeading eyebrow="Moodboards" title="The Edits" href="/collections" linkLabel="All edits" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {featuredEdits.map((c, i) => (
+      {/* Shop by mood — gradient cards with a floating product cut-out */}
+      <Container className="relative pt-16 sm:pt-24">
+        <Doodle kind="bloom" className="hidden md:block absolute left-[46%] top-12 size-20 text-marigold/40" />
+        <SectionHeading eyebrow="Find your vibe" title="Shop by" accent="mood" text="Pick the plan — or the craft — and we’ll bring the outfit." />
+        <Reveal stagger className="grid grid-cols-2 lg:grid-cols-6 gap-2.5 sm:gap-4">
+          {moods.map((m) => (
             <Link
-              key={c.id}
-              href={`/collections/${c.handle}`}
-              className={`group relative overflow-hidden bg-ink ${i === 0 ? "col-span-2 row-span-2 aspect-square lg:aspect-auto" : "aspect-[3/4]"}`}
+              key={m.key}
+              href={`/collections/all?${m.group}=${m.key}`}
+              className={`group relative h-60 sm:h-72 overflow-hidden rounded-card bg-gradient-to-br ${m.tint} p-4 sm:p-5 flex flex-col justify-between shadow-[0_18px_40px_-28px_rgba(34,16,30,0.6)] transition-transform duration-500 hover:-translate-y-1.5`}
             >
-              {c.imageUrl && (
-                <Image src={c.imageUrl} alt="" fill sizes={i === 0 ? "(min-width:1024px) 50vw, 100vw" : "(min-width:1024px) 25vw, 50vw"} className="object-cover object-[50%_30%] transition duration-700 group-hover:scale-105" />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/5 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6 text-cream">
-                <h3 className={`font-display leading-[1] ${i === 0 ? "text-4xl sm:text-5xl" : "text-2xl sm:text-3xl"}`}>{c.title}</h3>
-                {i === 0 && c.descriptionHtml && <p className="hidden sm:block text-sm text-cream/80 mt-3 max-w-md">{stripHtml(c.descriptionHtml)}</p>}
-                <span className="mt-4 inline-flex items-center gap-1.5 text-[10px] tracking-[0.24em] uppercase border-b border-marigold pb-1">
-                  Explore <ArrowUpRight className="size-3" />
+              <span aria-hidden className="absolute inset-0" style={blockPrint("#22101e", 0.1)} />
+              <span className="relative z-10">
+                <span className="block text-[10px] tracking-[0.26em] uppercase text-ink/70">{m.sub}</span>
+                <span className="block font-display italic text-[30px] sm:text-[34px] leading-none mt-1.5 text-ink">{m.title}</span>
+              </span>
+              {m.image && (
+                <span className="absolute -right-5 -bottom-6 w-[62%] aspect-[3/4] rounded-[40%_40%_0_0] overflow-hidden border-4 border-[#fffdf8]/70 shadow-xl transition-transform duration-700 group-hover:scale-105 group-hover:-rotate-2">
+                  <Image src={m.image} alt="" fill sizes="(min-width:1024px) 12vw, 30vw" className="object-cover object-top" />
                 </span>
-              </div>
+              )}
+              <span className="relative z-10 inline-flex w-fit items-center gap-1.5 rounded-full bg-[#fffdf8]/80 px-3 py-1 text-[12px] text-ink">
+                {m.total} styles <ArrowUpRight className="size-3.5 transition-transform group-hover:rotate-45" />
+              </span>
             </Link>
           ))}
-        </div>
+        </Reveal>
       </Container>
 
-      {/* Editorial split — inverted */}
-      <section className="mt-28 grid grid-cols-1 lg:grid-cols-2 bg-ink text-cream">
-        <div className="relative aspect-[4/5] lg:aspect-auto lg:min-h-[720px] overflow-hidden">
+      {/* Products — tabbed rail */}
+      {tabs.length > 0 && (
+        <Container className="pt-16 sm:pt-24">
+          <SectionHeading
+            eyebrow="Fresh picks"
+            title="Just dropped,"
+            accent="made for repeat wear"
+            text="Thoughtfully made pieces in breathable fabrics — for everyday comfort, effortless layering and last-minute getaways."
+          />
+          <ProductRail
+            list="Home"
+            lead={{ image: "/images/lifestyle/cafe-chair.webp", eyebrow: "Most loved", title: "The pieces everyone’s wearing", href: "/collections/all?sort=best-selling", cta: "Shop bestsellers" }}
+            tabs={tabs}
+          />
+        </Container>
+      )}
+
+      {/* Trumee in numbers — real catalogue & policy facts, counting up */}
+      <Container className="pt-16 sm:pt-20">
+        <Reveal stagger className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          {[
+            { n: styles, pre: "", suf: "", label: "styles, all designed in Gurgaon" },
+            { n: 6, pre: "", suf: "", label: "silhouettes from dresses to co-ords" },
+            { n: 7, pre: "", suf: "-day", label: "easy returns & size exchanges" },
+            { n: shippingS.flatRate / 100, pre: "₹", suf: "", label: "flat shipping anywhere in India" },
+          ].map((x) => (
+            <div key={x.label} className="relative overflow-hidden rounded-3xl bg-[#fffdf8]/75 border border-white/70 px-5 py-6 sm:px-7 sm:py-8">
+              <p className="font-display text-[48px] sm:text-[64px] leading-none text-plum">
+                <CountUp to={x.n} prefix={x.pre} suffix={x.suf} />
+              </p>
+              <p className="mt-2 text-[13px] sm:text-sm text-ink-soft">{x.label}</p>
+              <Doodle kind="sun" className="absolute -right-6 -top-6 size-24 text-marigold/30" />
+            </div>
+          ))}
+        </Reveal>
+      </Container>
+
+      {/* Reels — dark rounded panel */}
+      {clips.length > 0 && (
+        <Panel className="bg-ink text-cream pt-14 sm:pt-20 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-10 overflow-hidden" style={blockPrint("#f2d38c", 0.05)}>
+          <ScallopEdge color="#fffdf8" className="absolute inset-x-0 top-0 opacity-90" flip />
+          <SectionHeading dark eyebrow="Watch & shop" title="See it" accent="move" />
+          <ReelRail clips={clips} />
+        </Panel>
+      )}
+
+      {/* The Edits — moodboard index */}
+      {spotlightEdits.length > 0 && (
+        <Container className="pt-16 sm:pt-24">
+          <SectionHeading
+            eyebrow="Moodboards"
+            title="The"
+            accent="Edits"
+            text="Stories told in fabric — pick a mood and we’ll dress it."
+            href="/collections"
+            linkLabel="Explore all edits"
+          />
+          <EditSpotlight edits={spotlightEdits} />
+        </Container>
+      )}
+
+      {/* Editorial split */}
+      <Panel className="relative overflow-hidden bg-ink text-cream grid lg:grid-cols-2 isolate">
+        <div className="relative aspect-[4/5] lg:aspect-auto lg:min-h-[760px]">
           {escape ? (
             <LoopVideo src={escape.video} poster={escape.poster} className="absolute inset-0 size-full object-[50%_40%]" />
           ) : (
             <Image src="/images/lifestyle/lake-rust.webp" alt="" fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover" />
           )}
         </div>
-        <div className="flex items-center px-6 sm:px-12 lg:px-20 py-20">
+        <div className="relative flex items-center px-6 sm:px-12 lg:px-16 py-16 lg:py-20 overflow-hidden isolate">
+          <Image src="/images/lifestyle/lake-wide.webp" alt="" fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover opacity-35 -z-10" />
+          <div className="absolute inset-0 bg-gradient-to-br from-ink via-ink/85 to-ink/40 -z-10" />
           <div className="max-w-md">
             <p className="text-[11px] tracking-[0.3em] uppercase text-marigold">Nomadic Escapes</p>
-            <h2 className="font-display text-5xl sm:text-7xl leading-[0.95] mt-6">For your soul’s expedition</h2>
-            <p className="mt-7 text-cream/70 leading-relaxed">
+            <h2 className="font-display text-[52px] sm:text-[80px] leading-[0.9] mt-6">
+              For your <em className="font-normal text-marigold-soft">soul’s</em> expedition
+            </h2>
+            <p className="mt-7 text-cream/75 leading-relaxed text-[15px]">
               Adventure is more than travel — it’s a mindset. Pieces for spontaneous weekend getaways, barefoot evenings and stories that start with “why not?”
             </p>
             <div className="mt-10 grid grid-cols-2 gap-3 max-w-sm">
-              <Image src="/images/lifestyle/lake-rust.webp" alt="" width={400} height={500} className="aspect-[4/5] object-cover" />
-              <Image src="/images/lifestyle/stone-wall.webp" alt="" width={400} height={500} className="aspect-[4/5] object-cover mt-10" />
+              <Image src="/images/lifestyle/lake-rust.webp" alt="" width={400} height={500} className="aspect-[4/5] object-cover rounded-2xl" />
+              <Image src="/images/lifestyle/stone-wall.webp" alt="" width={400} height={500} className="aspect-[4/5] object-cover rounded-2xl mt-10" />
             </div>
-            <Link href="/collections/escape-edit" className="mt-10 inline-block bg-marigold text-ink px-7 py-3.5 text-[11px] font-semibold tracking-[0.22em] uppercase hover:bg-cream transition-colors">
+            <PillLink href="/collections/escape-edit" tone="marigold" className="mt-10">
               Escape in style
-            </Link>
+            </PillLink>
           </div>
         </div>
-      </section>
+      </Panel>
 
       {/* Details */}
-      <Container className="pt-28">
-        <SectionHeading eyebrow="In the spotlight" title="Details that do the talking" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <Container className="pt-16 sm:pt-24">
+        <SectionHeading eyebrow="In the spotlight" title="Details that" accent="do the talking" />
+        <Reveal stagger className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
           {home.spotlight.map((s) => (
-            <Link key={s.title} href={s.href} className="group">
-              <div className="relative aspect-[4/5] overflow-hidden bg-sand">
-                <Image src={s.image} alt="" fill sizes="(min-width:768px) 33vw, 100vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+            <Link key={s.title} href={s.href} className="group relative aspect-[4/5] overflow-hidden rounded-panel bg-sand isolate">
+              <Image src={s.image} alt="" fill sizes="(min-width:768px) 33vw, 100vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div className="glass absolute inset-x-3 bottom-3 rounded-3xl p-5 flex items-end justify-between gap-4">
+                <div>
+                  <h3 className="font-display text-[28px] leading-tight">{s.title}</h3>
+                  <p className="text-sm text-ink-soft mt-0.5">{s.text}</p>
+                </div>
+                <span className="size-10 shrink-0 rounded-full bg-ink text-cream grid place-items-center transition-transform group-hover:rotate-45">
+                  <ArrowUpRight className="size-4" />
+                </span>
               </div>
-              <h3 className="font-display text-[28px] leading-tight mt-5">{s.title}</h3>
-              <p className="text-sm text-muted mt-1">{s.text}</p>
             </Link>
           ))}
-        </div>
+        </Reveal>
       </Container>
 
-      {/* The Trumee promise — craft & quality, with CC0 museum imagery (credited) */}
-      <section className="mt-28 bg-sand py-20 sm:py-24">
-        <Container>
-          <SectionHeading eyebrow="The Trumee promise" title="Crafted to be worn, loved, and worn again" />
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {CRAFT_IMAGES.map((c) => (
-              <figure key={c.title}>
-                <div className="relative aspect-[4/5] overflow-hidden bg-cream">
-                  <Image src={c.src} alt={c.title + " — " + c.credit.split(" — ")[0]} fill sizes="(min-width:1024px) 25vw, 50vw" className="object-cover transition-transform duration-700 hover:scale-105" />
-                </div>
-                <h3 className="font-display text-2xl mt-4">{c.title}</h3>
-                <p className="text-sm text-ink-soft mt-1">{c.text}</p>
-                <Link href={c.shop.href} className="inline-block mt-3 py-1.5 text-[11px] tracking-[0.2em] uppercase border-b border-ink hover:text-plum hover:border-plum">
-                  {c.shop.label}
-                </Link>
-                <figcaption className="text-[10px] text-muted mt-2">
-                  <a href={c.href} target="_blank" rel="noopener" className="inline-block py-1.5 hover:underline">{c.credit}</a>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-          <dl className="mt-14 grid grid-cols-2 lg:grid-cols-4 gap-6 border-t border-ink/15 pt-10">
-            {[
-              ["Designed in", "Gurgaon, India"],
-              ["Dispatched in", "1–2 business days"],
-              ["Returns", "7 days, no fuss"],
-              ["Pay your way", "UPI · Cards · COD"],
-            ].map(([k, v]) => (
-              <div key={k}>
-                <dt className="text-[11px] tracking-[0.24em] uppercase text-muted">{k}</dt>
-                <dd className="font-display text-2xl sm:text-3xl mt-1">{v}</dd>
+      {/* The Trumee promise — craft & quality */}
+      <Panel className="bg-[#fffdf8]/75 py-16 sm:py-20 px-4 sm:px-6 lg:px-10" style={blockPrint("#6b2a5a", 0.07)}>
+        <SectionHeading eyebrow="The Trumee promise" title="Crafted to be worn, loved," accent="and worn again" />
+        <Reveal stagger className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {CRAFT_IMAGES.map((c) => (
+            <figure key={c.title} className="group">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-card bg-sand">
+                <Image src={c.src} alt={c.title} fill sizes="(min-width:1024px) 25vw, 50vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
               </div>
-            ))}
-          </dl>
-        </Container>
-      </section>
+              <h3 className="font-display text-[26px] sm:text-[28px] leading-tight mt-4">{c.title}</h3>
+              <p className="text-sm text-ink-soft mt-1 leading-relaxed">{c.text}</p>
+              <DotLink href={c.shop.href} className="mt-2">
+                {c.shop.label}
+              </DotLink>
+            </figure>
+          ))}
+        </Reveal>
+        <dl className="mt-14 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {[
+            ["Designed in", "Gurgaon, India"],
+            ["Dispatched in", "1–2 business days"],
+            ["Returns", "7 days, no fuss"],
+            ["Pay your way", "UPI · Cards · COD"],
+          ].map(([k, v]) => (
+            <div key={k} className="rounded-3xl border border-ink/10 px-5 py-5 sm:px-6">
+              <dt className="text-[11px] tracking-[0.24em] uppercase text-muted">{k}</dt>
+              <dd className="font-display text-[24px] sm:text-[34px] leading-tight mt-1">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </Panel>
 
-      {/* New in */}
-      <Container className="pt-28">
-        <SectionHeading eyebrow="Just landed" title="New in" href="/collections/all?sort=newest" />
-        <ProductGrid items={fresh.items} list="Home – New in" />
-      </Container>
-
-      {/* Love notes — marigold band */}
-      <section className="mt-28 bg-marigold text-ink py-20 sm:py-24">
-        <Container>
-          <p className="text-[11px] tracking-[0.3em] uppercase text-center">Love notes</p>
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-10">
-            {home.testimonials.map((t) => (
-              <figure key={t.name} className="text-center md:text-left">
-                <Quote className="size-7 mx-auto md:mx-0 mb-4 fill-ink/15 text-ink/30" strokeWidth={1} aria-hidden />
-                <blockquote className="font-display text-2xl leading-snug">{t.text}</blockquote>
-                <figcaption className="mt-5 text-[11px] tracking-[0.26em] uppercase">— {t.name}</figcaption>
-              </figure>
-            ))}
+      {/* Love notes — lace-edged marigold panel with a slow ribbon of cards */}
+      <Panel className="bg-marigold text-ink pt-16 sm:pt-20 pb-14 sm:pb-16 overflow-hidden" style={blockPrint("#22101e", 0.06)}>
+        <ScallopEdge color="#fffdf8" className="absolute inset-x-0 top-0 opacity-90" flip />
+        <p className="text-[11px] tracking-[0.3em] uppercase text-center">Love notes</p>
+        <p className="font-display text-center text-[40px] sm:text-[60px] leading-[1] mt-3 px-4">
+          Words from <em className="font-normal">our girls</em>
+        </p>
+        <div className="mt-12 overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]">
+          <div className="flex w-max gap-4 animate-ribbon hover:[animation-play-state:paused]">
+            {[0, 1, 2].flatMap((k) =>
+              home.testimonials.map((t) => (
+                <figure key={`${k}-${t.name}`} aria-hidden={k > 0} className="w-[300px] sm:w-[380px] shrink-0 rounded-3xl bg-[#fffdf8]/70 p-7 sm:p-8 flex flex-col shadow-[0_16px_40px_-30px_rgba(34,16,30,0.6)]">
+                  <Quote className="size-7 mb-4 fill-plum/15 text-plum/40" strokeWidth={1} aria-hidden />
+                  <blockquote className="font-display text-[22px] sm:text-[24px] leading-snug flex-1">{t.text}</blockquote>
+                  <figcaption className="mt-6 flex items-center gap-3 text-[12px] tracking-[0.2em] uppercase">
+                    <span className="size-9 rounded-full bg-ink text-marigold grid place-items-center font-display text-lg normal-case tracking-normal">{t.name[0]}</span>
+                    {t.name}
+                  </figcaption>
+                </figure>
+              )),
+            )}
           </div>
-        </Container>
-      </section>
+        </div>
+      </Panel>
 
       {/* Journal */}
       {posts.length > 0 && (
-        <Container className="pt-28">
-          <SectionHeading eyebrow="The Journal" title="Style notes" href="/blogs/news" linkLabel="Read the journal" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <Container className="pt-16 sm:pt-24">
+          <SectionHeading eyebrow="The Journal" title="Style" accent="notes" href="/blogs/news" linkLabel="Read the journal" />
+          <Reveal stagger className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-5">
             {posts.map((p) => (
               <Link key={p.id} href={`/blogs/news/${p.handle}`} className="group">
-                <div className="relative aspect-[4/3] overflow-hidden bg-sand">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-card bg-sand">
                   {p.coverUrl && <Image src={p.coverUrl} alt="" fill sizes="(min-width:768px) 33vw, 100vw" className="object-cover object-top transition-transform duration-700 group-hover:scale-105" />}
+                  {p.publishedAt && <span className="glass absolute left-3 top-3 rounded-full px-3 py-1 text-[11px] tracking-[0.12em] uppercase">{formatDate(p.publishedAt)}</span>}
                 </div>
-                <p className="text-[11px] tracking-[0.2em] uppercase text-muted mt-5">{p.publishedAt && formatDate(p.publishedAt)}</p>
-                <h3 className="font-display text-[26px] leading-tight mt-2 group-hover:text-plum">{p.title}</h3>
+                <h3 className="font-display text-[28px] leading-tight mt-5 group-hover:text-plum">{p.title}</h3>
                 <p className="text-sm text-muted mt-2 line-clamp-2">{p.excerpt}</p>
               </Link>
             ))}
-          </div>
+          </Reveal>
         </Container>
       )}
 
       {/* Promises */}
-      <Container className="pt-28">
-        <div className="grid grid-cols-2 lg:grid-cols-4 border-y border-line divide-x divide-line">
-          {[
-            [Truck, "Pan-India delivery", "Flat ₹29 shipping, 2–8 days"],
-            [RotateCcw, "Easy returns", "7-day return window"],
-            [Wallet, "Cash on delivery", "Pay when it arrives"],
-            [ShieldCheck, "Secure checkout", "UPI, cards & netbanking"],
-          ].map(([Icon, title, text]) => {
-            const I = Icon as typeof Truck;
-            return (
-              <div key={title as string} className="flex gap-3 items-start p-6 [&:nth-child(3)]:border-l-0 lg:[&:nth-child(3)]:border-l">
-                <I className="size-6 text-plum shrink-0" strokeWidth={1.3} />
-                <div>
-                  <p className="text-sm font-medium">{title as string}</p>
-                  <p className="text-xs text-muted mt-0.5">{text as string}</p>
-                </div>
+      <Container className="pt-16 sm:pt-20">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          {PROMISES.map(([I, title, text]) => (
+            <div key={title} className="rounded-3xl bg-[#fffdf8]/70 flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center p-5 sm:p-6">
+              <span className="size-11 shrink-0 rounded-full bg-ink text-marigold grid place-items-center">
+                <I className="size-5" strokeWidth={1.4} />
+              </span>
+              <div>
+                <p className="text-[15px] font-medium">{title}</p>
+                <p className="text-[13px] text-muted mt-0.5">{text}</p>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </Container>
     </>

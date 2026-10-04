@@ -39,10 +39,10 @@ export default async function ContentPage({ params }: PageProps<"/pages/[handle]
               A design-led label from Gurgaon, making easygoing, feel-good clothes for escape-seekers and life-lovers — with a little tech woven into every thread.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/collections/all" className="bg-marigold text-ink px-7 py-3.5 text-[11px] font-semibold tracking-[0.22em] uppercase hover:bg-cream transition-colors">
+              <Link href="/collections/all" className="rounded-full bg-marigold text-ink px-7 py-3.5 text-[11px] font-semibold tracking-[0.22em] uppercase hover:bg-cream transition-colors">
                 Shop the collection
               </Link>
-              <Link href="/contact" className="border border-cream/40 px-7 py-3.5 text-[11px] tracking-[0.22em] uppercase hover:bg-cream hover:text-ink transition-colors">
+              <Link href="/contact" className="rounded-full border border-cream/40 px-7 py-3.5 text-[11px] tracking-[0.22em] uppercase hover:bg-cream hover:text-ink transition-colors">
                 Say hello
               </Link>
             </div>

@@ -10,6 +10,7 @@ import { ProductGallery } from "@/components/store/product-gallery";
 import { ReviewForm } from "@/components/store/review-form";
 import { StickyBuyBar } from "@/components/store/sticky-buy-bar";
 import { DeliveryChecker, TrustBadges } from "@/components/store/trust";
+import { colorOf, craftOf } from "@/lib/product-facts";
 import { craftNotes } from "@/lib/trust";
 import { Breadcrumbs, Container, SectionHeading } from "@/components/store/ui";
 import { getProduct, listProducts } from "@/lib/catalog";
@@ -49,7 +50,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
   const p = await getProduct(handle);
   if (!p) return redirectOrNotFound(`/products/${handle}`);
 
-  const [shipping, store] = await Promise.all([getSettings("shipping"), getSettings("store")]);
+  const [shipping, store, payments] = await Promise.all([getSettings("shipping"), getSettings("store"), getSettings("payments")]);
   const notes = craftNotes(p);
   const variants = p.variants.map((v) => {
     const available = !v.trackInventory || v.allowBackorder || v.inventoryQty > 0;
@@ -63,12 +64,23 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
     breadcrumbLd([...(category ? [{ name: category.title, path: `/collections/${category.handle}` }] : []), { name: p.title, path: `/products/${p.handle}` }]),
   ];
 
+  const sizeList = p.variants.map((v) => v.option1).filter(Boolean) as string[];
+  const glance: [string, string][] = [
+    ["Fabric", p.fabric ?? "Breathable woven fabric"],
+    ["Sizes", sizeList.length > 1 ? `${sizeList[0]} – ${sizeList[sizeList.length - 1]}, true to size` : (sizeList[0] ?? "One size")],
+    ...((colorOf(p.title, p.variants.find((v) => v.option2)?.option2, p.tags) ? [["Colour", colorOf(p.title, p.variants.find((v) => v.option2)?.option2, p.tags)!]] : []) as [string, string][]),
+    ...((craftOf(p.title, p.tags).length ? [["Details", craftOf(p.title, p.tags).join(", ")]] : []) as [string, string][]),
+    ["Care", p.care ?? "Gentle hand wash, dry in shade"],
+    ["Dispatch", `Ships in ${shipping.processingDays}`],
+    ["Returns", "7-day returns & exchanges"],
+    ["Payment", shipping.codEnabled ? "Online or cash on delivery" : "UPI, cards, netbanking"],
+  ];
   const details = [
     { title: "Description", html: p.descriptionHtml, open: true },
     { title: "Fabric & care", html: `${p.fabric ? `<p><strong>Fabric:</strong> ${p.fabric}</p>` : ""}<p>${p.care ?? "Gentle hand wash in cold water. Dry in shade."}</p>` },
     {
       title: "Shipping & returns",
-      html: `<p>Ships in ${shipping.processingDays}. ${shipping.deliveryEstimates.map((d) => `${d.label}: ${d.days}`).join(" · ")}.</p><p>Easy returns within 7 days of delivery on unworn pieces with tags. <a href="/pages/returns-policy">Read the returns policy</a>.</p>`,
+      html: `<p>Ships in ${shipping.processingDays}. ${shipping.deliveryEstimates.map((d) => `${d.label}: ${d.days}`).join(" · ")}.</p><p>Easy returns and size exchanges within 7 days of delivery on unworn pieces with tags. <a href="/pages/returns-policy">Read the returns & exchange policy</a>.</p>`,
     },
   ];
 
@@ -96,11 +108,11 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
             </a>
           )}
           <div id="buy-box" className="mt-6 scroll-mt-24">
-            <ProductForm productId={p.id} title={p.title} options={p.options} variants={variants} />
+            <ProductForm productId={p.id} title={p.title} options={p.options} variants={variants} prepaidPercent={payments.prepaidDiscountPercent} />
           </div>
           <div className="mt-8 space-y-6">
-            <DeliveryChecker />
-            <TrustBadges />
+            <DeliveryChecker prepaidPercent={payments.prepaidDiscountPercent} />
+            <TrustBadges codEnabled={shipping.codEnabled} />
             <a
               href={`https://wa.me/${store.whatsapp}?text=${encodeURIComponent(`Hi Trumee! I have a question about “${p.title}”`)}`}
               target="_blank"
@@ -110,6 +122,15 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
               <MessageCircle className="size-4" strokeWidth={1.5} /> Not sure about the fit? Ask our stylist on WhatsApp
             </a>
           </div>
+          <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-3 rounded-3xl border border-line/70 bg-[#fffdf8]/60 p-5 text-sm">
+            <p className="col-span-2 text-[11px] tracking-[0.24em] uppercase text-plum">At a glance</p>
+            {glance.map(([k, v]) => (
+              <div key={k}>
+                <dt className="text-[11px] tracking-[0.12em] uppercase text-muted">{k}</dt>
+                <dd className="mt-0.5 text-ink">{v}</dd>
+              </div>
+            ))}
+          </dl>
           <div className="mt-2 divide-y divide-line">
             {details.map((d) => (
               <details key={d.title} open={d.open} className="group py-4">
@@ -125,20 +146,20 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
       </Container>
 
       {notes.length > 0 && (
-        <section className="mt-24 bg-sand py-16 sm:py-20">
-          <Container>
+        <section className="mt-24 px-2 sm:px-4 lg:px-6">
+          <div className="mx-auto max-w-[1400px] rounded-panel bg-[#fffdf8]/75 py-14 sm:py-16 px-4 sm:px-6 lg:px-10">
             <p className="flex items-center gap-3 text-[11px] tracking-[0.3em] uppercase text-plum">
               <Sparkles className="size-3.5" /> Why you’ll love it
             </p>
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {notes.map((n) => (
-                <div key={n.title} className="border-t border-ink/20 pt-5">
-                  <h3 className="font-display text-2xl">{n.title}</h3>
+                <div key={n.title} className="rounded-3xl border border-ink/10 p-6">
+                  <h3 className="font-display text-[28px] leading-tight">{n.title}</h3>
                   <p className="text-sm text-ink-soft mt-2 leading-relaxed">{n.text}</p>
                 </div>
               ))}
             </div>
-          </Container>
+          </div>
         </section>
       )}
 
@@ -185,11 +206,11 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
         <nav aria-label="Explore more" className="flex flex-wrap items-center gap-2 text-sm">
           <span className="text-[11px] tracking-[0.24em] uppercase text-muted mr-2">Explore</span>
           {p.collections.map(({ collection: c }) => (
-            <Link key={c.id} href={`/collections/${c.handle}`} className="border border-line px-3.5 py-1.5 hover:border-ink">
+            <Link key={c.id} href={`/collections/${c.handle}`} className="rounded-full border border-line px-4 py-2 hover:border-ink">
               {c.group === "category" ? `${c.title} for women` : c.title}
             </Link>
           ))}
-          <Link href="/blogs/news" className="border border-line px-3.5 py-1.5 hover:border-ink">Style guides</Link>
+          <Link href="/blogs/news" className="rounded-full border border-line px-4 py-2 hover:border-ink">Style guides</Link>
         </nav>
       </Container>
 

@@ -10,30 +10,25 @@ import { CheckoutError, createOrderFromCart, findOrderForTracking, markOrderPaid
 import { createRazorpayOrder, razorpayEnabled, razorpayKeyId, verifyPaymentSignature } from "@/lib/razorpay";
 import { getCartState } from "@/lib/cart";
 import { INDIAN_STATES } from "@/lib/india";
+import { deliveryQuote, lookupPincode as lookupPin } from "@/lib/delivery";
 import { getSettings } from "@/lib/settings";
 
 
 
 /** City/state autofill from India Post's public pincode directory. */
 export async function lookupPincode(pin: string): Promise<{ city: string; state: string } | null> {
-  if (!/^[1-9]\d{5}$/.test(pin)) return null;
-  try {
-    const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`, { next: { revalidate: 86400 * 30 }, signal: AbortSignal.timeout(4000) });
-    const [data] = (await res.json()) as { Status: string; PostOffice: { District: string; State: string }[] | null }[];
-    const po = data?.Status === "Success" ? data.PostOffice?.[0] : null;
-    return po ? { city: po.District, state: po.State } : null;
-  } catch {
-    return null;
-  }
+  return lookupPin(pin);
 }
 
-/** Product-page delivery checker: real pincode lookup → delivery window + COD availability. */
+/** Product-page delivery checker: delivery window + COD availability (live Shiprocket data when connected). */
 export async function checkDelivery(pin: string) {
-  const place = await lookupPincode(pin);
-  if (!place) return null;
-  const shipping = await getSettings("shipping");
-  const { estimateDelivery } = await import("@/lib/trust");
-  return { ...estimateDelivery(place), cod: shipping.codEnabled };
+  return deliveryQuote(pin);
+}
+
+/** Checkout pincode step: autofill city/state and show the delivery date + COD availability together. */
+export async function checkoutPincode(pin: string) {
+  const [place, quote] = await Promise.all([lookupPin(pin), deliveryQuote(pin)]);
+  return { place, quote };
 }
 
 /** Marks the cart as an started checkout (feeds abandoned-checkout recovery). */
@@ -75,6 +70,12 @@ export async function placeOrder(form: FormData): Promise<PlaceOrderResult> {
   if (!cartId) return { ok: false, error: "Your bag is empty." };
 
   const shipping = await getSettings("shipping");
+  // Real courier coverage (only when Shiprocket is connected): block undeliverable pincodes and COD where couriers can't collect cash.
+  const quote = await deliveryQuote(d.pincode);
+  if (quote?.source === "live" && !quote.serviceable)
+    return { ok: false, error: "Sorry — our couriers don’t deliver to this pincode yet. Please use another address or WhatsApp us.", field: "pincode" };
+  if (d.paymentMethod === "cod" && quote?.source === "live" && !quote.codAvailable)
+    return { ok: false, error: "Cash on delivery isn’t available for this pincode. Please pay online — you’ll also get the prepaid discount." };
   if (d.paymentMethod === "cod") {
     if (!shipping.codEnabled) return { ok: false, error: "Cash on delivery isn’t available right now." };
     const { totals } = await getCartState({ paymentMethod: "cod" });

@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus, ShoppingBag, Truck, X } from "lucide-react";
+import { Minus, Plus, RotateCcw, ShieldCheck, ShoppingBag, Truck, Wallet, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
@@ -27,7 +27,7 @@ export function CartDrawer() {
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-label="Shopping bag">
       <div className="absolute inset-0 bg-ink/40 animate-fade-in" onClick={() => setOpen(false)} />
-      <aside className="absolute inset-y-0 right-0 w-full max-w-[440px] bg-cream flex flex-col animate-slide-in">
+      <aside className="absolute inset-y-2 right-2 w-[calc(100%-1rem)] max-w-[440px] bg-[#fffdf8] rounded-3xl overflow-hidden flex flex-col animate-slide-in">
         <div className="flex items-center justify-between px-5 sm:px-6 h-16 border-b border-line">
           <h2 className="font-display text-2xl">Your bag {cart?.count ? <span className="text-muted text-lg">({cart.count})</span> : null}</h2>
           <button onClick={() => setOpen(false)} aria-label="Close bag" className="p-2 -mr-2">
@@ -41,7 +41,7 @@ export function CartDrawer() {
               <ShoppingBag className="size-10 mx-auto text-muted" strokeWidth={1} />
               <p className="font-display text-2xl mt-4">Your bag is empty</p>
               <p className="text-sm text-muted mt-2">Let’s find you something you’ll love wearing.</p>
-              <Link href="/collections/all" onClick={() => setOpen(false)} className="inline-block mt-6 bg-ink text-cream px-7 py-3 text-xs tracking-[0.18em] uppercase">
+              <Link href="/collections/all" onClick={() => setOpen(false)} className="inline-block mt-6 rounded-full bg-ink text-cream px-7 py-3 text-xs tracking-[0.18em] uppercase">
                 Start shopping
               </Link>
             </div>
@@ -88,22 +88,32 @@ export function CartDrawer() {
                 </li>
               ))}
             </ul>
-            <div className="border-t border-line px-5 sm:px-6 py-5 space-y-2 bg-cream">
+            <div className="border-t border-line px-5 sm:px-6 py-5 space-y-2 bg-[#fffdf8]">
               <Row label="Subtotal" value={inr(t!.subtotal)} />
               {t!.discountTotal > 0 && <Row label={`Discount (${t!.discountApplied})`} value={"−" + inr(t!.discountTotal)} className="text-sage" />}
               <Row label="Shipping" value={t!.shipping ? inr(t!.shipping) : "Free"} />
               <Row label="Total" value={inr(t!.total)} className="text-base font-medium pt-2 border-t border-line" />
               <p className="text-[11px] text-muted">Inclusive of all taxes. Discount codes can be applied at checkout.</p>
+              {t!.prepaidAvailable > 0 && (
+                <p className="rounded-full bg-sage/10 text-sage text-[13px] text-center px-3 py-1.5">
+                  Pay online & save {inr(t!.prepaidAvailable)} more at checkout
+                </p>
+              )}
               <Link
                 href="/checkout"
                 onClick={() => setOpen(false)}
-                className="mt-3 block text-center bg-ink text-cream py-4 text-xs tracking-[0.2em] uppercase hover:bg-ink-soft"
+                className="mt-3 block text-center rounded-full bg-ink text-cream py-4 text-xs tracking-[0.2em] uppercase hover:bg-ink-soft"
               >
                 Checkout · {inr(t!.total)}
               </Link>
               <Link href="/cart" onClick={() => setOpen(false)} className="block text-center text-xs underline underline-offset-4 pt-1">
                 View bag
               </Link>
+              <ul className="pt-3 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-[11px] text-ink-soft">
+                <li className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-sage" strokeWidth={1.5} /> Secure checkout</li>
+                {cart?.perks.codEnabled && <li className="flex items-center gap-1.5"><Wallet className="size-3.5 text-sage" strokeWidth={1.5} /> Cash on delivery</li>}
+                <li className="flex items-center gap-1.5"><RotateCcw className="size-3.5 text-sage" strokeWidth={1.5} /> 7-day returns & exchanges</li>
+              </ul>
             </div>
           </>
         )}

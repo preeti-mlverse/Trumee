@@ -16,7 +16,7 @@ export function StickyBuyBar({ title, price, soldOut }: { title: string; price: 
   return (
     <div
       className={cn(
-        "lg:hidden fixed inset-x-0 bottom-0 z-30 bg-cream/95 backdrop-blur border-t border-line px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex items-center gap-3 transition-transform duration-300",
+        "glass lg:hidden fixed inset-x-2 bottom-2 z-30 rounded-3xl border border-white/60 shadow-xl shadow-ink/15 px-3 py-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex items-center gap-3 transition-transform duration-300",
         show ? "translate-y-0" : "translate-y-full",
       )}
       aria-hidden={!show}
@@ -29,7 +29,7 @@ export function StickyBuyBar({ title, price, soldOut }: { title: string; price: 
         tabIndex={show ? 0 : -1}
         disabled={soldOut}
         onClick={() => document.getElementById("buy-box")?.scrollIntoView({ behavior: "smooth", block: "center" })}
-        className="bg-ink text-cream px-6 py-3 text-[11px] tracking-[0.2em] uppercase disabled:opacity-50"
+        className="rounded-full bg-ink text-cream px-6 py-3 text-[11px] tracking-[0.2em] uppercase disabled:opacity-50"
       >
         {soldOut ? "Sold out" : "Choose size"}
       </button>

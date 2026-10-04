@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Bodoni_Moda, Inter } from "next/font/google";
+import { Cormorant_Garamond, Jost } from "next/font/google";
 import "./globals.css";
 
-const bodoni = Bodoni_Moda({ variable: "--font-bodoni", subsets: ["latin"], axes: ["opsz"] });
-const archivo = Archivo({ variable: "--font-archivo", subsets: ["latin"], axes: ["wdth"] });
-const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
+const cormorant = Cormorant_Garamond({ variable: "--font-cormorant", subsets: ["latin"], weight: ["400", "500", "600"], style: ["normal", "italic"] });
+const jost = Jost({ variable: "--font-jost", subsets: ["latin"] });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -24,7 +23,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en-IN" className={`${bodoni.variable} ${archivo.variable} ${inter.variable} antialiased`}>
+    <html lang="en-IN" className={`${cormorant.variable} ${jost.variable} antialiased`}>
       <body className="min-h-dvh">{children}</body>
     </html>
   );

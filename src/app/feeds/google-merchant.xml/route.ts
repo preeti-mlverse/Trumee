@@ -1,26 +1,19 @@
 import { asc, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { colorOf, craftOf, dayRange, GOOGLE_CATEGORY, patternOf } from "@/lib/product-facts";
 import { abs } from "@/lib/seo";
 import { getSettings } from "@/lib/settings";
 import { stripHtml, truncate } from "@/lib/utils";
 
 export const revalidate = 3600;
 
-const CATEGORY: Record<string, string> = {
-  Dresses: "Apparel & Accessories > Clothing > Dresses",
-  Tops: "Apparel & Accessories > Clothing > Shirts & Tops",
-  Shirts: "Apparel & Accessories > Clothing > Shirts & Tops",
-  Skirts: "Apparel & Accessories > Clothing > Skirts",
-  Jumpsuits: "Apparel & Accessories > Clothing > One-Pieces > Jumpsuits & Rompers",
-  "Co-ord Sets": "Apparel & Accessories > Clothing > Outfit Sets",
-};
-
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const money = (paise: number) => `${(paise / 100).toFixed(2)} INR`;
 
 /**
  * Google Merchant Center product feed (RSS 2.0 + g: namespace) for free Shopping listings.
- * Add https://<domain>/feeds/google-merchant.xml as a scheduled fetch in Merchant Center.
+ * Add https://<domain>/feeds/google-merchant.xml as a scheduled fetch in Merchant Center;
+ * Microsoft (Bing) Merchant Center — which also feeds Copilot shopping — accepts the same file.
  */
 export async function GET() {
   const [products, shipping] = await Promise.all([
@@ -30,6 +23,11 @@ export async function GET() {
     }),
     getSettings("shipping"),
   ]);
+
+  const [hMin, hMax] = dayRange(shipping.processingDays, [1, 2]);
+  const transit = shipping.deliveryEstimates.map((d) => dayRange(d.days, [2, 8]));
+  const tMin = transit.length ? Math.min(...transit.map((t) => t[0])) : 2;
+  const tMax = transit.length ? Math.max(...transit.map((t) => t[1])) : 8;
 
   const items = products.flatMap((p) =>
     p.variants
@@ -52,16 +50,19 @@ export async function GET() {
           ["g:brand", "Trumee"],
           ["g:condition", "new"],
           ["g:identifier_exists", "no"],
-          ["g:google_product_category", CATEGORY[p.productType] ?? "Apparel & Accessories > Clothing"],
+          ["g:google_product_category", GOOGLE_CATEGORY[p.productType] ?? "Apparel & Accessories > Clothing"],
           ["g:product_type", p.productType || "Clothing"],
           ["g:gender", "female"],
           ["g:age_group", "adult"],
           ["g:size", v.option1 ?? undefined],
           ["g:size_system", "IN"],
-          ["g:color", v.option2 ?? undefined],
+          ["g:size_type", "regular"],
+          ["g:color", colorOf(p.title, v.option2, p.tags)],
+          ["g:pattern", patternOf(p.title, p.tags)],
           ["g:material", p.fabric ?? undefined],
+          ...craftOf(p.title, p.tags).map((c) => ["g:product_highlight", c] as [string, string]),
         ];
-        const ship = `<g:shipping><g:country>IN</g:country><g:service>Standard</g:service><g:price>${money(shipping.flatRate)}</g:price><g:min_handling_time>1</g:min_handling_time><g:max_handling_time>2</g:max_handling_time><g:min_transit_time>2</g:min_transit_time><g:max_transit_time>8</g:max_transit_time></g:shipping>`;
+        const ship = `<g:shipping><g:country>IN</g:country><g:service>Standard</g:service><g:price>${money(shipping.flatRate)}</g:price><g:min_handling_time>${hMin}</g:min_handling_time><g:max_handling_time>${hMax}</g:max_handling_time><g:min_transit_time>${tMin}</g:min_transit_time><g:max_transit_time>${tMax}</g:max_transit_time></g:shipping>`;
         return `<item>${fields.filter(([, val]) => val).map(([k, val]) => `<${k}>${esc(val!)}</${k}>`).join("")}${ship}</item>`;
       }),
   );

@@ -10,7 +10,7 @@ export function ContactForm() {
     if (state?.ok) track("generate_lead", { method: "contact_form" });
   }, [state]);
   if (state?.ok) return <p className="mt-6 text-sage">{state.message}</p>;
-  const input = "w-full border border-line bg-cream px-3.5 py-3 text-sm outline-none focus:border-ink";
+  const input = "w-full rounded-xl border border-line bg-[#fffdf8] px-4 py-3 text-sm outline-none focus:border-ink";
   return (
     <form action={action} className="mt-6 space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -20,7 +20,7 @@ export function ContactForm() {
       <input name="email" type="email" required placeholder="Email" aria-label="Email" className={input} />
       <textarea name="message" rows={5} required placeholder="How can we help?" aria-label="Message" className={input} />
       {state && !state.ok && <p className="text-sm text-sale">{state.message}</p>}
-      <button disabled={pending} className="bg-ink text-cream px-8 py-3.5 text-[11px] tracking-[0.22em] uppercase disabled:opacity-60">
+      <button disabled={pending} className="rounded-full bg-ink text-cream px-8 py-3.5 text-[11px] tracking-[0.22em] uppercase disabled:opacity-60">
         {pending ? "Sending…" : "Send message"}
       </button>
     </form>

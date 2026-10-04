@@ -17,9 +17,14 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
   const [search, setSearch] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const [pastHero, setPastHero] = useState(false);
+  const overHero = pathname === "/" && !pastHero;
 
   useEffect(() => {
-    const on = () => setScrolled(window.scrollY > 8);
+    const on = () => {
+      setScrolled(window.scrollY > 8);
+      setPastHero(window.scrollY > window.innerHeight * 0.6);
+    };
     on();
     window.addEventListener("scroll", on, { passive: true });
     return () => window.removeEventListener("scroll", on);
@@ -36,34 +41,47 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
           {announcement.href ? <Link href={announcement.href} className="inline-block py-1.5 -my-1.5">{announcement.text}</Link> : announcement.text}
         </div>
       )}
+      {/* Home, top of page: the pill floats inside the hero image so header + banner read as one piece.
+          Elsewhere / once scrolled: it docks on a sand backdrop matching the page sky, with a soft fade. */}
       <header
         className={cn(
-          "sticky top-0 z-40 bg-cream/95 backdrop-blur transition-shadow",
-          scrolled ? "shadow-[0_1px_0_var(--color-line)]" : "",
+          "sticky top-0 z-40 px-2 sm:px-4 lg:px-6 py-2 transition-colors duration-300",
+          overHero
+            ? "bg-transparent"
+            : "bg-(--sky-top) after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-gradient-to-b after:from-(--sky-top) after:to-transparent",
         )}
       >
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10 h-16 lg:h-[72px] grid grid-cols-[minmax(0,1fr)_auto_1fr] items-center">
+        <div
+          className={cn(
+            "mx-auto max-w-[1400px] rounded-full pl-3 pr-2 sm:pl-6 sm:pr-3 h-[52px] lg:h-[60px] grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border transition-[background-color,box-shadow,border-color,transform,margin] duration-300",
+            overHero
+              ? "glass mx-3 sm:mx-5 lg:mx-auto lg:max-w-[1352px] translate-y-3 border-white/50 shadow-[0_10px_30px_-18px_rgba(34,16,30,0.5)]"
+              : scrolled
+                ? "bg-[#fffdf8]/95 border-ink/[0.06] shadow-[0_8px_24px_-14px_rgba(34,16,30,0.35)]"
+                : "bg-[#fffdf8]/70 border-white/70 shadow-[0_2px_10px_-6px_rgba(34,16,30,0.12)]",
+          )}
+        >
           <div className="flex items-center gap-1">
-            <button aria-label="Open menu" className="lg:hidden -ml-2 p-2" onClick={() => setMenu(true)}>
+            <button aria-label="Open menu" className="lg:hidden size-10 grid place-items-center rounded-full hover:bg-white/70" onClick={() => setMenu(true)}>
               <Menu className="size-5" strokeWidth={1.5} />
             </button>
-            <nav className="hidden lg:flex items-center gap-7 text-[13px] tracking-[0.12em] uppercase">
+            <nav className="hidden lg:flex items-center gap-5 xl:gap-8 text-[12px] xl:text-[13px] tracking-[0.12em] uppercase">
               {nav.map((item) => (
                 <div key={item.label} className="group relative">
                   <Link
                     href={item.href}
                     className={cn(
-                      "relative py-6 inline-block hover:text-plum transition-colors",
-                      isActive(item, pathname) && "text-plum after:absolute after:left-0 after:right-0 after:bottom-5 after:h-px after:bg-plum",
+                      "relative py-4 inline-block hover:text-plum transition-colors",
+                      isActive(item, pathname) && "text-plum after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-2.5 after:size-1 after:rounded-full after:bg-plum",
                     )}
                   >
                     {item.label}
                   </Link>
                   {item.children?.length ? (
-                    <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity absolute -left-5 top-full">
-                      <div className="bg-cream border border-line shadow-xl shadow-ink/10 min-w-60 py-3">
+                    <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 transition-all absolute -left-5 top-full pt-2">
+                      <div className="bg-[#fffdf8] rounded-2xl border border-line/70 shadow-2xl shadow-ink/15 min-w-60 p-2">
                         {item.children.map((c) => (
-                          <Link key={c.href} href={c.href} className="block px-5 py-2 normal-case tracking-normal text-sm text-ink-soft hover:text-plum hover:bg-sand/60">
+                          <Link key={c.href} href={c.href} className="block rounded-xl px-4 py-2.5 normal-case tracking-normal text-sm text-ink-soft hover:text-plum hover:bg-sand/60">
                             {c.label}
                           </Link>
                         ))}
@@ -76,22 +94,22 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
           </div>
 
           <Link href="/" className="text-ink" aria-label="Trumee home">
-            <Wordmark className="text-[22px] lg:text-[26px]" />
+            <Wordmark className="text-[24px] lg:text-[30px]" />
           </Link>
 
           <div className="flex items-center justify-end gap-0.5 sm:gap-1.5">
-            <button aria-label="Search" className="p-2" onClick={() => setSearch(true)}>
+            <button aria-label="Search" className={ICON} onClick={() => setSearch(true)}>
               <Search className="size-5" strokeWidth={1.5} />
             </button>
-            <Link aria-label="Account" href="/account" className="p-2 hidden sm:inline-flex">
+            <Link aria-label="Account" href="/account" className={cn(ICON, "hidden sm:grid")}>
               <User className="size-5" strokeWidth={1.5} />
             </Link>
-            <Link aria-label="Wishlist" href="/wishlist" className="p-2 relative hidden sm:inline-flex">
+            <Link aria-label="Wishlist" href="/wishlist" className={cn(ICON, "relative hidden sm:grid")}>
               <Heart className="size-5" strokeWidth={1.5} />
               {ids.length > 0 && <Badge n={ids.length} />}
             </Link>
-            <button aria-label="Open bag" className="p-2 -mr-2 relative" onClick={() => setOpen(true)}>
-              <ShoppingBag className="size-5" strokeWidth={1.5} />
+            <button aria-label="Open bag" className="relative size-10 grid place-items-center rounded-full bg-ink text-cream hover:bg-plum transition-colors" onClick={() => setOpen(true)}>
+              <ShoppingBag className="size-[18px]" strokeWidth={1.5} />
               {!!cart?.count && <Badge n={cart.count} />}
             </button>
           </div>
@@ -102,7 +120,7 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
       {menu && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-ink/40 animate-fade-in" onClick={() => setMenu(false)} />
-          <div className="absolute inset-y-0 left-0 w-[86%] max-w-sm bg-cream flex flex-col animate-fade-in">
+          <div className="absolute inset-y-2 left-2 w-[86%] max-w-sm bg-[#fffdf8] rounded-3xl overflow-hidden flex flex-col animate-fade-in">
             <div className="flex items-center justify-between px-5 h-16 border-b border-line">
               <Wordmark className="text-xl" />
               <button aria-label="Close menu" onClick={() => setMenu(false)} className="p-2 -mr-2">
@@ -112,7 +130,7 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
             <nav className="flex-1 overflow-y-auto px-5 py-4">
               {nav.map((item) => (
                 <div key={item.label} className="border-b border-line/70 py-3">
-                  <Link href={item.href} className="block text-sm tracking-[0.14em] uppercase py-1">
+                  <Link href={item.href} className="block font-display text-[26px] leading-tight py-1">
                     {item.label}
                   </Link>
                   {item.children && (
@@ -141,9 +159,11 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
   );
 }
 
+const ICON = "size-10 grid place-items-center rounded-full hover:bg-white/80 transition-colors";
+
 function Badge({ n }: { n: number }) {
   return (
-    <span className="absolute top-0.5 right-0 min-w-[18px] h-[18px] rounded-full bg-marigold text-ink text-[10px] font-medium grid place-items-center px-1">
+    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-marigold text-ink text-[10px] font-medium grid place-items-center px-1">
       {n > 99 ? "99+" : n}
     </span>
   );

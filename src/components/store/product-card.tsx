@@ -31,7 +31,7 @@ export function ProductCard({ p, list, index = 0, priority }: { p: CardProduct; 
         }
         className="block"
       >
-        <div className="relative aspect-[2/3] overflow-hidden bg-sand">
+        <div className="relative aspect-[2/3] overflow-hidden rounded-card bg-sand isolate">
           {a && (
             <Image
               src={a.url}
@@ -60,20 +60,20 @@ export function ProductCard({ p, list, index = 0, priority }: { p: CardProduct; 
               />
             )
           )}
-          <div className="absolute left-0 top-3 flex flex-col items-start gap-1">
+          <div className="absolute left-2.5 top-2.5 sm:left-3 sm:top-3 flex flex-col items-start gap-1">
             {p.soldOut ? (
-              <span className="bg-cream text-ink text-[10px] tracking-[0.18em] uppercase px-2.5 py-1">Sold out</span>
+              <span className="rounded-full bg-[#fffdf8] text-ink text-[10px] sm:text-[11px] tracking-[0.1em] uppercase px-2.5 sm:px-3 py-1">Sold out</span>
             ) : off >= 5 ? (
-              <span className="bg-marigold text-ink text-[10px] font-semibold tracking-[0.14em] uppercase px-2.5 py-1 tabular-nums">−{off}%</span>
+              <span className="rounded-full bg-[#fffdf8] text-ink text-[10px] sm:text-[11px] font-medium tracking-[0.06em] px-2.5 sm:px-3 py-1 tabular-nums">{off}% off</span>
             ) : null}
           </div>
           {p.video && (
-            <span className="absolute left-3 bottom-3 flex items-center gap-1.5 text-[10px] tracking-[0.18em] uppercase text-cream/90 group-hover:opacity-0 transition-opacity drop-shadow">
+            <span className="glass-dark absolute left-2.5 bottom-2.5 sm:left-3 sm:bottom-3 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] tracking-[0.16em] uppercase text-cream group-hover:opacity-0 transition-opacity">
               <Play className="size-3 fill-current" /> Watch
             </span>
           )}
           {!p.soldOut && p.sizes.length > 0 && (
-            <div className="hidden md:flex absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-ink/90 text-cream px-3 py-2.5 gap-3 justify-center text-[11px] tracking-wider">
+            <div className="glass hidden md:flex absolute inset-x-3 bottom-3 translate-y-[calc(100%+1rem)] group-hover:translate-y-0 transition-transform duration-300 rounded-full text-ink px-3 py-2 gap-3.5 justify-center text-[12px] tracking-wider">
               {p.sizes.map((s) => (
                 <span key={s.value} className={cn(!s.available && "line-through opacity-40")}>
                   {s.value}
@@ -82,9 +82,9 @@ export function ProductCard({ p, list, index = 0, priority }: { p: CardProduct; 
             </div>
           )}
         </div>
-        <div className="pt-3.5">
-          <h3 className="text-[13px] sm:text-[14px] leading-snug line-clamp-2 text-ink-soft group-hover:text-ink">{p.title}</h3>
-          <div className="mt-1.5 flex items-baseline gap-2 text-sm tabular-nums">
+        <div className="pt-3.5 px-0.5">
+          <h3 className="text-[13px] sm:text-[15px] leading-snug line-clamp-2 text-ink-soft group-hover:text-ink">{p.title}</h3>
+          <div className="mt-1.5 flex items-baseline gap-2 text-[15px] tabular-nums">
             <span className={cn("font-medium", off > 0 && "text-plum")}>{inr(p.price)}</span>
             {off > 0 && <span className="text-xs text-muted line-through">{inr(p.compareAtPrice)}</span>}
           </div>
@@ -98,7 +98,7 @@ export function ProductCard({ p, list, index = 0, priority }: { p: CardProduct; 
       <button
         aria-label={saved ? "Remove from wishlist" : "Save to wishlist"}
         onClick={() => toggle(p.id, p.title)}
-        className="absolute right-2 top-2 size-8 grid place-items-center rounded-full bg-cream/85 backdrop-blur-sm"
+        className="glass absolute right-2.5 top-2.5 sm:right-3 sm:top-3 size-9 grid place-items-center rounded-full transition-transform hover:scale-110"
       >
         <Heart className={cn("size-[17px]", saved ? "fill-plum text-plum" : "text-ink-soft")} strokeWidth={1.5} />
       </button>
@@ -108,7 +108,7 @@ export function ProductCard({ p, list, index = 0, priority }: { p: CardProduct; 
 
 export function ProductGrid({ items, list, className }: { items: CardProduct[]; list?: string; className?: string }) {
   return (
-    <div className={cn("grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 sm:gap-x-5 gap-y-12", className)}>
+    <div className={cn("grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 sm:gap-x-5 gap-y-10 sm:gap-y-14", className)}>
       {items.map((p, i) => (
         <ProductCard key={p.id} p={p} list={list} index={i} priority={i < 4} />
       ))}

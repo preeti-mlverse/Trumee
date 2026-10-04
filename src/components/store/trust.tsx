@@ -1,12 +1,12 @@
 "use client";
 
-import { BadgeCheck, Loader2, MapPin, RotateCcw, Ruler, ShieldCheck, Truck, Wallet, X } from "lucide-react";
+import { BadgeCheck, CircleAlert, Loader2, MapPin, Percent, RotateCcw, Ruler, ShieldCheck, Truck, Wallet, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { checkDelivery } from "@/app/actions/checkout";
 import { cn } from "@/lib/utils";
 
-/** Pincode → delivery window + COD, using the real India Post directory. */
-export function DeliveryChecker() {
+/** Pincode → delivery window + COD (live Shiprocket courier data when connected, else policy estimates). */
+export function DeliveryChecker({ prepaidPercent = 0 }: { prepaidPercent?: number }) {
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
   const [res, setRes] = useState<Awaited<ReturnType<typeof checkDelivery>> | "invalid" | null>(null);
@@ -31,7 +31,7 @@ export function DeliveryChecker() {
   };
 
   return (
-    <div className="border border-line p-4">
+    <div className="rounded-3xl bg-[#fffdf8]/70 border border-line/70 p-5">
       <p className="flex items-center gap-2 text-sm font-medium">
         <MapPin className="size-4" strokeWidth={1.5} /> Check delivery date
       </p>
@@ -42,28 +42,38 @@ export function DeliveryChecker() {
           inputMode="numeric"
           placeholder="Enter pincode"
           aria-label="Pincode"
-          className="flex-1 border border-line bg-cream px-3 py-2.5 text-sm outline-none focus:border-ink tabular-nums"
+          className="flex-1 rounded-full border border-line bg-[#fffdf8] px-4 py-2.5 text-sm outline-none focus:border-ink tabular-nums"
         />
-        <button disabled={busy} className="border border-ink px-4 text-[11px] tracking-[0.18em] uppercase hover:bg-ink hover:text-cream disabled:opacity-50">
+        <button disabled={busy} className="rounded-full bg-ink text-cream px-5 text-[12px] tracking-[0.12em] uppercase hover:bg-plum transition-colors disabled:opacity-50">
           {busy ? <Loader2 className="size-4 animate-spin" /> : "Check"}
         </button>
       </form>
       {res === "invalid" && <p className="text-xs text-sale mt-2">Please enter a valid 6-digit pincode.</p>}
-      {res && res !== "invalid" && (
+      {res && res !== "invalid" && !res.serviceable && (
+        <p className="mt-3 flex items-start gap-2 text-sm text-sale">
+          <CircleAlert className="size-4 mt-0.5 shrink-0" strokeWidth={1.5} /> Our couriers don’t reach {res.place ?? "this pincode"} yet — WhatsApp us and we’ll try to help.
+        </p>
+      )}
+      {res && res !== "invalid" && res.serviceable && (
         <ul className="mt-3 space-y-1.5 text-sm">
           <li className="flex items-start gap-2">
             <Truck className="size-4 mt-0.5 text-sage shrink-0" strokeWidth={1.5} />
             <span>
-              Delivery by <strong>{res.from} – {res.to}</strong> to {res.place}
+              {res.source === "live" ? "Get it by" : "Delivery by"} <strong>{res.from} – {res.to}</strong>
+              {res.place ? ` to ${res.place}` : ""}
             </span>
           </li>
-          {res.cod && (
+          <li className="flex items-center gap-2">
+            <Wallet className={cn("size-4", res.codAvailable ? "text-sage" : "text-muted")} strokeWidth={1.5} />
+            {res.codAvailable ? "Cash on delivery available" : "Cash on delivery isn’t available here — pay online"}
+          </li>
+          {prepaidPercent > 0 && (
             <li className="flex items-center gap-2">
-              <Wallet className="size-4 text-sage" strokeWidth={1.5} /> Cash on delivery available
+              <Percent className="size-4 text-sage" strokeWidth={1.5} /> Extra {prepaidPercent}% off when you pay online
             </li>
           )}
           <li className="flex items-center gap-2">
-            <RotateCcw className="size-4 text-sage" strokeWidth={1.5} /> 7-day easy returns
+            <RotateCcw className="size-4 text-sage" strokeWidth={1.5} /> 7-day easy returns & exchanges
           </li>
         </ul>
       )}
@@ -99,13 +109,13 @@ export function SizeGuideButton() {
       {open && (
         <div className="fixed inset-0 z-50 grid place-items-center p-4" role="dialog" aria-label="Size guide">
           <div className="absolute inset-0 bg-ink/50" onClick={() => setOpen(false)} />
-          <div className="relative bg-cream w-full max-w-xl max-h-[90vh] overflow-auto p-6 sm:p-8 animate-fade-in">
+          <div className="relative bg-[#fffdf8] rounded-3xl w-full max-w-xl max-h-[90vh] overflow-auto p-6 sm:p-8 animate-fade-in">
             <button onClick={() => setOpen(false)} aria-label="Close size guide" className="absolute top-4 right-4 p-1">
               <X className="size-5" />
             </button>
             <h2 className="font-display text-3xl">Size guide</h2>
             <p className="text-sm text-muted mt-2">Body measurements. Between sizes? Size up for a relaxed fit, or WhatsApp us for advice.</p>
-            <div className="mt-5 inline-flex border border-line text-xs">
+            <div className="mt-5 inline-flex rounded-full border border-line text-xs overflow-hidden">
               {["in", "cm"].map((u) => (
                 <button key={u} onClick={() => setCm(u === "cm")} className={cn("px-4 py-1.5 uppercase tracking-wider", (u === "cm") === cm && "bg-ink text-cream")}>
                   {u}
@@ -140,11 +150,11 @@ export function SizeGuideButton() {
   );
 }
 
-export function TrustBadges({ className }: { className?: string }) {
+export function TrustBadges({ className, codEnabled = true }: { className?: string; codEnabled?: boolean }) {
   const items = [
     { icon: ShieldCheck, t: "Secure payments", s: "Razorpay · PCI-DSS" },
-    { icon: RotateCcw, t: "7-day returns", s: "Unworn with tags" },
-    { icon: Wallet, t: "Cash on delivery", s: "Pan-India" },
+    { icon: RotateCcw, t: "7-day returns", s: "Easy exchanges too" },
+    codEnabled ? { icon: Wallet, t: "Cash on delivery", s: "Pan-India" } : { icon: Truck, t: "Ships in 1–2 days", s: "Pan-India delivery" },
     { icon: BadgeCheck, t: "GST invoice", s: "With every order" },
   ];
   return (

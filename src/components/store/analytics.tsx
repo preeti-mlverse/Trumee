@@ -103,7 +103,7 @@ export function ThirdPartyTags({ ga4, pixel, clarity }: { ga4: string; pixel: st
         `}</Script>
       )}
       {hasTags && !asked && (
-        <div className="fixed bottom-3 inset-x-3 sm:left-auto sm:right-5 sm:bottom-5 sm:max-w-sm z-40 bg-cream border border-line shadow-2xl shadow-ink/10 p-5 animate-fade-in">
+        <div className="fixed bottom-3 inset-x-3 sm:left-auto sm:right-5 sm:bottom-5 sm:max-w-sm z-40 bg-[#fffdf8] rounded-3xl border border-line shadow-2xl shadow-ink/10 p-5 animate-fade-in">
           <p className="text-sm leading-relaxed">
             We use cookies to run the store and, with your OK, to measure ads and improve your experience.{" "}
             <Link href="/pages/privacy-policy" className="underline underline-offset-2">
@@ -111,7 +111,7 @@ export function ThirdPartyTags({ ga4, pixel, clarity }: { ga4: string; pixel: st
             </Link>
           </p>
           <div className="mt-4 flex gap-2">
-            <button onClick={() => choose("all")} className="flex-1 bg-ink text-cream py-2.5 text-xs tracking-[0.14em] uppercase">
+            <button onClick={() => choose("all")} className="flex-1 rounded-full bg-ink text-cream py-2.5 text-xs tracking-[0.14em] uppercase">
               Accept all
             </button>
             <button onClick={() => choose("essential")} className="flex-1 border border-ink py-2.5 text-xs tracking-[0.14em] uppercase">

@@ -75,13 +75,19 @@ export default async function OrderStatusPage({ params, searchParams }: PageProp
       )}
 
       {tracking && (
-        <div className="mt-10 flex flex-wrap items-center gap-4 bg-sand p-5">
+        <div className="mt-10 flex flex-wrap items-center gap-4 rounded-3xl bg-[#fffdf8]/80 border border-line/70 p-5">
           <Truck className="size-5" strokeWidth={1.5} />
           <p className="text-sm flex-1">
             Shipped{tracking.carrier ? ` with ${tracking.carrier}` : ""} · Tracking <strong>{tracking.trackingNumber}</strong>
+            {o.shippingMeta?.status && (
+              <span className="block text-xs text-muted mt-1">
+                Latest: {o.shippingMeta.status.toLowerCase()}
+                {o.shippingMeta.etd && !delivered ? ` · expected by ${o.shippingMeta.etd.slice(0, 10)}` : ""}
+              </span>
+            )}
           </p>
           {tracking.trackingUrl && (
-            <a href={tracking.trackingUrl} target="_blank" rel="noopener" className="bg-ink text-cream px-5 py-2.5 text-[11px] tracking-[0.2em] uppercase">
+            <a href={tracking.trackingUrl} target="_blank" rel="noopener" className="rounded-full bg-ink text-cream px-5 py-2.5 text-[11px] tracking-[0.2em] uppercase">
               Track package
             </a>
           )}
@@ -108,6 +114,7 @@ export default async function OrderStatusPage({ params, searchParams }: PageProp
           <dl className="mt-4 space-y-1.5 text-sm max-w-xs ml-auto">
             <div className="flex justify-between"><dt>Subtotal</dt><dd>{inr(o.subtotal)}</dd></div>
             {o.discountTotal > 0 && <div className="flex justify-between text-sage"><dt>Discount ({o.discountCode})</dt><dd>−{inr(o.discountTotal)}</dd></div>}
+            {o.prepaidDiscount > 0 && <div className="flex justify-between text-sage"><dt>Prepaid discount</dt><dd>−{inr(o.prepaidDiscount)}</dd></div>}
             <div className="flex justify-between"><dt>Shipping</dt><dd>{o.shippingTotal ? inr(o.shippingTotal) : "Free"}</dd></div>
             {o.codFee > 0 && <div className="flex justify-between"><dt>COD fee</dt><dd>{inr(o.codFee)}</dd></div>}
             <div className="flex justify-between font-medium text-base border-t border-line pt-2"><dt>Total</dt><dd>{inr(o.total)}</dd></div>

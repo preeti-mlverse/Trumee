@@ -28,6 +28,35 @@ export type ShippingSettings = {
   deliveryEstimates: { label: string; days: string }[];
 };
 
+/** Online-payment incentive, editable in Admin → Settings → Payments. */
+export type PaymentSettings = {
+  /** % off the order (after other discounts, before shipping) when paying online. 0 = off. */
+  prepaidDiscountPercent: number;
+  /** Cap on the prepaid saving, in paise; null = no cap. */
+  prepaidDiscountMax: number | null;
+  /** Orders below this subtotal (paise) don't get it; 0 = any order. */
+  prepaidDiscountMinOrder: number;
+};
+
+/**
+ * Shiprocket logistics. Login credentials live in env (SHIPROCKET_EMAIL / SHIPROCKET_PASSWORD),
+ * never in the database; everything else is editable in Admin → Settings → Shipping.
+ */
+export type ShiprocketSettings = {
+  /** Live delivery dates from Shiprocket on product pages and checkout (falls back to estimates). */
+  liveEstimates: boolean;
+  /** Push every confirmed order to Shiprocket automatically. */
+  autoCreateOrders: boolean;
+  /** Pickup address nickname exactly as set in Shiprocket → Settings → Pickup Addresses. */
+  pickupLocation: string;
+  pickupPostcode: string;
+  /** Default parcel used when a product has no weight of its own. */
+  weightKg: number;
+  lengthCm: number;
+  breadthCm: number;
+  heightCm: number;
+};
+
 export type TaxSettings = {
   pricesIncludeTax: boolean;
   /** GST on apparel: lowRate up to the per-unit threshold, highRate above it. */
@@ -43,8 +72,42 @@ export type IntegrationSettings = {
   clarityId: string;
 };
 
+/**
+ * One hero slide. `layout` picks the composition:
+ * motion = full-bleed campaign video · banner = a finished wide artwork shown whole + shoppable strip · scenic = full-bleed landscape photo ·
+ * runway = catwalk loops side by side · split = photo beside a cream copy panel.
+ */
+export type HeroSlide = {
+  layout?: "motion" | "banner" | "scenic" | "runway" | "split";
+  /** banner: collection whose pieces are shown in the shoppable strip; `featured` handles lead it */
+  collection?: string;
+  featured?: string[];
+  /** motion: landscape video (desktop) and portrait crop (phones); `image`/`mobileImage` are their posters */
+  video?: string;
+  mobileVideo?: string;
+  /** How long the slide stays up, in ms (defaults to 7000) */
+  duration?: number;
+  image: string;
+  /** Portrait crop used on phones */
+  mobileImage?: string;
+  /** CSS object-position for the phone image, e.g. "20% 0%" */
+  mobileFocus?: string;
+  eyebrow: string;
+  title: string;
+  /** Italic words appended to the title */
+  accent?: string;
+  text?: string;
+  cta: string;
+  href: string;
+  secondary?: { label: string; href: string };
+  /** split: small detail tiles beside the copy */
+  details?: { image: string; label: string; href: string }[];
+  /** Short name on the slide tab */
+  tab?: string;
+};
+
 export type HomeSettings = {
-  heroSlides: { image: string; eyebrow: string; title: string; cta: string; href: string }[];
+  heroSlides: HeroSlide[];
   featuredCollections: string[]; // handles
   spotlight: { image: string; title: string; text: string; href: string }[];
   testimonials: { name: string; text: string }[];
@@ -81,6 +144,17 @@ export const DEFAULTS = {
       { label: "Remote areas", days: "5–8 business days" },
     ],
   } satisfies ShippingSettings,
+  payments: { prepaidDiscountPercent: 0, prepaidDiscountMax: null, prepaidDiscountMinOrder: 0 } satisfies PaymentSettings,
+  shiprocket: {
+    liveEstimates: true,
+    autoCreateOrders: false,
+    pickupLocation: "Primary",
+    pickupPostcode: "122017",
+    weightKg: 0.4,
+    lengthCm: 30,
+    breadthCm: 25,
+    heightCm: 4,
+  } satisfies ShiprocketSettings,
   tax: { pricesIncludeTax: true, threshold: 250000, lowRate: 5, highRate: 18 } satisfies TaxSettings,
   integrations: {
     ga4MeasurementId: "",
@@ -120,25 +194,62 @@ export const DEFAULTS = {
   home: {
     heroSlides: [
       {
-        image: "/images/lifestyle/hero-pink-wall.webp",
-        eyebrow: "The Summer Edit",
-        title: "Dressed for days that don’t follow a plan",
-        cta: "Explore the collection",
+        layout: "motion",
+        tab: "In full bloom",
+        video: "/videos/hero-motion.mp4",
+        mobileVideo: "/videos/hero-motion-portrait.mp4",
+        image: "/videos/hero-motion.webp",
+        mobileImage: "/videos/hero-motion-portrait.webp",
+        eyebrow: "The new season",
+        title: "Bloom, wander,",
+        accent: "repeat",
+        text: "Florals, crochet and schiffli made for sunlit days — our new season, in full bloom.",
+        cta: "Shop the collection",
         href: "/collections/all",
+        secondary: { label: "New in", href: "/collections/all?sort=newest" },
       },
       {
-        image: "/images/lifestyle/lake-rust.webp",
-        eyebrow: "Nomadic Escapes",
-        title: "For your soul’s expedition",
-        cta: "Escape in style",
-        href: "/collections/escape-edit",
+        layout: "banner",
+        tab: "Crisp & casual",
+        image: "/images/banners/shirts.webp",
+        mobileImage: "/images/banners/shirts-mobile.webp",
+        eyebrow: "The shirt edit",
+        title: "Crisp & casual",
+        accent: "shirts for your getaway",
+        text: "Denim, checks and schiffli-trimmed cotton — throw on, tie up, head out.",
+        cta: "Shop shirts",
+        href: "/collections/shirts",
+        collection: "shirts",
+        featured: ["checkered-yoke-denim-shirt-with-roll-up-sleeves"],
       },
       {
-        image: "/images/lifestyle/forest-blue.webp",
-        eyebrow: "Free Spirited",
-        title: "Flowy silhouettes, earthy prints",
-        cta: "Shop the edit",
-        href: "/collections/free-spirited",
+        layout: "banner",
+        tab: "One-piece wonder",
+        image: "/images/banners/one-piece.webp",
+        mobileImage: "/images/banners/one-piece-mobile.webp",
+        eyebrow: "Jumpsuits & dungarees",
+        title: "One-piece",
+        accent: "wonder",
+        text: "Schiffli cotton with scalloped hems — one piece, zero effort, all day.",
+        cta: "Shop jumpsuits",
+        href: "/collections/jumpsuit",
+        collection: "jumpsuit",
+        featured: ["ombre-cotton-schiffli-dungaree-style-jumpsuit"],
+      },
+      {
+        layout: "banner",
+        tab: "Match, set, style",
+        image: "/images/banners/coord.webp",
+        mobileImage: "/images/banners/coord-mobile.webp",
+        mobileFocus: "18% 0%",
+        eyebrow: "Co-ord sets",
+        title: "Match, set,",
+        accent: "style",
+        text: "Two pieces, endless outfits — wear them together or split them up.",
+        cta: "Shop co-ords",
+        href: "/collections/co-ord-sets",
+        collection: "co-ord-sets",
+        featured: ["mustard-artistic-print-cord-set-with-crochet-lace-accents"],
       },
     ],
     featuredCollections: ["main-character-energy", "in-her-element", "wander-x-wear", "after-the-rain", "free-spirited", "escape-edit"],
@@ -173,6 +284,8 @@ export const DEFAULTS = {
 export type SettingsMap = {
   store: StoreSettings;
   shipping: ShippingSettings;
+  payments: PaymentSettings;
+  shiprocket: ShiprocketSettings;
   tax: TaxSettings;
   integrations: IntegrationSettings;
   navigation: NavLink[];

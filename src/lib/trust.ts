@@ -15,7 +15,7 @@ const REMOTE_STATES = [
 
 export type DeliveryEstimate = { tier: "metro" | "standard" | "remote"; minDays: number; maxDays: number; from: string; to: string; place: string };
 
-function addBusinessDays(d: Date, n: number) {
+export function addBusinessDays(d: Date, n: number) {
   const r = new Date(d);
   while (n > 0) {
     r.setDate(r.getDate() + 1);
@@ -24,7 +24,7 @@ function addBusinessDays(d: Date, n: number) {
   return r;
 }
 
-const fmt = (d: Date) => d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", timeZone: "Asia/Kolkata" });
+export const fmtDay = (d: Date) => d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", timeZone: "Asia/Kolkata" });
 
 export function estimateDelivery(place: { city: string; state: string }, now = new Date()): DeliveryEstimate {
   const city = place.city.toLowerCase();
@@ -34,7 +34,7 @@ export function estimateDelivery(place: { city: string; state: string }, now = n
   const [min, max] = tier === "metro" ? [2, 4] : tier === "remote" ? [5, 8] : [3, 6];
   const minDays = min + 1;
   const maxDays = max + 2;
-  return { tier, minDays, maxDays, from: fmt(addBusinessDays(now, minDays)), to: fmt(addBusinessDays(now, maxDays)), place: `${place.city}, ${place.state}` };
+  return { tier, minDays, maxDays, from: fmtDay(addBusinessDays(now, minDays)), to: fmtDay(addBusinessDays(now, maxDays)), place: `${place.city}, ${place.state}` };
 }
 
 export type CraftNote = { title: string; text: string };
@@ -68,14 +68,15 @@ export function craftNotes(p: { title: string; tags: string[]; fabric: string | 
 
 /**
  * Craft photography (self-hosted, resized to WebP) from Wikimedia Commons under open licences.
- * CC BY / CC BY-SA require the credit + licence link shown under each image.
+ * CC BY / CC BY-SA attribution lives on /credits (linked from the footer).
  */
 export const CRAFT_IMAGES = [
   {
     src: "/images/craft/embroidery.webp",
     title: "Embroidery",
     text: "Thread-work florals, stitched in — never printed on. The same craft behind our schiffli and dori pieces.",
-    credit: "Chikan embroidery, Lucknow — Joey Berzowska, CC BY 2.0 (resized)",
+    credit: "Chikan embroidery, Lucknow — Joey Berzowska",
+    license: { name: "CC BY 2.0", url: "https://creativecommons.org/licenses/by/2.0/" },
     href: "https://commons.wikimedia.org/wiki/File:Chikan_embroidery,_Lucknow.jpg",
     shop: { label: "Shop embroidered pieces", href: "/collections/skirts" },
   },
@@ -83,7 +84,8 @@ export const CRAFT_IMAGES = [
     src: "/images/craft/crochet.webp",
     title: "Crochet lace",
     text: "Lace trims chosen for texture and hand-finished onto necklines, hems and yokes.",
-    credit: "Crochet lace detail — Dnor, public domain",
+    credit: "Crochet lace detail — Dnor",
+    license: { name: "Public domain", url: "" },
     href: "https://commons.wikimedia.org/wiki/File:Crochet_small_Swedish_tablecloth_about_1930_detail.jpg",
     shop: { label: "Shop crochet tops", href: "/collections/tops" },
   },
@@ -91,7 +93,8 @@ export const CRAFT_IMAGES = [
     src: "/images/craft/block-print.webp",
     title: "Indian textile heritage",
     text: "Prints rooted in Rajasthan’s hand block-printing tradition — Sanganeri florals on soft cotton.",
-    credit: "Hand block printing, Jaipur — Ketayun Katz, CC BY-SA 4.0 (resized)",
+    credit: "Hand block printing, Jaipur — Ketayun Katz",
+    license: { name: "CC BY-SA 4.0", url: "https://creativecommons.org/licenses/by-sa/4.0/" },
     href: "https://commons.wikimedia.org/wiki/File:Printing_with_Hand_Carved_Block.jpg",
     shop: { label: "Shop printed dresses", href: "/collections/dresses" },
   },
@@ -99,7 +102,8 @@ export const CRAFT_IMAGES = [
     src: "/images/craft/cotton.webp",
     title: "Breathable cotton",
     text: "Cotton, cotton slub and cotton flex — natural fibres that breathe through Indian summers.",
-    credit: "Cotton boll, Andhra Pradesh — rajaraman sundaram, CC BY 3.0 (resized)",
+    credit: "Cotton boll, Andhra Pradesh — rajaraman sundaram",
+    license: { name: "CC BY 3.0", url: "https://creativecommons.org/licenses/by/3.0/" },
     href: "https://commons.wikimedia.org/wiki/File:COTTON_FLOWER,JAMMALAMEDUGU.KADAPA,A.P_-_panoramio.jpg",
     shop: { label: "Shop cotton jumpsuits", href: "/collections/jumpsuit" },
   },

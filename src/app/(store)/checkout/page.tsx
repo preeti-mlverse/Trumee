@@ -11,14 +11,14 @@ import { getSettings } from "@/lib/settings";
 export const metadata: Metadata = { title: "Checkout", robots: { index: false, follow: false } };
 
 export default async function CheckoutPage() {
-  const [cart, shipping, customer] = await Promise.all([getCartState(), getSettings("shipping"), getCustomer()]);
+  const [cart, shipping, store, customer] = await Promise.all([getCartState(), getSettings("shipping"), getSettings("store"), getCustomer()]);
 
   if (!cart.lines.length)
     return (
       <Container className="py-32 text-center">
         <h1 className="font-display text-5xl">Your bag is empty</h1>
         <p className="text-muted mt-3">Add a piece or two and come back to check out.</p>
-        <Link href="/collections/all" className="inline-block mt-8 bg-ink text-cream px-7 py-3.5 text-[11px] tracking-[0.22em] uppercase">
+        <Link href="/collections/all" className="inline-block mt-8 rounded-full bg-ink text-cream px-7 py-3.5 text-[11px] tracking-[0.22em] uppercase">
           Shop all clothing
         </Link>
       </Container>
@@ -42,6 +42,8 @@ export default async function CheckoutPage() {
         codEnabled={shipping.codEnabled}
         codMax={shipping.codMaxOrder}
         codFee={shipping.codFee}
+        processingDays={shipping.processingDays}
+        whatsapp={store.whatsapp}
         prefill={{
           email: customer?.email ?? cart.email ?? undefined,
           phone: customer?.phone ?? address?.phone,

@@ -6,6 +6,7 @@ import type { Address, Attribution } from "@/db/schema";
 import { recordPurchase } from "./analytics/server";
 import { loadLines, priceLines } from "./cart";
 import { sendEmail, templates } from "./email";
+import { autoPushIfEnabled } from "./fulfilment";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -95,6 +96,7 @@ export async function createOrderFromCart(input: {
         discountTotal: totals.discountTotal,
         shippingTotal: totals.shipping,
         codFee: totals.codFee,
+        prepaidDiscount: totals.prepaidDiscount,
         taxTotal: totals.tax,
         total: totals.total,
         discountCode: totals.discountApplied,
@@ -180,6 +182,7 @@ async function afterConfirmed(orderId: number) {
   await Promise.allSettled([
     sendEmail({ to: o.email, ...mail }),
     recordPurchase({ sessionId: o.sessionId, orderId: o.id, number: o.number, total: o.total, customerId: o.customerId }),
+    autoPushIfEnabled(o.id),
   ]);
 }
 

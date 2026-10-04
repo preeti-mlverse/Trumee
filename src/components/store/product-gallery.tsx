@@ -37,13 +37,13 @@ export function ProductGallery({
 
   return (
     <div className="lg:grid grid-cols-1 lg:grid-cols-[76px_minmax(0,1fr)] lg:gap-4">
-      <div className="hidden lg:flex flex-col gap-3 max-h-[82vh] overflow-y-auto scrollbar-none">
+      <div className="hidden lg:flex flex-col gap-3 max-h-[82vh] overflow-y-auto scrollbar-none p-1">
         {slides.map((s, i) => (
           <button
             key={s.url}
             onClick={() => go(i)}
             aria-label={s.kind === "video" ? "Play catwalk video" : `Show image ${i + 1}`}
-            className={cn("relative aspect-[2/3] bg-sand shrink-0 border transition", i === active ? "border-ink" : "border-transparent opacity-60 hover:opacity-100")}
+            className={cn("relative aspect-[2/3] bg-sand shrink-0 rounded-xl overflow-hidden ring-1 ring-offset-2 ring-offset-cream transition", i === active ? "ring-ink" : "ring-transparent opacity-60 hover:opacity-100")}
           >
             <Image src={s.kind === "video" ? s.poster ?? images[0]?.url : s.url} alt="" fill sizes="76px" className="object-cover" />
             {s.kind === "video" && (
@@ -54,7 +54,7 @@ export function ProductGallery({
           </button>
         ))}
       </div>
-      <div className="relative self-start">
+      <div className="relative self-start rounded-panel overflow-hidden isolate">
         <div ref={strip} onScroll={onScroll} className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none">
           {slides.map((s, i) => (
             <div key={s.url} className="relative aspect-[2/3] lg:aspect-[4/5] w-full shrink-0 snap-center bg-sand overflow-hidden">
@@ -69,7 +69,7 @@ export function ProductGallery({
         {video && active !== slides.findIndex((s) => s.kind === "video") && (
           <button
             onClick={() => go(slides.findIndex((s) => s.kind === "video"))}
-            className="absolute left-3 bottom-3 flex items-center gap-2 bg-ink/80 text-cream text-[10px] tracking-[0.2em] uppercase px-3 py-2 backdrop-blur-sm"
+            className="glass-dark absolute left-4 bottom-4 flex items-center gap-2 rounded-full text-cream text-[11px] tracking-[0.16em] uppercase px-4 py-2.5"
           >
             <Play className="size-3 fill-current" /> Watch it move
           </button>

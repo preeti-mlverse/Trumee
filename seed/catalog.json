@@ -330,7 +330,8 @@
     "breezy",
     "casuals",
     "schiffli",
-    "vacation"
+    "vacation",
+    "colour:Navy"
    ],
    "createdAt": "2025-07-04T16:23:25+05:30",
    "publishedAt": "2025-07-04T16:23:27+05:30",
@@ -618,7 +619,8 @@
     "breezy",
     "casuals",
     "floral",
-    "vacation"
+    "vacation",
+    "colour:Red"
    ],
    "createdAt": "2025-07-04T15:58:46+05:30",
    "publishedAt": "2025-07-04T15:58:47+05:30",
@@ -918,7 +920,8 @@
     "checkered",
     "embroidery",
     "office",
-    "vacation"
+    "vacation",
+    "colour:Green"
    ],
    "createdAt": "2025-07-04T15:17:30+05:30",
    "publishedAt": "2025-07-04T15:40:05+05:30",
@@ -1230,7 +1233,8 @@
     "breezy",
     "casuals",
     "floral",
-    "vacation"
+    "vacation",
+    "colour:Red"
    ],
    "createdAt": "2025-07-04T14:39:29+05:30",
    "publishedAt": "2025-07-04T14:39:29+05:30",
@@ -1514,7 +1518,8 @@
     "breezy",
     "casuals",
     "floral",
-    "vacation"
+    "vacation",
+    "colour:Red"
    ],
    "createdAt": "2025-07-04T14:16:42+05:30",
    "publishedAt": "2025-07-04T14:16:43+05:30",
@@ -1656,7 +1661,8 @@
     "breezy",
     "casuals",
     "Crochet",
-    "vacation"
+    "vacation",
+    "colour:Navy"
    ],
    "createdAt": "2025-07-04T14:05:31+05:30",
    "publishedAt": "2025-07-04T14:05:32+05:30",
@@ -1944,7 +1950,8 @@
     "below 2500",
     "breezy",
     "casuals",
-    "vacation"
+    "vacation",
+    "colour:Pink"
    ],
    "createdAt": "2025-07-04T13:45:30+05:30",
    "publishedAt": "2025-07-04T13:45:32+05:30",
@@ -2099,7 +2106,8 @@
     "breezy",
     "casuals",
     "Crochet",
-    "vacation"
+    "vacation",
+    "colour:White"
    ],
    "createdAt": "2025-07-04T13:29:29+05:30",
    "publishedAt": "2025-07-04T13:36:27+05:30",
@@ -2632,7 +2640,8 @@
     "breezy",
     "casuals",
     "Crochet",
-    "vacation"
+    "vacation",
+    "colour:Blue"
    ],
    "createdAt": "2025-07-04T12:15:20+05:30",
    "publishedAt": "2025-07-04T12:23:29+05:30",
@@ -2762,7 +2771,8 @@
     "casuals",
     "Crochet",
     "floral",
-    "vacation"
+    "vacation",
+    "colour:Navy"
    ],
    "createdAt": "2025-07-04T11:55:54+05:30",
    "publishedAt": "2025-07-04T11:55:56+05:30",
@@ -2904,7 +2914,8 @@
     "breezy",
     "Crochet",
     "floral",
-    "vacation"
+    "vacation",
+    "colour:Purple"
    ],
    "createdAt": "2025-07-04T11:31:52+05:30",
    "publishedAt": "2025-07-04T11:40:20+05:30",
@@ -3039,7 +3050,8 @@
     "breezy",
     "Crochet",
     "floral",
-    "vacation"
+    "vacation",
+    "colour:Navy"
    ],
    "createdAt": "2025-07-04T11:31:23+05:30",
    "publishedAt": "2025-07-04T11:31:24+05:30",
@@ -3187,7 +3199,8 @@
     "above1000",
     "casuals",
     "embroidery",
-    "office"
+    "office",
+    "colour:Red"
    ],
    "createdAt": "2025-07-04T10:36:55+05:30",
    "publishedAt": "2025-07-04T10:36:57+05:30",
@@ -3471,7 +3484,8 @@
     "breezy",
     "casuals",
     "Crochet",
-    "vacation"
+    "vacation",
+    "colour:Maroon"
    ],
    "createdAt": "2025-07-04T08:20:07+05:30",
    "publishedAt": "2025-07-04T08:20:08+05:30",
@@ -3888,7 +3902,8 @@
     "below 2500",
     "embroidery",
     "schiffli",
-    "vacation"
+    "vacation",
+    "colour:White"
    ],
    "createdAt": "2025-07-04T01:24:48+05:30",
    "publishedAt": "2025-07-04T01:24:49+05:30",
@@ -4717,7 +4732,8 @@
     "below1000",
     "breezy",
     "floral",
-    "mini"
+    "mini",
+    "colour:Maroon"
    ],
    "createdAt": "2025-07-03T23:42:30+05:30",
    "publishedAt": "2025-07-03T23:42:31+05:30",

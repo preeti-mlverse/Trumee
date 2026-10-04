@@ -69,7 +69,7 @@ export async function Listing({ sp, collectionId, q, listName, basePath }: { sp:
               key={n}
               href={pageHref(n)}
               aria-current={n === page ? "page" : undefined}
-              className={`size-10 grid place-items-center text-sm border ${n === page ? "bg-ink text-cream border-ink" : "border-line hover:border-ink"}`}
+              className={`size-10 grid place-items-center rounded-full text-sm border ${n === page ? "bg-ink text-cream border-ink" : "border-line hover:border-ink"}`}
             >
               {n}
             </Link>

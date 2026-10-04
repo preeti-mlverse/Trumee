@@ -7,8 +7,8 @@ import type { CardProduct } from "@/lib/catalog";
 import { useWishlist } from "./cart-context";
 import { ProductGrid } from "./product-card";
 
-const input = "w-full border border-line bg-cream px-3.5 py-3 text-sm outline-none focus:border-ink";
-const btn = "w-full bg-ink text-cream py-3.5 text-[11px] tracking-[0.22em] uppercase disabled:opacity-60";
+const input = "w-full rounded-xl border border-line bg-[#fffdf8] px-4 py-3 text-sm outline-none focus:border-ink";
+const btn = "w-full rounded-full bg-ink text-cream py-3.5 text-[11px] tracking-[0.22em] uppercase disabled:opacity-60";
 
 function Msg({ s }: { s: { error?: string; ok?: string } | null }) {
   if (!s) return null;
@@ -85,7 +85,7 @@ export function ProfileForm({ c }: { c: { firstName: string | null; lastName: st
         <input type="checkbox" name="acceptsMarketing" defaultChecked={c.acceptsMarketing} className="accent-[var(--color-ink)] size-4" /> Email me new drops and offers
       </label>
       <Msg s={s} />
-      <button disabled={pending} className="border border-ink px-6 py-3 text-[11px] tracking-[0.2em] uppercase hover:bg-ink hover:text-cream">
+      <button disabled={pending} className="rounded-full border border-ink px-6 py-3 text-[11px] tracking-[0.2em] uppercase hover:bg-ink hover:text-cream">
         {pending ? "Saving…" : "Save details"}
       </button>
     </form>
@@ -106,7 +106,7 @@ export function WishlistView() {
       <div className="mt-10 py-16 text-center border border-line">
         <p className="font-display text-3xl">Nothing saved yet</p>
         <p className="text-sm text-muted mt-2">Tap the heart on any piece to keep it here.</p>
-        <Link href="/collections/all" className="inline-block mt-6 bg-ink text-cream px-7 py-3.5 text-[11px] tracking-[0.22em] uppercase">Browse the collection</Link>
+        <Link href="/collections/all" className="inline-block mt-6 rounded-full bg-ink text-cream px-7 py-3.5 text-[11px] tracking-[0.22em] uppercase">Browse the collection</Link>
       </div>
     );
   return <ProductGrid items={items} list="Wishlist" className="mt-10" />;

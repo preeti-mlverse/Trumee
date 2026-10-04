@@ -13,14 +13,14 @@ export function ReviewForm({ productId }: { productId: number }) {
   if (state?.ok) return <p className="text-sm text-sage py-4">{state.message}</p>;
   if (!open)
     return (
-      <button onClick={() => setOpen(true)} className="border border-ink px-6 py-3 text-xs tracking-[0.18em] uppercase hover:bg-ink hover:text-cream">
+      <button onClick={() => setOpen(true)} className="rounded-full border border-ink px-6 py-3 text-xs tracking-[0.18em] uppercase hover:bg-ink hover:text-cream">
         Write a review
       </button>
     );
 
-  const input = "w-full border border-line bg-cream px-3.5 py-3 text-sm outline-none focus:border-ink";
+  const input = "w-full rounded-xl border border-line bg-[#fffdf8] px-4 py-3 text-sm outline-none focus:border-ink";
   return (
-    <form action={action} className="max-w-xl space-y-4 bg-sand/60 p-6">
+    <form action={action} className="max-w-xl space-y-4 rounded-3xl bg-[#fffdf8]/70 p-6">
       <input type="hidden" name="productId" value={productId} />
       <input type="hidden" name="rating" value={rating} />
       <div className="flex gap-1" role="radiogroup" aria-label="Rating">
@@ -37,7 +37,7 @@ export function ReviewForm({ productId }: { productId: number }) {
       <input name="title" placeholder="Headline (optional)" className={input} />
       <textarea name="body" rows={4} placeholder="How was the fit, fabric and feel?" required className={input} />
       {state && !state.ok && <p className="text-sm text-sale">{state.message}</p>}
-      <button disabled={pending} className="bg-ink text-cream px-7 py-3 text-xs tracking-[0.18em] uppercase disabled:opacity-50">
+      <button disabled={pending} className="rounded-full bg-ink text-cream px-7 py-3 text-xs tracking-[0.18em] uppercase disabled:opacity-50">
         {pending ? "Sending…" : "Submit review"}
       </button>
     </form>

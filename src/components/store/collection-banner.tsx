@@ -43,7 +43,8 @@ export async function CollectionBanner({
   for (const p of all.items) if (media.length < 3 && !media.some((m) => m.key === "v" + p.id) && p.images[0]) media.push({ key: "i" + p.id, href: `/products/${p.handle}`, image: p.images[0].url, label: p.title });
 
   return (
-    <section className={cn("lg:grid lg:grid-cols-12 lg:min-h-[560px] lg:h-[68svh] lg:max-h-[760px]", dark ? "bg-ink text-cream" : "bg-sand text-ink")}>
+    <section className="px-2 sm:px-4 lg:px-6 pt-2 sm:pt-3">
+    <div className={cn("mx-auto max-w-[1400px] rounded-panel overflow-hidden lg:grid lg:grid-cols-12 lg:min-h-[560px] lg:h-[66svh] lg:max-h-[740px]", dark ? "bg-ink text-cream" : "bg-[#fffdf8]/75 text-ink")}>
       <div className="lg:col-span-5 flex flex-col justify-between px-4 sm:px-6 lg:px-12 pt-8 pb-10 lg:py-12">
         <div className={cn(dark && "[&_a]:text-cream/60 [&_a:hover]:text-cream [&_span]:text-cream/80")}>
           <Breadcrumbs items={[{ label: "Collections", href: "/collections" }, { label: title }]} />
@@ -52,7 +53,7 @@ export async function CollectionBanner({
           <p className={cn("text-[11px] tracking-[0.3em] uppercase", dark ? "text-marigold" : "text-plum")}>
             {group === "edit" ? "The Edit" : group === "all" ? "Everything" : "Category"}
           </p>
-          <h1 className="font-display text-[52px] sm:text-7xl xl:text-[92px] leading-[0.92] tracking-[-0.015em] mt-5">{title}</h1>
+          <h1 className="font-display text-[58px] sm:text-[84px] xl:text-[104px] leading-[0.9] mt-5">{title}</h1>
           {description && <p className={cn("mt-5 max-w-md leading-relaxed", dark ? "text-cream/70" : "text-ink-soft")}>{description}</p>}
         </div>
         <nav aria-label="Related collections" className="mt-10 lg:mt-0 flex flex-wrap gap-2">
@@ -64,7 +65,7 @@ export async function CollectionBanner({
                 key={s.id}
                 href={`/collections/${s.handle}`}
                 className={cn(
-                  "px-3.5 py-2 text-[11px] tracking-[0.16em] uppercase border transition-colors",
+                  "rounded-full px-4 py-2 text-[13px] tracking-[0.02em] border transition-colors",
                   dark ? "border-cream/25 hover:bg-cream hover:text-ink" : "border-ink/25 hover:bg-ink hover:text-cream",
                 )}
               >
@@ -74,7 +75,7 @@ export async function CollectionBanner({
         </nav>
       </div>
 
-      <div className="lg:col-span-7 grid grid-cols-3 gap-px bg-ink h-[62vw] sm:h-[48vw] lg:h-auto">
+      <div className="lg:col-span-7 grid grid-cols-3 gap-1.5 p-1.5 lg:pl-0 h-[62vw] sm:h-[48vw] lg:h-auto [&>*]:rounded-card">
         {media.slice(0, 3).map((m, i) => {
           const inner = (
             <>
@@ -101,6 +102,7 @@ export async function CollectionBanner({
           );
         })}
       </div>
+    </div>
     </section>
   );
 }

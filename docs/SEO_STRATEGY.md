@@ -126,3 +126,43 @@ Map each to the closest collection or product; add the phrase naturally to that 
 - [ ] **Owner:** Google Business Profile for the Gurgaon studio
 - [ ] **Owner:** collect reviews (aim for 5+ per bestseller) — they drive stars in results
 - [ ] Monthly: check Search Console "Queries" and add FAQs for queries you rank 8–20 on
+
+## 8. AI search (GEO) — being the answer in ChatGPT, Perplexity, Gemini & AI Overviews
+
+Brand brief used for all copy: women 20–48 wanting trendy, comfortable, affordable everyday and vacation western wear; tone chic, confident, fashion-forward.
+
+**Shipped in code**
+- `robots.txt` names the AI crawlers explicitly (OAI-SearchBot, ChatGPT-User, GPTBot, PerplexityBot, Perplexity-User, ClaudeBot, Claude-SearchBot, Claude-User, Google-Extended, Applebot-Extended, Bingbot, CCBot) — allowed, with the same private-path blocks as everyone else.
+- `/llms.txt` — quotable brand facts (audience, fabrics, sizes, prices, shipping, payments incl. prepaid offer, returns/exchanges, contact) + category/edit map + links to machine-readable files.
+- `/llms-full.txt` — every live style with price, sale price, sizes (incl. sold out), fabric, colour, pattern and craft, grouped by category.
+- Product pages carry an **"At a glance"** block (fabric, sizes, colour, details, care, dispatch, returns, payment) — short factual answers assistants quote.
+- Category guides open with a 150–200-word intro + 3 "People Also Ask" FAQs answered in the first sentence (Tops, Dresses done; repeat for the rest).
+- Colour is set for every product (variant option → `colour:` tag → name) so schema, feed and llms files agree.
+
+**Owner actions (off-site — this is where most AI visibility comes from)**
+- [ ] Get Trumee mentioned in Indian fashion publications/blogs and "best boho brands in India" listicles (LLMs cite these).
+- [ ] Seed genuine conversations: r/IndianFashionAddicts, r/femalefashionadvice, Quora answers on boho/vacation outfits.
+- [ ] Microsoft Merchant Center: add the same feed (`/feeds/google-merchant.xml`) — powers Bing & Copilot shopping.
+- [ ] Monthly: ask ChatGPT / Perplexity / Gemini "best boho dresses brand India", "crochet tops online India" etc.; log whether Trumee is cited and which pages; add FAQs/guides for the gaps.
+- [ ] Competitor gap: pull ranked keywords for 3 competitors (e.g. Bunaai, Pink Fort, Kaori by Shreya), group by intent, ship one collection guide/blog per gap.
+
+## 9. Structured data map (what each page emits)
+
+| Page | Schema.org types |
+|---|---|
+| Every page | `OnlineStore`/`ClothingStore` (Organization: logo, address, contact, sameAs, knowsAbout, priceRange, payment, **MerchantReturnPolicy**), `WebSite` + `SearchAction` |
+| Product | `ProductGroup` (brand, category, material, colour, pattern, `PeopleAudience` female/adult, `additionalProperty` fabric/care/craft, `VideoObject`) → `hasVariant` `Product` per size (`SizeSpecification`, colour, sku, `inProductGroupWithID`) → `Offer` (price, `StrikethroughPrice` for sales, availability, `OfferShippingDetails` with handling/transit days, `MerchantReturnPolicy`), `AggregateRating` + `Review` **only from real reviews**, `BreadcrumbList` |
+| Collection | `CollectionPage` + `ItemList` (url, name, image), `FAQPage`, `BreadcrumbList` |
+| Journal post | `BlogPosting`, `BreadcrumbList` |
+
+Validate after launch: Google Rich Results Test + Search Console → Shopping/Merchant listings, Products, FAQ, Breadcrumbs reports.
+
+## 10. Go-live checklist
+
+- [ ] `NEXT_PUBLIC_SITE_URL=https://trumee.in` (all canonicals, sitemap, schema and llms files use it)
+- [ ] Hosting/CDN bot protection: make sure AI crawlers above are **not** challenged (Cloudflare "Block AI bots" off; Vercel firewall rules allow them)
+- [ ] Search Console + Bing Webmaster: verify, submit `/sitemap.xml`
+- [ ] Merchant Center (Google + Microsoft): add feed, enable free listings, set shipping (₹29 flat) and returns (7 days) to match the site
+- [ ] Razorpay live keys, Resend domain, Shiprocket credentials + webhook (docs/SHIPROCKET_SETUP.md)
+- [ ] Prepaid discount % set in Admin → Settings → Payments (shown on product pages, bag, checkout and in llms.txt)
+- [ ] Rich Results Test on 3 products, 2 collections, home

@@ -30,6 +30,8 @@ export type CartState = {
   discountCode: string | null;
   email: string | null;
   totals: Totals;
+  /** Store policies the cart UI advertises (from settings, so copy never contradicts checkout). */
+  perks: { codEnabled: boolean; prepaidPercent: number; processingDays: string };
 };
 
 export async function getCartId() {
@@ -149,8 +151,9 @@ export async function priceLines(
   lines: CartLine[],
   opts: { code?: string | null; email?: string | null; paymentMethod?: "razorpay" | "cod" },
 ) {
-  const [shipping, tax] = await Promise.all([getSettings("shipping"), getSettings("tax")]);
-  const ctx = { shipping, tax, paymentMethod: opts.paymentMethod };
+  const [shipping, tax, payments] = await Promise.all([getSettings("shipping"), getSettings("tax"), getSettings("payments")]);
+  const prepaid = { percent: payments.prepaidDiscountPercent, max: payments.prepaidDiscountMax, minOrder: payments.prepaidDiscountMinOrder };
+  const ctx = { shipping, tax, paymentMethod: opts.paymentMethod, prepaid };
   const { discount, error } = await lookupDiscount(opts.code, { email: opts.email });
   const chosen = discount ?? (opts.code ? null : await automaticDiscount(lines, ctx));
   const totals = priceCart(lines, { ...ctx, discount: chosen });
@@ -159,11 +162,13 @@ export async function priceLines(
 }
 
 export async function getCartState(opts: { paymentMethod?: "razorpay" | "cod" } = {}): Promise<CartState> {
+  const [shippingS, paymentsS] = await Promise.all([getSettings("shipping"), getSettings("payments")]);
+  const perks = { codEnabled: shippingS.codEnabled, prepaidPercent: paymentsS.prepaidDiscountPercent, processingDays: shippingS.processingDays };
   const id = await getCartId();
   const cart = id ? await db.query.carts.findFirst({ where: eq(schema.carts.id, id) }) : null;
   if (!cart || cart.completedOrderId) {
     const totals = await priceLines([], {});
-    return { id: null, lines: [], count: 0, discountCode: null, email: null, totals };
+    return { id: null, lines: [], count: 0, discountCode: null, email: null, totals, perks };
   }
   const lines = await loadLines(cart.id);
   const totals = await priceLines(lines, { code: cart.discountCode, email: cart.email, paymentMethod: opts.paymentMethod });
@@ -174,6 +179,7 @@ export async function getCartState(opts: { paymentMethod?: "razorpay" | "cod" } 
     discountCode: cart.discountCode,
     email: cart.email,
     totals,
+    perks,
   };
 }
 

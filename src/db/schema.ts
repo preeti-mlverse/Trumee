@@ -223,6 +223,19 @@ export const customers = pgTable("customers", {
   ...timestamps,
 });
 
+export type ShippingMeta = {
+  provider: "shiprocket";
+  srOrderId?: number;
+  shipmentId?: number;
+  awb?: string;
+  courier?: string;
+  status?: string;
+  etd?: string;
+  pickupScheduled?: boolean;
+  error?: string;
+  updatedAt: string;
+};
+
 export type Address = {
   name: string;
   phone: string;
@@ -335,6 +348,10 @@ export const orders = pgTable(
     discountTotal: integer("discount_total").notNull().default(0),
     shippingTotal: integer("shipping_total").notNull().default(0),
     codFee: integer("cod_fee").notNull().default(0),
+    /** Online-payment incentive (Admin → Settings → Payments), already deducted from `total`. */
+    prepaidDiscount: integer("prepaid_discount").notNull().default(0),
+    /** Courier booking state (Shiprocket order/shipment ids, AWB, live status). */
+    shippingMeta: jsonb("shipping_meta").$type<ShippingMeta>(),
     /** GST contained in the (tax-inclusive) prices, for reporting and invoices. */
     taxTotal: integer("tax_total").notNull().default(0),
     total: integer("total").notNull(),
