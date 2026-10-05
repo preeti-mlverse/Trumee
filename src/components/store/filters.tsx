@@ -103,7 +103,7 @@ export function Filters({ facets, total }: { facets: { sizes: string[]; types: s
   return (
     <>
       {/* Docks flush under the header on the same sand backdrop, so the two read as one bar */}
-      <div className="sticky top-[68px] lg:top-[76px] z-30 -mx-4 sm:-mx-6 lg:-mx-10 px-2 sm:px-4 lg:px-6 pt-1 pb-2 mb-6 sm:mb-8 bg-(--sky-top) after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-gradient-to-b after:from-(--sky-top) after:to-transparent">
+      <div className="sticky top-16 lg:top-[72px] z-30 -mx-4 sm:-mx-6 lg:-mx-10 px-2 sm:px-4 lg:px-6 pt-1 pb-2 mb-6 sm:mb-8 bg-(--sky-top) after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-gradient-to-b after:from-(--sky-top) after:to-transparent">
       <div className="mx-auto max-w-[1400px] flex items-center justify-between gap-4 rounded-full border border-ink/[0.06] bg-[#fffdf8]/90 px-4 sm:px-5 py-0.5 sm:py-1 shadow-[0_6px_18px_-14px_rgba(34,16,30,0.35)]">
         <button onClick={() => setOpen(true)} className="flex items-center gap-2 py-2 text-xs tracking-[0.16em] uppercase">
           <SlidersHorizontal className="size-4" strokeWidth={1.5} /> Filter {activeCount > 0 && <span className="text-plum">({activeCount})</span>}

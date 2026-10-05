@@ -34,7 +34,7 @@ export function Hero({ slides, clips, shop = [] }: { slides: HeroSlide[]; clips:
 
   return (
     <section
-      className="px-2 sm:px-4 lg:px-6 pt-2 -mt-[68px] lg:-mt-[76px]"
+      className="px-2 sm:px-4 lg:px-6 pt-2 sm:pt-3"
       aria-roledescription="carousel"
       aria-label="Featured"
       onTouchStart={(e) => (touch.current = e.touches[0].clientX)}
@@ -46,7 +46,7 @@ export function Hero({ slides, clips, shop = [] }: { slides: HeroSlide[]; clips:
       }}
     >
       <h1 className="sr-only">Trumee — boho dresses, crochet tops and western wear for women in India</h1>
-      <div className="relative mx-auto max-w-[1400px] h-[88svh] min-h-[620px] lg:h-[calc(100svh-48px)] lg:min-h-[700px] lg:max-h-[920px] rounded-panel overflow-hidden bg-ink">
+      <div className="relative mx-auto max-w-[1400px] h-[84svh] min-h-[580px] lg:h-[calc(100svh-124px)] lg:min-h-[640px] lg:max-h-[860px] rounded-panel overflow-hidden bg-ink">
         {slides.map((s, k) => (
           <div
             key={k}
@@ -155,7 +155,7 @@ function Motion({ s, active, priority }: { s: HeroSlide; active: boolean; priori
   return (
     <div className="absolute inset-0 text-ink">
       <Image src={s.image} alt="" fill priority={priority} sizes="100vw" className={cn("object-cover", s.mobileImage && "hidden sm:block")} />
-      {s.mobileImage && <Image src={s.mobileImage} alt="" fill priority={priority} sizes="100vw" className="object-cover sm:hidden" />}
+      {s.mobileImage && <Image src={s.mobileImage} alt="" fill priority={priority} sizes="(min-width:640px) 1px, 100vw" className="object-cover sm:hidden" />}
       {src && <LoopVideo key={src.video} src={src.video} poster={src.poster} playing={active} priority={priority} className="absolute inset-0 size-full object-center" />}
       <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/45 to-transparent pointer-events-none" />
       {active && (
@@ -186,7 +186,7 @@ function Banner({ s, active, products }: { s: HeroSlide; active: boolean; produc
       <div className="absolute inset-0 bg-ink/45" />
 
       {/* Desktop: the banner, whole */}
-      <div className="hidden sm:flex absolute inset-0 flex-col px-6 lg:px-12 pt-24 lg:pt-28 pb-24 sm:pb-28">
+      <div className="hidden sm:flex absolute inset-0 flex-col px-6 lg:px-12 pt-6 lg:pt-10 pb-24 sm:pb-28">
         <Link href={s.href} tabIndex={tab} className="group relative block w-full aspect-[1920/500] rounded-3xl overflow-hidden shadow-[0_30px_60px_-25px_rgba(0,0,0,0.6)] ring-1 ring-white/15">
           <Image src={s.image} alt={`${s.title} ${s.accent ?? ""}`.trim()} fill priority sizes="(min-width:1400px) 1300px, 92vw" className={cn("object-cover transition-transform duration-[1500ms] group-hover:scale-[1.02]", active && "animate-kenburns")} />
         </Link>
@@ -228,9 +228,9 @@ function Banner({ s, active, products }: { s: HeroSlide; active: boolean; produc
       </div>
 
       {/* Phones: model panel + live headline */}
-      <div className="sm:hidden absolute inset-0 flex flex-col px-3 pt-[84px] pb-16">
+      <div className="sm:hidden absolute inset-0 flex flex-col px-3 pt-3 pb-16">
         <Link href={s.href} tabIndex={tab} className="relative flex-1 min-h-0 rounded-[1.5rem] overflow-hidden ring-1 ring-white/15">
-          <Image src={s.mobileImage ?? s.image} alt="" fill priority sizes="100vw" style={{ objectPosition: s.mobileFocus ?? "50% 0%" }} className={cn("object-cover", active && "animate-kenburns")} />
+          <Image src={s.mobileImage ?? s.image} alt="" fill priority sizes="(min-width:640px) 1px, 94vw" style={{ objectPosition: s.mobileFocus ?? "50% 0%" }} className={cn("object-cover", active && "animate-kenburns")} />
         </Link>
         {active && (
           <div className="px-2 pt-5">

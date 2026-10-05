@@ -17,14 +17,9 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
   const [search, setSearch] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const [pastHero, setPastHero] = useState(false);
-  const overHero = pathname === "/" && !pastHero;
 
   useEffect(() => {
-    const on = () => {
-      setScrolled(window.scrollY > 8);
-      setPastHero(window.scrollY > window.innerHeight * 0.6);
-    };
+    const on = () => setScrolled(window.scrollY > 8);
     on();
     window.addEventListener("scroll", on, { passive: true });
     return () => window.removeEventListener("scroll", on);
@@ -41,26 +36,14 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
           {announcement.href ? <Link href={announcement.href} className="inline-block py-1.5 -my-1.5">{announcement.text}</Link> : announcement.text}
         </div>
       )}
-      {/* Home, top of page: the pill floats inside the hero image so header + banner read as one piece.
-          Elsewhere / once scrolled: it docks on a sand backdrop matching the page sky, with a soft fade. */}
+      {/* Full-width bar, edge to edge; the page content always starts below it. */}
       <header
         className={cn(
-          "sticky top-0 z-40 px-2 sm:px-4 lg:px-6 py-2 transition-colors duration-300",
-          overHero
-            ? "bg-transparent"
-            : "bg-(--sky-top) after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-gradient-to-b after:from-(--sky-top) after:to-transparent",
+          "sticky top-0 z-40 w-full bg-[#fffdf8] border-b transition-shadow duration-300",
+          scrolled ? "border-ink/10 shadow-[0_6px_20px_-14px_rgba(34,16,30,0.35)]" : "border-ink/[0.06]",
         )}
       >
-        <div
-          className={cn(
-            "mx-auto max-w-[1400px] rounded-full pl-3 pr-2 sm:pl-6 sm:pr-3 h-[52px] lg:h-[60px] grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border transition-[background-color,box-shadow,border-color,transform,margin] duration-300",
-            overHero
-              ? "glass mx-3 sm:mx-5 lg:mx-auto lg:max-w-[1352px] translate-y-3 border-white/50 shadow-[0_10px_30px_-18px_rgba(34,16,30,0.5)]"
-              : scrolled
-                ? "bg-[#fffdf8]/95 border-ink/[0.06] shadow-[0_8px_24px_-14px_rgba(34,16,30,0.35)]"
-                : "bg-[#fffdf8]/70 border-white/70 shadow-[0_2px_10px_-6px_rgba(34,16,30,0.12)]",
-          )}
-        >
+        <div className="mx-auto max-w-[1440px] px-3 sm:px-6 lg:px-10 h-16 lg:h-[72px] grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center">
           <div className="flex items-center gap-1">
             <button aria-label="Open menu" className="lg:hidden size-10 grid place-items-center rounded-full hover:bg-white/70" onClick={() => setMenu(true)}>
               <Menu className="size-5" strokeWidth={1.5} />
