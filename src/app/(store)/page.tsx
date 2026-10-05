@@ -56,12 +56,12 @@ function Panel({ className, style, children }: { className?: string; style?: Rea
 
 /** "Shop by mood": occasion and craft tags that already power the collection filters. */
 const MOODS = [
-  { key: "vacation", group: "occasion", title: "Getaway", sub: "Vacation-ready", tint: "from-[#f6dfa6] to-[#e2a631]" },
-  { key: "casuals", group: "occasion", title: "Everyday", sub: "Easy casuals", tint: "from-[#f3eadb] to-[#d9c6a6]" },
-  { key: "office", group: "occasion", title: "Nine to five", sub: "Office-ready", tint: "from-[#ecdde6] to-[#b98aa9]" },
-  { key: "crochet", group: "detail", title: "Crochet", sub: "Hand-finished lace", tint: "from-[#faf5ec] to-[#e8dcc6]" },
-  { key: "embroidery", group: "detail", title: "Embroidered", sub: "Thread-work florals", tint: "from-[#f5e1d6] to-[#d8a088]" },
-  { key: "schiffli", group: "detail", title: "Schiffli", sub: "Scallops & eyelets", tint: "from-[#e9ecd8] to-[#a9b47e]" },
+  { key: "vacation", group: "occasion", title: "Getaway", sub: "Vacation-ready", tint: "from-[#fbd9bf] via-[#f2ab82] to-[#e2835c]" },
+  { key: "casuals", group: "occasion", title: "Everyday", sub: "Easy casuals", tint: "from-[#e3ebf3] via-[#b9cbe0] to-[#8ea8c6]" },
+  { key: "office", group: "occasion", title: "Nine to five", sub: "Office-ready", tint: "from-[#eedcea] via-[#cfa7c5] to-[#a37096]" },
+  { key: "crochet", group: "detail", title: "Crochet", sub: "Hand-finished lace", tint: "from-[#f8eedd] via-[#e7cfa6] to-[#cfa86f]" },
+  { key: "embroidery", group: "detail", title: "Embroidered", sub: "Thread-work florals", tint: "from-[#fadadd] via-[#eaa6ae] to-[#cf7383]" },
+  { key: "schiffli", group: "detail", title: "Schiffli", sub: "Scallops & eyelets", tint: "from-[#dfeee6] via-[#a9cdbb] to-[#73a690]" },
 ] as const;
 
 export default async function Home() {
@@ -176,13 +176,13 @@ export default async function Home() {
               href={`/collections/all?${m.group}=${m.key}`}
               className={`group relative h-72 sm:h-80 overflow-hidden rounded-card bg-gradient-to-br ${m.tint} p-4 sm:p-5 flex flex-col justify-between shadow-[0_18px_40px_-28px_rgba(34,16,30,0.6)] transition-transform duration-500 hover:-translate-y-1.5`}
             >
-              <span aria-hidden className="absolute inset-0" style={blockPrint("#22101e", 0.1)} />
+              <span aria-hidden className="absolute inset-0" style={blockPrint("#22101e", 0.07)} />
               <span className="relative z-10">
                 <span className="block text-[10px] tracking-[0.26em] uppercase text-ink/70">{m.sub}</span>
                 <span className="block font-display italic text-[30px] sm:text-[34px] leading-none mt-1.5 text-ink">{m.title}</span>
               </span>
               {m.image && (
-                <span className="absolute right-2 sm:right-3 bottom-0 left-8 sm:left-10 top-[34%] rounded-t-[999px] overflow-hidden border-4 border-b-0 border-[#fffdf8]/80 shadow-xl transition-transform duration-700 origin-bottom group-hover:scale-[1.04]">
+                <span className="absolute right-0 bottom-0 left-6 sm:left-8 top-[30%] rounded-t-[999px] overflow-hidden transition-transform duration-700 origin-bottom group-hover:scale-[1.04] [mask-image:linear-gradient(to_bottom,transparent,#000_22%)]">
                   <Image src={m.image} alt="" fill sizes="(min-width:1024px) 14vw, 40vw" className="object-cover object-top" />
                 </span>
               )}
