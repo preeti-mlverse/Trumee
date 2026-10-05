@@ -34,7 +34,7 @@ export function Hero({ slides, clips, shop = [] }: { slides: HeroSlide[]; clips:
 
   return (
     <section
-      className="px-2 sm:px-4 lg:px-6 pt-2 sm:pt-3"
+      className="w-full"
       aria-roledescription="carousel"
       aria-label="Featured"
       onTouchStart={(e) => (touch.current = e.touches[0].clientX)}
@@ -46,7 +46,7 @@ export function Hero({ slides, clips, shop = [] }: { slides: HeroSlide[]; clips:
       }}
     >
       <h1 className="sr-only">Trumee — boho dresses, crochet tops and western wear for women in India</h1>
-      <div className="relative mx-auto max-w-[1400px] h-[84svh] min-h-[580px] lg:h-[calc(100svh-124px)] lg:min-h-[640px] lg:max-h-[860px] rounded-panel overflow-hidden bg-ink">
+      <div className="relative w-full h-[84svh] min-h-[580px] lg:h-[calc(100svh-112px)] lg:min-h-[640px] lg:max-h-[880px] overflow-hidden bg-ink">
         {slides.map((s, k) => (
           <div
             key={k}

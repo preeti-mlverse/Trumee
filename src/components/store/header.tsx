@@ -32,20 +32,20 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
   return (
     <>
       {announcement.enabled && (
-        <div className="bg-ink text-marigold-soft text-[9.5px] sm:text-[11px] tracking-[0.14em] sm:tracking-[0.24em] uppercase text-center py-2.5 px-3 whitespace-nowrap overflow-hidden text-ellipsis">
+        <div className="bg-marigold text-ink text-[9.5px] sm:text-[11px] tracking-[0.14em] sm:tracking-[0.24em] uppercase text-center py-2.5 px-3 whitespace-nowrap overflow-hidden text-ellipsis">
           {announcement.href ? <Link href={announcement.href} className="inline-block py-1.5 -my-1.5">{announcement.text}</Link> : announcement.text}
         </div>
       )}
       {/* Full-width bar, edge to edge; the page content always starts below it. */}
       <header
         className={cn(
-          "sticky top-0 z-40 w-full bg-[#fffdf8] border-b transition-shadow duration-300",
-          scrolled ? "border-ink/10 shadow-[0_6px_20px_-14px_rgba(34,16,30,0.35)]" : "border-ink/[0.06]",
+          "sticky top-0 z-40 w-full bg-plum-dark text-cream transition-shadow duration-300",
+          scrolled && "shadow-[0_8px_24px_-12px_rgba(34,16,30,0.55)]",
         )}
       >
         <div className="mx-auto max-w-[1440px] px-3 sm:px-6 lg:px-10 h-16 lg:h-[72px] grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center">
           <div className="flex items-center gap-1">
-            <button aria-label="Open menu" className="lg:hidden size-10 grid place-items-center rounded-full hover:bg-white/70" onClick={() => setMenu(true)}>
+            <button aria-label="Open menu" className="lg:hidden size-10 grid place-items-center rounded-full hover:bg-white/10" onClick={() => setMenu(true)}>
               <Menu className="size-5" strokeWidth={1.5} />
             </button>
             <nav className="hidden lg:flex items-center gap-5 xl:gap-8 text-[12px] xl:text-[13px] tracking-[0.12em] uppercase">
@@ -54,15 +54,15 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
                   <Link
                     href={item.href}
                     className={cn(
-                      "relative py-4 inline-block hover:text-plum transition-colors",
-                      isActive(item, pathname) && "text-plum after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-2.5 after:size-1 after:rounded-full after:bg-plum",
+                      "relative py-4 inline-block hover:text-marigold-soft transition-colors",
+                      isActive(item, pathname) && "text-marigold-soft after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-2.5 after:size-1 after:rounded-full after:bg-marigold",
                     )}
                   >
                     {item.label}
                   </Link>
                   {item.children?.length ? (
                     <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 transition-all absolute -left-5 top-full pt-2">
-                      <div className="bg-[#fffdf8] rounded-2xl border border-line/70 shadow-2xl shadow-ink/15 min-w-60 p-2">
+                      <div className="bg-[#fffdf8] text-ink rounded-2xl border border-line/70 shadow-2xl shadow-ink/25 min-w-60 p-2">
                         {item.children.map((c) => (
                           <Link key={c.href} href={c.href} className="block rounded-xl px-4 py-2.5 normal-case tracking-normal text-sm text-ink-soft hover:text-plum hover:bg-sand/60">
                             {c.label}
@@ -76,7 +76,7 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
             </nav>
           </div>
 
-          <Link href="/" className="text-ink" aria-label="Trumee home">
+          <Link href="/" className="text-cream" aria-label="Trumee home">
             <Wordmark className="text-[24px] lg:text-[30px]" />
           </Link>
 
@@ -91,7 +91,7 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
               <Heart className="size-5" strokeWidth={1.5} />
               {ids.length > 0 && <Badge n={ids.length} />}
             </Link>
-            <button aria-label="Open bag" className="relative size-10 grid place-items-center rounded-full bg-ink text-cream hover:bg-plum transition-colors" onClick={() => setOpen(true)}>
+            <button aria-label="Open bag" className="relative size-10 grid place-items-center rounded-full bg-marigold text-ink hover:bg-marigold-soft transition-colors" onClick={() => setOpen(true)}>
               <ShoppingBag className="size-[18px]" strokeWidth={1.5} />
               {!!cart?.count && <Badge n={cart.count} />}
             </button>
@@ -103,7 +103,7 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
       {menu && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-ink/40 animate-fade-in" onClick={() => setMenu(false)} />
-          <div className="absolute inset-y-2 left-2 w-[86%] max-w-sm bg-[#fffdf8] rounded-3xl overflow-hidden flex flex-col animate-fade-in">
+          <div className="absolute inset-y-2 left-2 w-[86%] max-w-sm bg-[#fffdf8] text-ink rounded-3xl overflow-hidden flex flex-col animate-fade-in">
             <div className="flex items-center justify-between px-5 h-16 border-b border-line">
               <Wordmark className="text-xl" />
               <button aria-label="Close menu" onClick={() => setMenu(false)} className="p-2 -mr-2">
@@ -142,7 +142,7 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
   );
 }
 
-const ICON = "size-10 grid place-items-center rounded-full hover:bg-white/80 transition-colors";
+const ICON = "size-10 grid place-items-center rounded-full hover:bg-white/10 transition-colors";
 
 function Badge({ n }: { n: number }) {
   return (

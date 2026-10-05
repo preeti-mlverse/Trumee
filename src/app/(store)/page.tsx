@@ -1,4 +1,4 @@
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { ArrowUpRight, Quote, RotateCcw, ShieldCheck, Truck, Wallet } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -7,10 +7,10 @@ import { db, schema } from "@/db";
 import { EditSpotlight } from "@/components/store/edit-spotlight";
 import { Hero, type HeroClip, type HeroProduct } from "@/components/store/hero";
 import { LoopVideo } from "@/components/store/loop-video";
-import { blockPrint, Doodle, ScallopEdge } from "@/components/store/motifs";
+import { blockPrint, Doodle } from "@/components/store/motifs";
 import { ProductRail } from "@/components/store/product-rail";
 import { CategoryTile, ImageWord, ReelRail } from "@/components/store/reels";
-import { CountUp, Reveal } from "@/components/store/reveal";
+import { Reveal } from "@/components/store/reveal";
 import { Container, DotLink, PillLink, SectionHeading } from "@/components/store/ui";
 import { listCollections, listProducts } from "@/lib/catalog";
 import { getSettings } from "@/lib/settings";
@@ -56,12 +56,12 @@ function Panel({ className, style, children }: { className?: string; style?: Rea
 
 /** "Shop by mood": occasion and craft tags that already power the collection filters. */
 const MOODS = [
-  { key: "vacation", group: "occasion", title: "Getaway", sub: "Vacation-ready", tint: "from-[#f2c27b] to-[#e88d67]" },
-  { key: "casuals", group: "occasion", title: "Everyday", sub: "Easy casuals", tint: "from-[#f3dcb2] to-[#d9b38c]" },
-  { key: "office", group: "occasion", title: "Nine to five", sub: "Office-ready", tint: "from-[#c9b6d9] to-[#8e6aa6]" },
-  { key: "crochet", group: "detail", title: "Crochet", sub: "Hand-finished lace", tint: "from-[#f6e6d0] to-[#e2c6a1]" },
-  { key: "embroidery", group: "detail", title: "Embroidered", sub: "Thread-work florals", tint: "from-[#f5c7c0] to-[#d9757a]" },
-  { key: "schiffli", group: "detail", title: "Schiffli", sub: "Scallops & eyelets", tint: "from-[#cfe0dc] to-[#7fa59e]" },
+  { key: "vacation", group: "occasion", title: "Getaway", sub: "Vacation-ready", tint: "from-[#f6dfa6] to-[#e2a631]" },
+  { key: "casuals", group: "occasion", title: "Everyday", sub: "Easy casuals", tint: "from-[#f3eadb] to-[#d9c6a6]" },
+  { key: "office", group: "occasion", title: "Nine to five", sub: "Office-ready", tint: "from-[#ecdde6] to-[#b98aa9]" },
+  { key: "crochet", group: "detail", title: "Crochet", sub: "Hand-finished lace", tint: "from-[#faf5ec] to-[#e8dcc6]" },
+  { key: "embroidery", group: "detail", title: "Embroidered", sub: "Thread-work florals", tint: "from-[#f5e1d6] to-[#d8a088]" },
+  { key: "schiffli", group: "detail", title: "Schiffli", sub: "Scallops & eyelets", tint: "from-[#e9ecd8] to-[#a9b47e]" },
 ] as const;
 
 export default async function Home() {
@@ -108,8 +108,6 @@ export default async function Home() {
     if (pick) used.add(pick.id);
     return { ...m, total: moodLists[i].total, image: pick?.images[0]?.url ?? null };
   });
-  const [{ styles }] = await db.select({ styles: sql<number>`count(*)::int` }).from(schema.products).where(eq(schema.products.status, "active"));
-  const shippingS = await getSettings("shipping");
   const tabs = [
     { label: "Bestsellers", items: bestsellers.items, href: "/collections/all?sort=best-selling" },
     { label: "New in", items: fresh.items, href: "/collections/all?sort=newest" },
@@ -121,8 +119,8 @@ export default async function Home() {
       <Hero slides={home.heroSlides} clips={heroClips} shop={shop} />
 
       {/* Craft words — slim marigold ribbon tucked under the hero, same width */}
-      <div className="px-2 sm:px-4 lg:px-6 mt-2 sm:mt-3" aria-hidden>
-        <div className="mx-auto max-w-[1400px] rounded-full bg-marigold text-ink overflow-hidden py-2 sm:py-2.5">
+      <div aria-hidden>
+        <div className="bg-marigold text-ink overflow-hidden py-2 sm:py-2.5">
           <div className="flex w-max animate-marquee-slow whitespace-nowrap font-display italic text-[17px] sm:text-[21px] leading-none">
             {[0, 1].map((k) => (
               <span key={k} className="flex">
@@ -176,7 +174,7 @@ export default async function Home() {
             <Link
               key={m.key}
               href={`/collections/all?${m.group}=${m.key}`}
-              className={`group relative h-60 sm:h-72 overflow-hidden rounded-card bg-gradient-to-br ${m.tint} p-4 sm:p-5 flex flex-col justify-between shadow-[0_18px_40px_-28px_rgba(34,16,30,0.6)] transition-transform duration-500 hover:-translate-y-1.5`}
+              className={`group relative h-72 sm:h-80 overflow-hidden rounded-card bg-gradient-to-br ${m.tint} p-4 sm:p-5 flex flex-col justify-between shadow-[0_18px_40px_-28px_rgba(34,16,30,0.6)] transition-transform duration-500 hover:-translate-y-1.5`}
             >
               <span aria-hidden className="absolute inset-0" style={blockPrint("#22101e", 0.1)} />
               <span className="relative z-10">
@@ -184,11 +182,11 @@ export default async function Home() {
                 <span className="block font-display italic text-[30px] sm:text-[34px] leading-none mt-1.5 text-ink">{m.title}</span>
               </span>
               {m.image && (
-                <span className="absolute -right-5 -bottom-6 w-[62%] aspect-[3/4] rounded-[40%_40%_0_0] overflow-hidden border-4 border-[#fffdf8]/70 shadow-xl transition-transform duration-700 group-hover:scale-105 group-hover:-rotate-2">
-                  <Image src={m.image} alt="" fill sizes="(min-width:1024px) 12vw, 30vw" className="object-cover object-top" />
+                <span className="absolute right-2 sm:right-3 bottom-0 left-8 sm:left-10 top-[34%] rounded-t-[999px] overflow-hidden border-4 border-b-0 border-[#fffdf8]/80 shadow-xl transition-transform duration-700 origin-bottom group-hover:scale-[1.04]">
+                  <Image src={m.image} alt="" fill sizes="(min-width:1024px) 14vw, 40vw" className="object-cover object-top" />
                 </span>
               )}
-              <span className="relative z-10 inline-flex w-fit items-center gap-1.5 rounded-full bg-[#fffdf8]/80 px-3 py-1 text-[12px] text-ink">
+              <span className="relative z-10 inline-flex w-fit items-center gap-1.5 rounded-full bg-[#fffdf8] px-3 py-1 text-[12px] text-ink shadow-sm">
                 {m.total} styles <ArrowUpRight className="size-3.5 transition-transform group-hover:rotate-45" />
               </span>
             </Link>
@@ -213,30 +211,9 @@ export default async function Home() {
         </Container>
       )}
 
-      {/* Trumee in numbers — real catalogue & policy facts, counting up */}
-      <Container className="pt-16 sm:pt-20">
-        <Reveal stagger className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-          {[
-            { n: styles, pre: "", suf: "", label: "styles, all designed in Gurgaon" },
-            { n: 6, pre: "", suf: "", label: "silhouettes from dresses to co-ords" },
-            { n: 7, pre: "", suf: "-day", label: "easy returns & size exchanges" },
-            { n: shippingS.flatRate / 100, pre: "₹", suf: "", label: "flat shipping anywhere in India" },
-          ].map((x) => (
-            <div key={x.label} className="relative overflow-hidden rounded-3xl bg-[#fffdf8]/75 border border-white/70 px-5 py-6 sm:px-7 sm:py-8">
-              <p className="font-display text-[48px] sm:text-[64px] leading-none text-plum">
-                <CountUp to={x.n} prefix={x.pre} suffix={x.suf} />
-              </p>
-              <p className="mt-2 text-[13px] sm:text-sm text-ink-soft">{x.label}</p>
-              <Doodle kind="sun" className="absolute -right-6 -top-6 size-24 text-marigold/30" />
-            </div>
-          ))}
-        </Reveal>
-      </Container>
-
       {/* Reels — dark rounded panel */}
       {clips.length > 0 && (
         <Panel className="bg-ink text-cream pt-14 sm:pt-20 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-10 overflow-hidden" style={blockPrint("#f2d38c", 0.05)}>
-          <ScallopEdge color="#fffdf8" className="absolute inset-x-0 top-0 opacity-90" flip />
           <SectionHeading dark eyebrow="Watch & shop" title="See it" accent="move" />
           <ReelRail clips={clips} />
         </Panel>
@@ -326,24 +303,10 @@ export default async function Home() {
             </figure>
           ))}
         </Reveal>
-        <dl className="mt-14 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {[
-            ["Designed in", "Gurgaon, India"],
-            ["Dispatched in", "1–2 business days"],
-            ["Returns", "7 days, no fuss"],
-            ["Pay your way", "UPI · Cards · COD"],
-          ].map(([k, v]) => (
-            <div key={k} className="rounded-3xl border border-ink/10 px-5 py-5 sm:px-6">
-              <dt className="text-[11px] tracking-[0.24em] uppercase text-muted">{k}</dt>
-              <dd className="font-display text-[24px] sm:text-[34px] leading-tight mt-1">{v}</dd>
-            </div>
-          ))}
-        </dl>
       </Panel>
 
       {/* Love notes — lace-edged marigold panel with a slow ribbon of cards */}
       <Panel className="bg-marigold text-ink pt-16 sm:pt-20 pb-14 sm:pb-16 overflow-hidden" style={blockPrint("#22101e", 0.06)}>
-        <ScallopEdge color="#fffdf8" className="absolute inset-x-0 top-0 opacity-90" flip />
         <p className="text-[11px] tracking-[0.3em] uppercase text-center">Love notes</p>
         <p className="font-display text-center text-[40px] sm:text-[60px] leading-[1] mt-3 px-4">
           Words from <em className="font-normal">our girls</em>

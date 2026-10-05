@@ -108,10 +108,10 @@ body {
 }
 
 /* Scroll reveal (see components/store/reveal.tsx) */
-.reveal { transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.reveal[data-reveal="out"] { opacity: 0; transform: translateY(28px); }
-.reveal-stagger > * { transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.reveal-stagger[data-reveal="out"] > * { opacity: 0; transform: translateY(32px) scale(0.98); }
+.reveal { transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.reveal[data-reveal="out"] { opacity: 0; transform: translateY(16px); }
+.reveal-stagger > * { transition: opacity 0.45s ease, transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.reveal-stagger[data-reveal="out"] > * { opacity: 0; transform: translateY(18px); }
 .reveal-stagger > *:nth-child(2) { transition-delay: 0.08s; }
 .reveal-stagger > *:nth-child(3) { transition-delay: 0.16s; }
 .reveal-stagger > *:nth-child(4) { transition-delay: 0.24s; }
