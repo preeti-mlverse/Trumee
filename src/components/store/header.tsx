@@ -39,7 +39,7 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
       {/* Full-width bar, edge to edge; the page content always starts below it. */}
       <header
         className={cn(
-          "sticky top-0 z-40 w-full bg-[#f3e4ea] text-plum-dark border-b border-plum/10 transition-shadow duration-300",
+          "sticky top-0 z-40 w-full bg-gradient-to-r from-[#f5e6cf] via-[#f2d6b3] to-[#eebf9c] text-plum-dark border-b border-[#d9a77c]/30 transition-shadow duration-300",
           scrolled && "shadow-[0_8px_24px_-14px_rgba(75,27,63,0.35)]",
         )}
       >
