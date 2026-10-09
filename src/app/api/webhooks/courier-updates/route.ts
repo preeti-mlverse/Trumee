@@ -38,7 +38,10 @@ export async function POST(req: Request) {
     return Response.json({ ok: false }, { status: 200 });
   }
   const awb = p.awb ? String(p.awb) : null;
-  const number = Number(String(p.order_id ?? "").replace(/^TRM/i, "").replace(/\D/g, "")) || null;
+  // Only our own orders (sent to Shiprocket as "TRM1005"). The same Shiprocket account also carries the
+  // Shopify store's orders ("#1005", "1005"), whose numbers overlap ours — never match those by number.
+  const ref = String(p.order_id ?? "").trim();
+  const number = /^TRM\d+$/i.test(ref) ? Number(ref.slice(3)) : null;
 
   const order = await db.query.orders.findFirst({
     where: or(
