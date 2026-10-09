@@ -36,19 +36,29 @@ Everything below in grey boxes marked **(server)** is typed into this SSH window
 
 ## Step 3 — Install the software (server, once)
 
+Paste **one line at a time** and wait for the prompt to come back before the next one.
+
 ```bash
-apt update && apt upgrade -y
+export DEBIAN_FRONTEND=noninteractive
+apt update && apt -o Dpkg::Options::="--force-confold" upgrade -y
+reboot
+```
+
+The upgrade keeps your server's existing settings files without asking (a question about `sshd_config`
+otherwise appears mid-install and can drop the connection). After `reboot`, wait a minute and log in again.
+
+```bash
 curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 apt install -y nodejs git nginx postgresql certbot python3-certbot-nginx
 npm i -g pm2
-
-# Firewall: allow SSH and web traffic only
 ufw allow OpenSSH && ufw allow 'Nginx Full' && ufw --force enable
-
-# 2 GB swap so the build never runs out of memory
-fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
-echo '/swapfile none swap sw 0 0' >> /etc/fstab
+node -v && psql --version && nginx -v
 ```
+
+The last line should print three version numbers.
+
+Swap is only needed on servers with 2 GB of memory or less (`free -h` shows it). With 4 GB or more, skip it;
+otherwise: `fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile && echo '/swapfile none swap sw 0 0' >> /etc/fstab`
 
 ## Step 4 — Copy your products and settings (database)
 
@@ -82,6 +92,17 @@ nano .env
 
 Fill in `.env` (Ctrl+O, Enter to save, Ctrl+X to exit):
 
+Where each value comes from:
+
+| Line | What to put |
+|---|---|
+| `DATABASE_URL` | Same password you chose in Step 4 (`CREATE USER … PASSWORD`). Use **letters and numbers only** — `@ : / # %` break the address. |
+| `NEXT_PUBLIC_SITE_URL`, `NOINDEX` | Exactly as shown |
+| `AUTH_SECRET` | Run `openssl rand -hex 32` on the server and paste the result (keeps admin logins secure) |
+| `CRON_SECRET` | Run `openssl rand -hex 24` and paste the result |
+| `ADMIN_EMAIL` | `admin@trumee.in` — the admin account that came with the database copy (or any email to create a new one) |
+| `ADMIN_PASSWORD` | A new password you make up, at least 10 characters |
+
 ```
 DATABASE_URL=postgres://trumee:PICK_A_STRONG_PASSWORD@localhost:5432/trumee
 NEXT_PUBLIC_SITE_URL=https://new.trumee.in
@@ -95,6 +116,12 @@ CRON_SECRET=<paste output of: openssl rand -hex 24>
 - `NOINDEX=1` hides the test site from Google so it never competes with trumee.in. **Remove it at launch.**
 - Razorpay: put **test** keys (`rzp_test_…`) here for now. Leave empty to keep the simulated payment mode.
 - Shiprocket / Resend: optional for the test site (see docs/SHIPROCKET_SETUP.md).
+
+Set the admin login from those two lines (run it again any time to reset the password):
+
+```bash
+npm run admin:set
+```
 
 Build and start:
 
@@ -172,4 +199,6 @@ overwritten by `git pull`. (Only re-copy the database from your PC if you want t
 | certbot fails | DNS isn't pointing yet, or port 80 is blocked — `ufw status` |
 | 502 Bad Gateway | The app isn't running: `pm2 logs trumee` |
 | Build killed / out of memory | Swap missing: `free -h` should show 2 GB swap |
+| Install stopped at "configuration file sshd_config … 1. install 2. keep" or the connection dropped mid-install | Log in again and run `dpkg --configure -a`; if asked, choose **2 (keep the local version)**. Then continue. |
+| Forgot the admin password | Change `ADMIN_PASSWORD` in `.env`, run `npm run admin:set` |
 | Changes not showing | Forgot `npm run build && pm2 restart trumee` after `git pull` |

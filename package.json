@@ -11,6 +11,7 @@
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx scripts/seed.ts",
     "db:demo": "tsx scripts/seed-demo.ts",
+    "admin:set": "tsx scripts/set-admin.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
