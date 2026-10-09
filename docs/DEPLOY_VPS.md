@@ -25,8 +25,8 @@ On **your PC** (PowerShell — don't use `>` to save the dump, it corrupts the f
 
 ```powershell
 docker exec trumee-db pg_dump -U trumee -Fc -f /tmp/trumee.dump trumee
-docker cp trumee-db:/tmp/trumee.dump .	rumee.dump
-scp .	rumee.dump root@YOUR_SERVER:/tmp/
+docker cp trumee-db:/tmp/trumee.dump trumee.dump
+scp trumee.dump root@YOUR_SERVER:/tmp/
 ```
 
 On the **server**:
