@@ -43,13 +43,11 @@ const PROMISES = [
   [ShieldCheck, "Secure checkout", "UPI, cards & netbanking"],
 ] as const;
 
-/** Full-width rounded panel inset from the viewport edges. */
-function Panel({ className, style, children }: { className?: string; style?: React.CSSProperties; children: React.ReactNode }) {
+/** Edge-to-edge colour band; content keeps the page width unless `full`. */
+function Panel({ bg, className, style, full, children }: { bg: string; className?: string; style?: React.CSSProperties; full?: boolean; children: React.ReactNode }) {
   return (
-    <section className="mt-16 sm:mt-24 px-2 sm:px-4 lg:px-6">
-      <div className={`relative mx-auto max-w-[1400px] rounded-panel ${className ?? ""}`} style={style}>
-        {children}
-      </div>
+    <section className={`relative mt-16 sm:mt-24 ${bg}`} style={style}>
+      <div className={`relative mx-auto ${full ? "" : "max-w-[1400px]"} ${className ?? ""}`}>{children}</div>
     </section>
   );
 }
@@ -209,7 +207,7 @@ export default async function Home() {
 
       {/* Reels — dark rounded panel */}
       {clips.length > 0 && (
-        <Panel className="bg-ink text-cream pt-8 sm:pt-11 pb-8 sm:pb-11 px-4 sm:px-6 lg:px-10 overflow-hidden" style={blockPrint("#f5e0a3", 0.05)}>
+        <Panel bg="bg-ink text-cream overflow-hidden" className="pt-8 sm:pt-11 pb-8 sm:pb-11 px-4 sm:px-6 lg:px-10" style={blockPrint("#f5e0a3", 0.05)}>
           <SectionHeading dark eyebrow="Watch & shop" title="See it" accent="move" className="mb-6 sm:mb-8" />
           <ReelRail clips={clips} />
         </Panel>
@@ -224,7 +222,7 @@ export default async function Home() {
       )}
 
       {/* Editorial split */}
-      <Panel className="relative overflow-hidden bg-ink text-cream grid lg:grid-cols-2 isolate">
+      <Panel bg="bg-ink text-cream overflow-hidden isolate" full className="grid lg:grid-cols-2">
         <div className="relative aspect-[4/5] lg:aspect-auto lg:min-h-[760px]">
           {escape ? (
             <LoopVideo src={escape.video} poster={escape.poster} className="absolute inset-0 size-full object-[50%_40%]" />
@@ -276,7 +274,7 @@ export default async function Home() {
       </Container>
 
       {/* The Trumee promise — craft & quality */}
-      <Panel className="bg-paper/75 py-16 sm:py-20 px-4 sm:px-6 lg:px-10" style={blockPrint("#1d6188", 0.07)}>
+      <Panel bg="bg-paper/75" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-10" style={blockPrint("#1d6188", 0.07)}>
         <SectionHeading eyebrow="The Trumee promise" title="Crafted to be worn, loved," accent="and worn again" />
         <Reveal stagger className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {CRAFT_IMAGES.map((c) => (
@@ -295,7 +293,7 @@ export default async function Home() {
       </Panel>
 
       {/* Love notes — lace-edged sun panel with a slow ribbon of cards */}
-      <Panel className="bg-sun text-ink pt-16 sm:pt-20 pb-14 sm:pb-16 overflow-hidden" style={blockPrint("#161616", 0.06)}>
+      <Panel bg="bg-sun text-ink overflow-hidden" full className="pt-16 sm:pt-20 pb-14 sm:pb-16" style={blockPrint("#161616", 0.06)}>
         <p className="text-[11px] tracking-[0.3em] uppercase text-center">Love notes</p>
         <p className="font-display text-center text-[40px] sm:text-[60px] leading-[1] mt-3 px-4">
           Words from <em className="font-normal">our girls</em>

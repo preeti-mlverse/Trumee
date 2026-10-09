@@ -146,8 +146,8 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
       </Container>
 
       {notes.length > 0 && (
-        <section className="mt-24 px-2 sm:px-4 lg:px-6">
-          <div className="mx-auto max-w-[1400px] rounded-panel bg-paper/75 py-14 sm:py-16 px-4 sm:px-6 lg:px-10">
+        <section className="mt-24 bg-paper/75">
+          <div className="mx-auto max-w-[1400px] py-14 sm:py-16 px-4 sm:px-6 lg:px-10">
             <p className="flex items-center gap-3 text-[11px] tracking-[0.3em] uppercase text-sea">
               <Sparkles className="size-3.5" /> Why you’ll love it
             </p>

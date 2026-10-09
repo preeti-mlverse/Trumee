@@ -50,8 +50,8 @@ export async function CollectionBanner({
   for (const p of all.items) if (media.length < 3 && !media.some((m) => m.key === "v" + p.id) && p.images[0]) media.push({ key: "i" + p.id, href: `/products/${p.handle}`, image: p.images[0].url, label: p.title });
 
   return (
-    <section className="px-2 sm:px-4 lg:px-6 pt-2 sm:pt-3">
-    <div className={cn("mx-auto max-w-[1400px] rounded-panel overflow-hidden lg:grid lg:grid-cols-12 lg:min-h-[560px] lg:h-[66svh] lg:max-h-[740px]", dark ? "bg-ink text-cream" : "bg-paper/75 text-ink")}>
+    <section>
+    <div className={cn("overflow-hidden lg:grid lg:grid-cols-12 lg:min-h-[560px] lg:h-[66svh] lg:max-h-[740px]", dark ? "bg-ink text-cream" : "bg-paper/75 text-ink")}>
       <div className="relative lg:col-span-5 flex flex-col justify-between px-4 sm:px-6 lg:px-12 pt-8 pb-10 lg:py-12 overflow-hidden">
         <span aria-hidden className="absolute inset-0" style={blockPrint(dark ? "#f5e0a3" : "#1d6188", dark ? 0.05 : 0.06)} />
         <span aria-hidden className={cn("absolute -left-24 -bottom-24 size-72 rounded-full blur-3xl", dark ? "bg-sea-bright/30" : "bg-sun-soft/70")} />
@@ -71,7 +71,7 @@ export async function CollectionBanner({
         </div>
       </div>
 
-      <div className="lg:col-span-7 grid grid-cols-3 gap-1.5 p-1.5 lg:pl-0 h-[62vw] sm:h-[48vw] lg:h-auto [&>*]:rounded-card">
+      <div className="lg:col-span-7 grid grid-cols-3 gap-0.5 h-[62vw] sm:h-[48vw] lg:h-auto">
         {media.slice(0, 3).map((m, i) => {
           const inner = (
             <>

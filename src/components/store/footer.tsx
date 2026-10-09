@@ -40,8 +40,8 @@ const COLS = [
 
 export function Footer({ store }: { store: StoreSettings }) {
   return (
-    <footer className="mt-28 px-2 sm:px-4 lg:px-6 pb-2 sm:pb-4">
-      <div className="mx-auto max-w-[1400px] rounded-panel bg-ink text-cream overflow-hidden px-5 sm:px-10 lg:px-14 pt-16 pb-8">
+    <footer className="mt-28 bg-ink text-cream">
+      <div className="mx-auto max-w-[1400px] overflow-hidden px-5 sm:px-10 lg:px-14 pt-16 pb-8">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.3fr)_2fr]">
           <div>
             <p className="font-display text-4xl sm:text-5xl leading-[1]">
