@@ -25,7 +25,7 @@ if (password.length < 10) {
 const client = postgres(process.env.DATABASE_URL!, { max: 1 });
 const db = drizzle(client, { schema });
 
-async function main() {
+async function main(email: string, password: string) {
   const passwordHash = await bcrypt.hash(password, 11);
   const existing = await db.query.staff.findFirst({ where: (s, { eq }) => eq(s.email, email) });
   if (existing) {
@@ -38,7 +38,7 @@ async function main() {
   await client.end();
 }
 
-main().catch((e) => {
+main(email, password).catch((e) => {
   console.error(e);
   process.exit(1);
 });
