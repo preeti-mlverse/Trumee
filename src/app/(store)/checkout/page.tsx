@@ -6,6 +6,7 @@ import { CheckoutForm } from "@/components/store/checkout-form";
 import { Container } from "@/components/store/ui";
 import { getCustomer } from "@/lib/auth";
 import { getCartState } from "@/lib/cart";
+import { onlinePaymentsAvailable } from "@/lib/razorpay";
 import { getSettings } from "@/lib/settings";
 
 export const metadata: Metadata = { title: "Checkout", robots: { index: false, follow: false } };
@@ -44,6 +45,7 @@ export default async function CheckoutPage() {
         codFee={shipping.codFee}
         processingDays={shipping.processingDays}
         whatsapp={store.whatsapp}
+        onlineEnabled={onlinePaymentsAvailable()}
         prefill={{
           email: customer?.email ?? cart.email ?? undefined,
           phone: customer?.phone ?? address?.phone,

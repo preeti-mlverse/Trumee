@@ -138,7 +138,7 @@ curl -I http://localhost:3000  # should say 200
 cat > /etc/nginx/sites-available/trumee <<'EOF'
 server {
     server_name new.trumee.in;
-    client_max_body_size 20m;
+    client_max_body_size 60m;
     location / {
         proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;

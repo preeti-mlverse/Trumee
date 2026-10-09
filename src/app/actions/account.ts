@@ -1,6 +1,7 @@
 "use server";
 
-import { and, eq, gt, sql } from "drizzle-orm";
+import { and, desc, eq, gt, sql } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { nanoid } from "nanoid";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -99,4 +100,61 @@ export async function wishlistProducts(ids: number[]) {
   if (!clean.length) return [];
   const { items } = await listProducts({ ids: clean, limit: 60 });
   return items;
+}
+
+// ───────────────────────────── address book
+
+const addressInput = z.object({
+  name: z.string().trim().min(2, "Enter the full name"),
+  phone: z
+    .string()
+    .transform((v) => v.replace(/\D/g, "").slice(-10))
+    .refine((v) => /^[6-9]\d{9}$/.test(v), "Enter a 10-digit mobile number"),
+  line1: z.string().trim().min(5, "Enter the house / flat and street"),
+  line2: z.string().trim().max(120).optional(),
+  city: z.string().trim().min(2, "Enter the city"),
+  state: z.string().trim().min(2, "Choose the state"),
+  pincode: z.string().trim().regex(/^[1-9]\d{5}$/, "Enter a 6-digit pincode"),
+});
+
+/** Add (no id) or edit an address in the signed-in customer's book. */
+export async function saveAddress(id: number | null, _: State, form: FormData): Promise<State> {
+  const c = await requireCustomer();
+  const parsed = addressInput.safeParse(Object.fromEntries(form));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const data = { ...parsed.data, line2: parsed.data.line2 || undefined, country: "India" };
+  const makeDefault = form.get("isDefault") === "on";
+  const count = (await db.query.addresses.findMany({ where: eq(schema.addresses.customerId, c.id), columns: { id: true } })).length;
+  if (makeDefault) await db.update(schema.addresses).set({ isDefault: false }).where(eq(schema.addresses.customerId, c.id));
+  if (id) {
+    await db
+      .update(schema.addresses)
+      .set({ data, ...(makeDefault ? { isDefault: true } : {}) })
+      .where(and(eq(schema.addresses.id, id), eq(schema.addresses.customerId, c.id)));
+  } else {
+    await db.insert(schema.addresses).values({ customerId: c.id, data, isDefault: makeDefault || count === 0 });
+  }
+  revalidatePath("/account");
+  return { ok: "Address saved." };
+}
+
+export async function deleteAddress(id: number) {
+  const c = await requireCustomer();
+  const [gone] = await db
+    .delete(schema.addresses)
+    .where(and(eq(schema.addresses.id, id), eq(schema.addresses.customerId, c.id)))
+    .returning({ isDefault: schema.addresses.isDefault });
+  // Keep one default when the default is removed
+  if (gone?.isDefault) {
+    const next = await db.query.addresses.findFirst({ where: eq(schema.addresses.customerId, c.id), orderBy: desc(schema.addresses.createdAt) });
+    if (next) await db.update(schema.addresses).set({ isDefault: true }).where(eq(schema.addresses.id, next.id));
+  }
+  revalidatePath("/account");
+}
+
+export async function setDefaultAddress(id: number) {
+  const c = await requireCustomer();
+  await db.update(schema.addresses).set({ isDefault: false }).where(eq(schema.addresses.customerId, c.id));
+  await db.update(schema.addresses).set({ isDefault: true }).where(and(eq(schema.addresses.id, id), eq(schema.addresses.customerId, c.id)));
+  revalidatePath("/account");
 }

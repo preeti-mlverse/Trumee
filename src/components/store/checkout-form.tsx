@@ -29,6 +29,7 @@ export function CheckoutForm({
   codFee,
   processingDays,
   whatsapp,
+  onlineEnabled = true,
 }: {
   initial: CartState;
   prefill: Prefill;
@@ -37,12 +38,14 @@ export function CheckoutForm({
   codFee: number;
   processingDays: string;
   whatsapp: string;
+  /** False when Razorpay isn't set up on this server: online payment is shown as unavailable. */
+  onlineEnabled?: boolean;
 }) {
   const router = useRouter();
   const { cart: live, applyCode, removeCode } = useCart();
   const cart = live ?? initial;
   const t = cart.totals;
-  const [method, setMethod] = useState<"razorpay" | "cod">("razorpay");
+  const [method, setMethod] = useState<"razorpay" | "cod">(onlineEnabled ? "razorpay" : "cod");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ msg: string; field?: string } | null>(null);
   const [sim, setSim] = useState<{ token: string; amount: number } | null>(null);
@@ -125,10 +128,11 @@ export function CheckoutForm({
       order_id: res.gatewayOrderId,
       amount: res.amount,
       currency: "INR",
-      name: "Trumee",
+      name: res.name,
       description: "Order payment",
       prefill: res.prefill,
       theme: { color: "#161616" },
+      ...(res.hide.length ? { config: { display: { hide: res.hide.map((method) => ({ method })), preferences: { show_default_blocks: true } } } } : {}),
       handler: async (r: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => {
         const v = await verifyPayment(res.token, r);
         if (v.ok) finish(v.url);
@@ -189,9 +193,10 @@ export function CheckoutForm({
           <div className="rounded-3xl border border-line overflow-hidden divide-y divide-line bg-paper/60">
             <PayOption
               checked={method === "razorpay"}
+              disabled={!onlineEnabled}
               onChange={() => setMethod("razorpay")}
               title="UPI, cards, netbanking & wallets"
-              sub="Secured by Razorpay · PCI-DSS compliant"
+              sub={onlineEnabled ? "Secured by Razorpay · PCI-DSS compliant" : "Online payment is temporarily unavailable"}
               badge={t.prepaidAvailable > 0 ? `Save ${inr(t.prepaidAvailable)} · ${prepaidPct}% off` : undefined}
               icon={<Lock className="size-4" />}
             />

@@ -36,7 +36,23 @@ export type PaymentSettings = {
   prepaidDiscountMax: number | null;
   /** Orders below this subtotal (paise) don't get it; 0 = any order. */
   prepaidDiscountMinOrder: number;
+  /** Payment methods offered in the Razorpay window (hidden ones aren't shown). */
+  methods: Record<PaymentMethodKey, boolean>;
+  /** Business name at the top of the Razorpay window. */
+  checkoutName: string;
+  /** Default refund speed: normal (5–7 working days, free) or optimum (instant where possible, small fee). */
+  refundSpeed: "normal" | "optimum";
 };
+
+export const PAYMENT_METHODS = [
+  { key: "upi", label: "UPI", hint: "GPay, PhonePe, Paytm, any UPI app" },
+  { key: "card", label: "Cards", hint: "Debit and credit cards" },
+  { key: "netbanking", label: "Netbanking", hint: "All major banks" },
+  { key: "wallet", label: "Wallets", hint: "Paytm, PhonePe, Amazon Pay wallets" },
+  { key: "emi", label: "EMI", hint: "Card and cardless EMI" },
+  { key: "paylater", label: "Pay later", hint: "Simpl, LazyPay, ICICI PayLater…" },
+] as const;
+export type PaymentMethodKey = (typeof PAYMENT_METHODS)[number]["key"];
 
 /**
  * Shiprocket logistics. Login credentials live in env (SHIPROCKET_EMAIL / SHIPROCKET_PASSWORD),
@@ -55,6 +71,10 @@ export type ShiprocketSettings = {
   lengthCm: number;
   breadthCm: number;
   heightCm: number;
+  /** Which courier "Ship now" books: Shiprocket's recommendation, the cheapest, or the fastest. */
+  courierPreference: "recommended" | "cheapest" | "fastest";
+  /** Request the courier pickup right after the AWB is assigned. Off = schedule it in Shiprocket yourself. */
+  autoPickup: boolean;
 };
 
 export type TaxSettings = {
@@ -149,7 +169,14 @@ export const DEFAULTS = {
       { label: "Remote areas", days: "5–8 business days" },
     ],
   } satisfies ShippingSettings,
-  payments: { prepaidDiscountPercent: 0, prepaidDiscountMax: null, prepaidDiscountMinOrder: 0 } satisfies PaymentSettings,
+  payments: {
+    prepaidDiscountPercent: 0,
+    prepaidDiscountMax: null,
+    prepaidDiscountMinOrder: 0,
+    methods: { upi: true, card: true, netbanking: true, wallet: true, emi: true, paylater: true },
+    checkoutName: "Trumee",
+    refundSpeed: "normal",
+  } satisfies PaymentSettings,
   shiprocket: {
     liveEstimates: true,
     autoCreateOrders: false,
@@ -159,6 +186,8 @@ export const DEFAULTS = {
     lengthCm: 30,
     breadthCm: 25,
     heightCm: 4,
+    courierPreference: "recommended",
+    autoPickup: true,
   } satisfies ShiprocketSettings,
   tax: { pricesIncludeTax: true, threshold: 250000, lowRate: 5, highRate: 18 } satisfies TaxSettings,
   integrations: {

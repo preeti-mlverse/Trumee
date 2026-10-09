@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 !.env.example
 .audit.json
+
+# admin uploads (product photos) — back these up on the server
+/uploads/

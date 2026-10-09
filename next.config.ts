@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Admin photo uploads go through Server Actions (default limit 1 MB). Nginx must allow the same (client_max_body_size).
+  experimental: { serverActions: { bodySizeLimit: "60mb" } },
   images: {
     // WebP only: sources are already WebP, and AVIF encoding is ~2x slower and far more
     // memory-hungry — on a small server it delays first loads and can crash the process.

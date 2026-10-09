@@ -76,7 +76,7 @@ pm2 save && pm2 startup     # restart automatically after a reboot
 ```nginx
 server {
     server_name trumee.in www.trumee.in;
-    client_max_body_size 20m;
+    client_max_body_size 60m;
     location / {
         proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
@@ -115,6 +115,16 @@ Vercel ran this automatically; on a VPS add it to cron (`crontab -e`):
 
 ```bash
 cd /var/www/trumee && git pull && npm ci && npm run build && pm2 restart trumee
+```
+
+## Uploaded product photos
+
+Photos added in **Admin → Products** are saved in `/var/www/trumee/uploads/` (not in GitHub). `git pull`
+never touches this folder, but include it in your server backups together with the database:
+
+```bash
+tar czf ~/trumee-uploads-$(date +%F).tgz -C /var/www/trumee uploads
+sudo -u postgres pg_dump -Fc trumee > ~/trumee-db-$(date +%F).dump
 ```
 
 ## Adding new photos and videos

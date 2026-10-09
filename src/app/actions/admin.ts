@@ -8,8 +8,10 @@ import { z } from "zod";
 import { db, schema } from "@/db";
 import { ADMIN_COOKIE, logAudit, requireOwner, requireStaff, startStaffSession, verifyPassword } from "@/lib/auth";
 import { deliveryQuote } from "@/lib/delivery";
-import { pushOrderToShiprocket, refreshTracking, shipWithShiprocket } from "@/lib/fulfilment";
-import { DEFAULTS, getSettings, type SettingsMap } from "@/lib/settings";
+import { cancelShipment, pushOrderToShiprocket, refreshTracking, requestPickup, shippingDocument, shipWithShiprocket } from "@/lib/fulfilment";
+import { addNote, cancelOrder, markPaid, OrderActionError, refundOrder } from "@/lib/order-admin";
+import { testRazorpay } from "@/lib/razorpay";
+import { DEFAULTS, getSettings, PAYMENT_METHODS, type SettingsMap } from "@/lib/settings";
 import { serviceability, shiprocketConfigured } from "@/lib/shiprocket";
 
 // ───────────────────────────── session
@@ -78,9 +80,52 @@ const SCHEMAS = {
     est1: z.string().trim().max(40),
     est2: z.string().trim().max(40),
   }),
+  checkout: z.object({
+    checkoutName: z.string().trim().min(1, "Enter the name shown in the payment window").max(40),
+    refundSpeed: z.enum(["normal", "optimum"]),
+    ...Object.fromEntries(PAYMENT_METHODS.map((m) => [`m_${m.key}`, checkbox])),
+  }),
+  store: z.object({
+    name: z.string().trim().min(1).max(60),
+    tagline: z.string().trim().max(120),
+    legalName: z.string().trim().max(120),
+    gstin: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .refine((v) => v === "" || /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(v), "That doesn’t look like a 15-character GSTIN"),
+    email: z.string().trim().email("Enter a valid support email"),
+    phone: z.string().trim().min(8).max(20),
+    whatsapp: z.string().trim().regex(/^\d{10,13}$/, "WhatsApp: digits only with country code, e.g. 919986950695"),
+    address: z.string().trim().min(10).max(300),
+    supportHours: z.string().trim().max(80),
+    instagram: z.string().trim().url().or(z.literal("")),
+    youtube: z.string().trim().url().or(z.literal("")),
+    facebook: z.string().trim().url().or(z.literal("")),
+    pinterest: z.string().trim().url().or(z.literal("")),
+  }),
+  announcement: z.object({
+    enabled: checkbox,
+    text: z.string().trim().max(140),
+    href: z.string().trim().max(200),
+  }),
+  tax: z.object({
+    pricesIncludeTax: checkbox,
+    threshold: rupees,
+    lowRate: z.coerce.number().min(0).max(40),
+    highRate: z.coerce.number().min(0).max(40),
+  }),
+  integrations: z.object({
+    ga4MeasurementId: z.string().trim().regex(/^(G-[A-Z0-9]+)?$/i, "GA4 IDs look like G-XXXXXXX"),
+    metaPixelId: z.string().trim().regex(/^\d*$/, "The Meta Pixel ID is a number"),
+    clarityId: z.string().trim().regex(/^[a-z0-9]*$/i, "Clarity project IDs are letters and numbers"),
+    googleSiteVerification: z.string().trim().max(100),
+  }),
   shiprocket: z.object({
     liveEstimates: checkbox,
     autoCreateOrders: checkbox,
+    autoPickup: checkbox,
+    courierPreference: z.enum(["recommended", "cheapest", "fastest"]),
     pickupLocation: z.string().trim().min(1, "Enter the pickup nickname from Shiprocket").max(60),
     pickupPostcode: z.string().trim().regex(/^[1-9]\d{5}$/, "Enter a 6-digit pincode"),
     weightKg: z.coerce.number().min(0.05).max(30),
@@ -109,6 +154,21 @@ export async function saveSettings(section: SettingsSection, _: unknown, form: F
 
   if (section === "payments") {
     await writeSetting("payments", { ...(await getSettings("payments")), ...(d as SettingsMap["payments"]) });
+  } else if (section === "checkout") {
+    const methods = Object.fromEntries(PAYMENT_METHODS.map((m) => [m.key, !!d[`m_${m.key}`]])) as SettingsMap["payments"]["methods"];
+    if (!Object.values(methods).some(Boolean)) return { error: "Keep at least one payment method switched on." };
+    await writeSetting("payments", { ...(await getSettings("payments")), checkoutName: String(d.checkoutName), refundSpeed: d.refundSpeed as "normal" | "optimum", methods });
+  } else if (section === "store") {
+    const { instagram, youtube, facebook, pinterest, ...rest } = d as Record<string, string>;
+    const social = Object.fromEntries(Object.entries({ instagram, youtube, facebook, pinterest }).filter(([, v]) => v));
+    await writeSetting("store", { ...(await getSettings("store")), ...rest, social } as SettingsMap["store"]);
+  } else if (section === "announcement") {
+    const cur = await getSettings("store");
+    await writeSetting("store", { ...cur, announcement: { enabled: !!d.enabled, text: String(d.text), href: String(d.href) || undefined } });
+  } else if (section === "tax") {
+    await writeSetting("tax", { ...(await getSettings("tax")), ...(d as SettingsMap["tax"]) });
+  } else if (section === "integrations") {
+    await writeSetting("integrations", { ...(await getSettings("integrations")), ...(d as SettingsMap["integrations"]) });
   } else if (section === "cod" || section === "shipping") {
     const cur = await getSettings("shipping");
     const next = { ...cur };
@@ -150,7 +210,67 @@ export async function testShiprocket(_: unknown, form: FormData): Promise<{ ok?:
   }
 }
 
+export async function testRazorpayAction(): Promise<{ ok?: string; error?: string }> {
+  await requireOwner();
+  try {
+    const mode = await testRazorpay();
+    return { ok: `Connected ✓ — ${mode === "live" ? "LIVE mode: real payments" : "TEST mode: no real money moves"}.` };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
 // ───────────────────────────── orders
+
+export type OrderOp = "refund" | "cancel" | "markPaid" | "note" | "label" | "invoice" | "cancelShipment" | "pickup";
+export type OrderOpResult = { ok?: string; error?: string; url?: string; at?: number };
+
+/** Everything the order detail page can do. Form fields depend on the op. */
+export async function orderAction(orderId: number, op: OrderOp, _: unknown, form: FormData): Promise<OrderOpResult> {
+  const staff = await requireStaff("orders");
+  const f = (k: string) => String(form.get(k) ?? "").trim();
+  try {
+    switch (op) {
+      case "refund": {
+        const amount = Math.round(Number(f("amount")) * 100);
+        if (!Number.isFinite(amount)) return { error: "Enter the refund amount in ₹." };
+        const reason = f("reason") || "Refund";
+        const speed = f("speed") === "optimum" ? "optimum" : "normal";
+        const r = await refundOrder(orderId, { amount, reason, speed }, staff.id);
+        await logAudit(staff.id, "order.refund", "order", orderId, { amount, reason, speed });
+        return { ok: r.gatewayRefundId ? `Refund started on Razorpay (${r.gatewayRefundId}).` : "Refund recorded.", at: Date.now() };
+      }
+      case "cancel": {
+        const reason = f("reason") || "Cancelled by store";
+        await cancelOrder(orderId, { reason, refund: form.get("refund") === "on", restock: form.get("restock") === "on" }, staff.id);
+        await logAudit(staff.id, "order.cancel", "order", orderId, { reason });
+        return { ok: "Order cancelled.", at: Date.now() };
+      }
+      case "markPaid":
+        await markPaid(orderId, staff.id);
+        await logAudit(staff.id, "order.mark_paid", "order", orderId);
+        return { ok: "Marked as paid.", at: Date.now() };
+      case "note":
+        await addNote(orderId, f("note"), staff.id);
+        return { ok: "Note added.", at: Date.now() };
+      case "label":
+      case "invoice":
+        return { ok: "Opening…", url: await shippingDocument(orderId, op), at: Date.now() };
+      case "cancelShipment":
+        await cancelShipment(orderId, staff.id);
+        await logAudit(staff.id, "shiprocket.cancel_shipment", "order", orderId);
+        return { ok: "Shipment cancelled — use Ship now to book a new courier.", at: Date.now() };
+      case "pickup":
+        await requestPickup(orderId, staff.id);
+        return { ok: "Pickup requested.", at: Date.now() };
+    }
+  } catch (e) {
+    return { error: e instanceof OrderActionError || e instanceof Error ? e.message : String(e) };
+  } finally {
+    revalidatePath(`/admin/orders/${orderId}`);
+    revalidatePath("/admin/orders");
+  }
+}
 
 export async function shiprocketOrderAction(orderId: number, op: "push" | "ship" | "track"): Promise<{ ok?: string; error?: string }> {
   const staff = await requireStaff("orders");

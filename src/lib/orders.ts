@@ -17,7 +17,7 @@ export async function nextOrderNumber(tx: Tx | typeof db = db) {
   return n + 1;
 }
 
-async function adjustStock(tx: Tx, items: { variantId: number | null; quantity: number }[], sign: -1 | 1, reason: string, orderId: number) {
+export async function adjustStock(tx: Tx, items: { variantId: number | null; quantity: number }[], sign: -1 | 1, reason: string, orderId: number) {
   for (const it of items) {
     if (!it.variantId) continue;
     const [v] = await tx
@@ -140,9 +140,18 @@ export async function createOrderFromCart(input: {
     }
     return order;
   }).then(async (order) => {
+    if (input.customerId) await rememberAddress(input.customerId, input.address).catch(() => {});
     if (order.paymentMethod === "cod") await afterConfirmed(order.id);
     return order;
   });
+}
+
+/** Adds a checkout address to the customer's address book (skips duplicates; the first one becomes default). */
+export async function rememberAddress(customerId: number, a: Address) {
+  const book = await db.query.addresses.findMany({ where: eq(schema.addresses.customerId, customerId) });
+  const same = (b: Address) => b.pincode === a.pincode && b.line1.trim().toLowerCase() === a.line1.trim().toLowerCase();
+  if (book.some((r) => same(r.data))) return;
+  await db.insert(schema.addresses).values({ customerId, data: a, isDefault: book.length === 0 });
 }
 
 /** Payment verified (Razorpay handler, webhook, or simulated mode). Idempotent. */

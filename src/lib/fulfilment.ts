@@ -3,7 +3,20 @@ import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import type { ShippingMeta } from "@/db/schema";
 import { getSettings } from "./settings";
-import { assignAwb, createOrder, schedulePickup, shiprocketConfigured, ShiprocketError, trackAwb, trackingUrl } from "./shiprocket";
+import {
+  assignAwb,
+  cancelOrders,
+  cancelShipments,
+  chooseCourier,
+  createOrder,
+  invoiceUrl,
+  labelUrl,
+  schedulePickup,
+  shiprocketConfigured,
+  ShiprocketError,
+  trackAwb,
+  trackingUrl,
+} from "./shiprocket";
 
 /** Our order reference on Shiprocket (also what its webhooks send back as `order_id`). */
 export const shiprocketRef = (orderNumber: number) => `TRM${orderNumber}`;
@@ -87,18 +100,76 @@ export async function shipWithShiprocket(orderId: number, staffId?: number | nul
   if (!meta?.shipmentId) meta = await pushOrderToShiprocket(orderId, staffId);
   const shipmentId = meta?.shipmentId;
   if (!meta || !shipmentId) throw new ShiprocketError("No Shiprocket shipment for this order.");
+  const sr = await getSettings("shiprocket");
   if (!meta.awb) {
-    const { awb, courier } = await assignAwb(shipmentId);
+    let courierId: number | undefined;
+    if (sr.courierPreference !== "recommended") {
+      const o = await db.query.orders.findFirst({ where: eq(schema.orders.id, orderId), columns: { paymentMethod: true, shippingAddress: true }, with: { items: { columns: { quantity: true } } } });
+      const units = o?.items.reduce((n, i) => n + i.quantity, 0) ?? 1;
+      courierId = await chooseCourier(sr.pickupPostcode, o!.shippingAddress.pincode, {
+        weightKg: Math.max(0.1, sr.weightKg * units),
+        cod: o?.paymentMethod === "cod",
+        preference: sr.courierPreference,
+      });
+    }
+    const { awb, courier } = await assignAwb(shipmentId, courierId);
     meta = await saveMeta(orderId, { awb, courier: courier ?? undefined, status: "AWB ASSIGNED", error: undefined });
     await event(orderId, "shipping", `AWB ${awb} assigned${courier ? ` (${courier})` : ""}`, staffId);
   }
-  if (!meta.pickupScheduled) {
+  if (!meta.pickupScheduled && sr.autoPickup) {
     await schedulePickup(shipmentId);
     meta = await saveMeta(orderId, { pickupScheduled: true, status: "PICKUP SCHEDULED" });
     await event(orderId, "shipping", "Courier pickup scheduled", staffId);
   }
   await recordShipment(orderId, { awb: meta.awb!, courier: meta.courier ?? null, status: meta.status ?? null, delivered: false });
   return meta;
+}
+
+/** Requests the courier pickup for a booked shipment (when automatic pickup is off). */
+export async function requestPickup(orderId: number, staffId?: number | null) {
+  const meta = (await db.query.orders.findFirst({ where: eq(schema.orders.id, orderId), columns: { shippingMeta: true } }))?.shippingMeta;
+  if (!meta?.shipmentId || !meta.awb) throw new ShiprocketError("Book the courier first (Ship now).");
+  if (meta.pickupScheduled) return meta;
+  await schedulePickup(meta.shipmentId);
+  const next = await saveMeta(orderId, { pickupScheduled: true, status: "PICKUP SCHEDULED" });
+  await event(orderId, "shipping", "Courier pickup scheduled", staffId);
+  return next;
+}
+
+/** Shipping label / invoice PDFs from Shiprocket (links are short-lived, so they're fetched on demand). */
+export async function shippingDocument(orderId: number, kind: "label" | "invoice") {
+  const meta = (await db.query.orders.findFirst({ where: eq(schema.orders.id, orderId), columns: { shippingMeta: true } }))?.shippingMeta;
+  if (kind === "label") {
+    if (!meta?.shipmentId || !meta.awb) throw new ShiprocketError("Labels are available once the courier is booked (Ship now).");
+    return labelUrl(meta.shipmentId);
+  }
+  if (!meta?.srOrderId) throw new ShiprocketError("Send the order to Shiprocket first.");
+  return invoiceUrl(meta.srOrderId);
+}
+
+/**
+ * Cancels the courier booking (AWB) so the parcel isn't picked up; the order stays in Shiprocket
+ * and can be shipped again with a new AWB.
+ */
+export async function cancelShipment(orderId: number, staffId?: number | null) {
+  const meta = (await db.query.orders.findFirst({ where: eq(schema.orders.id, orderId), columns: { shippingMeta: true } }))?.shippingMeta;
+  if (!meta?.awb) throw new ShiprocketError("There’s no booked shipment to cancel.");
+  if (/transit|out for delivery|delivered|rto/i.test(meta.status ?? "")) throw new ShiprocketError(`The parcel is already ${meta.status?.toLowerCase()} — it can’t be cancelled now.`);
+  await cancelShipments([meta.awb]);
+  await db.delete(schema.fulfillments).where(and(eq(schema.fulfillments.orderId, orderId), eq(schema.fulfillments.trackingNumber, meta.awb)));
+  await db.update(schema.orders).set({ fulfillmentStatus: "unfulfilled" }).where(eq(schema.orders.id, orderId));
+  await saveMeta(orderId, { awb: undefined, courier: undefined, pickupScheduled: false, status: "SHIPMENT CANCELLED", etd: undefined });
+  await event(orderId, "shipping", `Shipment ${meta.awb} cancelled`, staffId);
+}
+
+/** Removes the order from Shiprocket entirely (used when the order itself is cancelled). */
+export async function cancelInShiprocket(orderId: number, staffId?: number | null) {
+  const meta = (await db.query.orders.findFirst({ where: eq(schema.orders.id, orderId), columns: { shippingMeta: true } }))?.shippingMeta;
+  if (!meta?.srOrderId) return;
+  if (/transit|out for delivery|delivered|rto/i.test(meta.status ?? "")) throw new ShiprocketError(`The parcel is already ${meta.status?.toLowerCase()} — create a return instead of cancelling.`);
+  await cancelOrders([meta.srOrderId]);
+  await saveMeta(orderId, { status: "CANCELED", pickupScheduled: false });
+  await event(orderId, "shipping", "Cancelled in Shiprocket", staffId);
 }
 
 /** Pulls the latest tracking for an order with an AWB. */

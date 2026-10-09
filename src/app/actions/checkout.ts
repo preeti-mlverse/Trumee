@@ -7,11 +7,11 @@ import { db, schema } from "@/db";
 import { getCustomer } from "@/lib/auth";
 import { getCartId } from "@/lib/cart";
 import { CheckoutError, createOrderFromCart, findOrderForTracking, markOrderPaid } from "@/lib/orders";
-import { createRazorpayOrder, razorpayEnabled, razorpayKeyId, verifyPaymentSignature } from "@/lib/razorpay";
+import { createRazorpayOrder, onlinePaymentsAvailable, razorpayEnabled, razorpayKeyId, simulatedPaymentsAllowed, verifyPaymentSignature } from "@/lib/razorpay";
 import { getCartState } from "@/lib/cart";
 import { INDIAN_STATES } from "@/lib/india";
+import { getSettings, PAYMENT_METHODS } from "@/lib/settings";
 import { deliveryQuote, lookupPincode as lookupPin } from "@/lib/delivery";
-import { getSettings } from "@/lib/settings";
 
 
 
@@ -56,7 +56,18 @@ const input = z.object({
 export type PlaceOrderResult =
   | { ok: false; error: string; field?: string }
   | { ok: true; kind: "done"; url: string }
-  | { ok: true; kind: "razorpay"; token: string; key: string; gatewayOrderId: string; amount: number; prefill: { name: string; email: string; contact: string } }
+  | {
+      ok: true;
+      kind: "razorpay";
+      token: string;
+      key: string;
+      gatewayOrderId: string;
+      amount: number;
+      prefill: { name: string; email: string; contact: string };
+      /** Admin → Settings → Payments: window title and methods to hide */
+      name: string;
+      hide: string[];
+    }
   | { ok: true; kind: "simulate"; token: string; amount: number };
 
 export async function placeOrder(form: FormData): Promise<PlaceOrderResult> {
@@ -68,6 +79,9 @@ export async function placeOrder(form: FormData): Promise<PlaceOrderResult> {
   const d = parsed.data;
   const cartId = await getCartId();
   if (!cartId) return { ok: false, error: "Your bag is empty." };
+
+  if (d.paymentMethod === "razorpay" && !onlinePaymentsAvailable())
+    return { ok: false, error: "Online payment isn’t available right now — please choose cash on delivery, or WhatsApp us." };
 
   const shipping = await getSettings("shipping");
   // Real courier coverage (only when Shiprocket is connected): block undeliverable pincodes and COD where couriers can't collect cash.
@@ -101,9 +115,13 @@ export async function placeOrder(form: FormData): Promise<PlaceOrderResult> {
     });
     if (order.paymentMethod === "cod") return { ok: true, kind: "done", url: `/orders/${order.token}?new=1` };
 
-    if (!razorpayEnabled()) return { ok: true, kind: "simulate", token: order.token, amount: order.total };
+    if (!razorpayEnabled()) {
+      if (simulatedPaymentsAllowed()) return { ok: true, kind: "simulate", token: order.token, amount: order.total };
+      return { ok: false, error: "Online payment isn’t available right now — please choose cash on delivery." };
+    }
     const rzp = await createRazorpayOrder(order.total, `TRM${order.number}`, { order_number: String(order.number) });
     await db.update(schema.orders).set({ paymentGatewayOrderId: rzp.id }).where(eq(schema.orders.id, order.id));
+    const pay = await getSettings("payments");
     return {
       ok: true,
       kind: "razorpay",
@@ -112,6 +130,8 @@ export async function placeOrder(form: FormData): Promise<PlaceOrderResult> {
       gatewayOrderId: rzp.id,
       amount: order.total,
       prefill: { name: d.name, email: d.email, contact: phone },
+      name: pay.checkoutName || "Trumee",
+      hide: PAYMENT_METHODS.filter((m) => pay.methods?.[m.key] === false).map((m) => m.key),
     };
   } catch (e) {
     if (e instanceof CheckoutError) return { ok: false, error: e.message };
@@ -130,7 +150,7 @@ export async function verifyPayment(token: string, p: { razorpay_payment_id: str
 
 /** Test mode only (no Razorpay keys configured): completes the payment step. */
 export async function simulatePayment(token: string) {
-  if (razorpayEnabled()) return { ok: false as const, error: "Not available" };
+  if (!simulatedPaymentsAllowed()) return { ok: false as const, error: "Not available" };
   const order = await db.query.orders.findFirst({ where: eq(schema.orders.token, token) });
   if (!order) return { ok: false as const, error: "Order not found" };
   await markOrderPaid(order.id, `test_${Date.now()}`);

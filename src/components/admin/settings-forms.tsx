@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
-import { saveSettings, testShiprocket, type SaveResult, type SettingsSection } from "@/app/actions/admin";
+import { useActionState, useState } from "react";
+import { saveSettings, testRazorpayAction, testShiprocket, type SaveResult, type SettingsSection } from "@/app/actions/admin";
 
 const input = "w-full rounded-lg border border-admin-line bg-white px-3 py-2 text-sm outline-none focus:border-admin-accent";
 
@@ -72,4 +72,68 @@ export function ShiprocketTest() {
       {state.error && <p className="w-full text-sm text-admin-red">{state.error}</p>}
     </form>
   );
+}
+
+export function Select({ label, name, defaultValue, options, help }: { label: string; name: string; defaultValue: string; options: { value: string; label: string }[]; help?: string }) {
+  return (
+    <label className="block">
+      <span className="block text-sm font-medium mb-1">{label}</span>
+      <select name={name} defaultValue={defaultValue} className={input}>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      {help && <span className="block text-xs text-admin-muted mt-1">{help}</span>}
+    </label>
+  );
+}
+
+export function TextArea({ label, name, defaultValue, help, rows = 3 }: { label: string; name: string; defaultValue?: string; help?: string; rows?: number }) {
+  return (
+    <label className="block">
+      <span className="block text-sm font-medium mb-1">{label}</span>
+      <textarea name={name} rows={rows} defaultValue={defaultValue ?? ""} className={input} />
+      {help && <span className="block text-xs text-admin-muted mt-1">{help}</span>}
+    </label>
+  );
+}
+
+/** A value to paste into another dashboard (webhook URLs), with a copy button. */
+export function CopyValue({ label, value }: { label: string; value: string }) {
+  const [done, setDone] = useState(false);
+  return (
+    <div>
+      <span className="block text-sm font-medium mb-1">{label}</span>
+      <div className="flex items-center gap-2">
+        <code className="flex-1 min-w-0 truncate rounded-lg bg-admin-bg px-3 py-2 text-xs">{value}</code>
+        <button
+          type="button"
+          onClick={() => navigator.clipboard?.writeText(value).then(() => (setDone(true), setTimeout(() => setDone(false), 1500)))}
+          className="rounded-lg border border-admin-line bg-white px-3 py-2 text-xs font-medium hover:border-admin-accent"
+        >
+          {done ? "Copied" : "Copy"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function RazorpayTest() {
+  const [state, action, pending] = useActionState(testRazorpayAction, {});
+  return (
+    <form action={action} className="flex flex-wrap items-center gap-2">
+      <button disabled={pending} className="rounded-lg border border-admin-line bg-white px-4 py-2 text-sm font-medium hover:border-admin-accent disabled:opacity-60">
+        {pending ? "Checking…" : "Test connection"}
+      </button>
+      {state.ok && <p className="text-sm text-admin-green">{state.ok}</p>}
+      {state.error && <p className="text-sm text-admin-red">{state.error}</p>}
+    </form>
+  );
+}
+
+export function Status({ ok, children }: { ok: boolean | "warn"; children: React.ReactNode }) {
+  const c = ok === true ? "bg-admin-green-bg text-admin-green" : ok === "warn" ? "bg-admin-yellow-bg text-admin-yellow" : "bg-admin-red-bg text-admin-red";
+  return <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${c}`}>{children}</span>;
 }

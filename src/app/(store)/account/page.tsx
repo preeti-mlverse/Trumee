@@ -5,6 +5,7 @@ import Link from "next/link";
 import { db, schema } from "@/db";
 import { logout } from "@/app/actions/account";
 import { ProfileForm } from "@/components/store/account-forms";
+import { AddressBook } from "@/components/store/address-book";
 import { Container } from "@/components/store/ui";
 import { requireCustomer } from "@/lib/auth";
 import { formatDate, inr } from "@/lib/utils";
@@ -21,6 +22,10 @@ export default async function AccountPage({ searchParams }: PageProps<"/account"
     orderBy: [desc(schema.orders.createdAt)],
     with: { items: { columns: { id: true, title: true, imageUrl: true } } },
     limit: 50,
+  });
+  const addresses = await db.query.addresses.findMany({
+    where: eq(schema.addresses.customerId, c.id),
+    orderBy: [desc(schema.addresses.isDefault), desc(schema.addresses.createdAt)],
   });
 
   return (
@@ -72,6 +77,8 @@ export default async function AccountPage({ searchParams }: PageProps<"/account"
           <h2 className="font-display text-3xl mb-5">Your details</h2>
           <p className="text-sm text-muted mb-4">{c.email}</p>
           <ProfileForm c={c} />
+          <h2 className="font-display text-3xl mt-12 mb-5">Addresses</h2>
+          <AddressBook addresses={addresses.map((a) => ({ id: a.id, data: a.data, isDefault: a.isDefault }))} />
           <div className="mt-10 text-sm space-y-2">
             <Link href="/wishlist" className="block underline">Wishlist</Link>
             <Link href="/pages/returns-policy" className="block underline">Returns & exchanges</Link>

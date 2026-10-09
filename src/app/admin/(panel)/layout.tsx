@@ -3,8 +3,11 @@ import { adminLogout } from "@/app/actions/admin";
 import { requireStaff } from "@/lib/auth";
 
 const NAV = [
-  { href: "/admin", label: "Overview" },
+  { href: "/admin", label: "Home" },
   { href: "/admin/orders", label: "Orders" },
+  { href: "/admin/products", label: "Products" },
+  { href: "/admin/inventory", label: "Inventory" },
+  { href: "/admin/customers", label: "Customers" },
   { href: "/admin/settings", label: "Settings" },
 ];
 
@@ -13,7 +16,7 @@ export default async function PanelLayout({ children }: LayoutProps<"/admin">) {
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-30 bg-admin-accent text-white">
-        <div className="mx-auto max-w-6xl px-4 h-14 flex items-center gap-6">
+        <div className="mx-auto max-w-7xl px-4 h-14 flex items-center gap-6 overflow-x-auto">
           <Link href="/admin" className="font-display tracking-[0.3em] text-lg">TRUMEE</Link>
           <nav className="flex gap-1 text-sm">
             {NAV.map((n) => (
@@ -31,7 +34,7 @@ export default async function PanelLayout({ children }: LayoutProps<"/admin">) {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      <main className="mx-auto max-w-7xl px-4 py-8">{children}</main>
     </div>
   );
 }
