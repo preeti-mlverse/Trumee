@@ -1,25 +1,53 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { updateStock, type CatalogResult } from "@/app/actions/catalog";
 
 type Row = { id: number; size: string | null; sku: string | null; qty: number; track: boolean; backorder: boolean; productId: number; title: string; status: string };
 
-/** Editable stock table: only changed rows are submitted; each change is logged with a reason. */
+const ORDER = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE", "ONE SIZE"];
+const rank = (s: string) => {
+  const i = ORDER.indexOf(s.toUpperCase());
+  return i === -1 ? 50 : i;
+};
+
+/**
+ * Stock grid: one row per product, one column per size. Each cell is that size's SKU; type the new
+ * count and save — every change is logged with a reason and shows on the store immediately.
+ */
 export function StockForm({ rows }: { rows: Row[] }) {
   const [state, action, pending] = useActionState<CatalogResult, FormData>(updateStock, {});
   const [edits, setEdits] = useState<Record<number, number>>({});
   const changed = Object.keys(edits).length;
-  // Saved numbers are now the real stock — clear the "changed" markers
   useEffect(() => {
     if (state.ok) setEdits({});
   }, [state.ok, state.at]);
 
+  const { sizes, products } = useMemo(() => {
+    const sizes = [...new Set(rows.map((r) => r.size ?? "—"))].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+    const map = new Map<number, { id: number; title: string; status: string; cells: Record<string, Row> }>();
+    for (const r of rows) {
+      const p = map.get(r.productId) ?? { id: r.productId, title: r.title, status: r.status, cells: {} };
+      p.cells[r.size ?? "—"] = r;
+      map.set(r.productId, p);
+    }
+    return { sizes, products: [...map.values()] };
+  }, [rows]);
+
+  const set = (r: Row, raw: string) =>
+    setEdits((x) => {
+      const n = { ...x };
+      const v = Number(raw);
+      if (raw === "" || !Number.isFinite(v) || v === r.qty) delete n[r.id];
+      else n[r.id] = Math.trunc(v);
+      return n;
+    });
+
   return (
     <form action={action} className="rounded-2xl bg-admin-card border border-admin-line">
-      <div className="flex flex-wrap items-center gap-3 px-5 py-3 border-b border-admin-line">
-        <span className="text-sm text-admin-muted">{changed ? `${changed} change${changed > 1 ? "s" : ""}` : "Type new stock numbers, then save"}</span>
+      <div className="sticky top-14 z-10 flex flex-wrap items-center gap-3 px-5 py-3 border-b border-admin-line bg-admin-card rounded-t-2xl">
+        <span className="text-sm text-admin-muted">{changed ? `${changed} size${changed > 1 ? "s" : ""} changed` : "Type the new count in any size, then save"}</span>
         <select name="reason" defaultValue="restock" className="ml-auto rounded-lg border border-admin-line bg-white px-3 py-1.5 text-sm">
           <option value="restock">Reason: new stock arrived</option>
           <option value="correction">Reason: stock count correction</option>
@@ -30,61 +58,68 @@ export function StockForm({ rows }: { rows: Row[] }) {
           {pending ? "Saving…" : "Save stock"}
         </button>
         {state.error && <span className="w-full text-sm text-admin-red">{state.error}</span>}
-        {state.ok && !pending && <span className="w-full text-sm text-admin-green">{state.ok}</span>}
+        {state.ok && !pending && <span className="w-full text-sm text-admin-green">{state.ok} The store shows the new stock now.</span>}
       </div>
+      {Object.entries(edits).map(([id, q]) => (
+        <input key={id} type="hidden" name={`q_${id}`} value={q} />
+      ))}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-admin-muted border-b border-admin-line">
             <tr>
-              {["Product", "Size", "SKU", "Available", "Set to"].map((h) => (
-                <th key={h} className="px-5 py-2.5 font-medium">{h}</th>
+              <th className="px-5 py-2.5 font-medium">Product</th>
+              {sizes.map((s) => (
+                <th key={s} className="px-2 py-2.5 font-medium text-center whitespace-nowrap">{s}</th>
               ))}
+              <th className="px-5 py-2.5 font-medium text-right">Total</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-admin-line">
-            {rows.map((r) => (
-              <tr key={r.id} className={edits[r.id] != null ? "bg-admin-yellow-bg/30" : ""}>
-                <td className="px-5 py-2">
-                  <Link href={`/admin/products/${r.productId}`} className="hover:underline">{r.title}</Link>
-                  {r.status === "draft" && <span className="ml-2 text-xs text-admin-yellow">draft</span>}
-                </td>
-                <td className="px-5 py-2">{r.size}</td>
-                <td className="px-5 py-2 text-admin-muted">{r.sku || "—"}</td>
-                <td className={`px-5 py-2 tabular-nums ${!r.track ? "text-admin-muted" : r.qty <= 0 ? "text-admin-red font-medium" : r.qty <= 3 ? "text-admin-yellow font-medium" : ""}`}>
-                  {r.track ? r.qty : "Not tracked"}
-                  {r.track && r.qty <= 0 && (r.backorder ? " · selling anyway" : " · sold out")}
-                </td>
-                <td className="px-5 py-1.5">
-                  {r.track && (
-                    <input
-                      type="number"
-                      step="1"
-                      name={edits[r.id] != null ? `q_${r.id}` : undefined}
-                      defaultValue={r.qty}
-                      onChange={(e) => {
-                        const v = Number(e.target.value);
-                        setEdits((x) => {
-                          const n = { ...x };
-                          if (e.target.value === "" || v === r.qty) delete n[r.id];
-                          else n[r.id] = v;
-                          return n;
-                        });
-                      }}
-                      className="w-20 rounded-lg border border-admin-line bg-white px-2 py-1 text-sm outline-none focus:border-admin-accent"
-                      aria-label={`New stock for ${r.title} ${r.size}`}
-                    />
-                  )}
-                </td>
-              </tr>
-            ))}
-            {!rows.length && (
+            {products.map((p) => {
+              const cells = Object.values(p.cells);
+              const total = cells.reduce((n, r) => n + (r.track ? (edits[r.id] ?? r.qty) : 0), 0);
+              return (
+                <tr key={p.id} className="align-top">
+                  <td className="px-5 py-2.5 min-w-56">
+                    <Link href={`/admin/products/${p.id}`} className="hover:underline">{p.title}</Link>
+                    {p.status === "draft" && <span className="ml-2 text-xs text-admin-yellow">draft</span>}
+                  </td>
+                  {sizes.map((s) => {
+                    const r = p.cells[s];
+                    if (!r) return <td key={s} className="px-2 py-2.5 text-center text-admin-line">·</td>;
+                    const val = edits[r.id] ?? r.qty;
+                    const tone = !r.track ? "" : val <= 0 ? (r.backorder ? "border-admin-yellow" : "border-admin-red bg-admin-red-bg/40") : val <= 3 ? "border-admin-yellow bg-admin-yellow-bg/40" : "";
+                    return (
+                      <td key={s} className="px-1.5 py-1.5 text-center">
+                        {r.track ? (
+                          <input
+                            type="number"
+                            step="1"
+                            defaultValue={r.qty}
+                            onChange={(e) => set(r, e.target.value)}
+                            className={`w-16 rounded-lg border border-admin-line bg-white px-2 py-1 text-center text-sm tabular-nums outline-none focus:border-admin-accent ${tone} ${edits[r.id] != null ? "ring-2 ring-admin-accent/30" : ""}`}
+                            aria-label={`Stock for ${p.title}, size ${s}${r.sku ? `, SKU ${r.sku}` : ""}`}
+                          />
+                        ) : (
+                          <span className="text-xs text-admin-muted">not tracked</span>
+                        )}
+                        <span className="block text-[10px] text-admin-muted mt-0.5 truncate max-w-20 mx-auto" title={r.sku ?? ""}>{r.sku || "no SKU"}</span>
+                      </td>
+                    );
+                  })}
+                  <td className="px-5 py-2.5 text-right tabular-nums font-medium">{total}</td>
+                </tr>
+              );
+            })}
+            {!products.length && (
               <tr>
-                <td colSpan={5} className="px-5 py-10 text-center text-admin-muted">Nothing here.</td>
+                <td colSpan={sizes.length + 2} className="px-5 py-10 text-center text-admin-muted">Nothing here.</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+      <p className="px-5 py-3 text-xs text-admin-muted border-t border-admin-line">Red = sold out · yellow = 3 or fewer left (shoppers see “only a few left”) · SKUs are edited on the product page.</p>
     </form>
   );
 }

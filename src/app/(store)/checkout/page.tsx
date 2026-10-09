@@ -7,6 +7,7 @@ import { Container } from "@/components/store/ui";
 import { getCustomer } from "@/lib/auth";
 import { getCartState } from "@/lib/cart";
 import { onlinePaymentsAvailable } from "@/lib/razorpay";
+import { isPlaceholderEmail } from "@/lib/social-auth";
 import { getSettings } from "@/lib/settings";
 
 export const metadata: Metadata = { title: "Checkout", robots: { index: false, follow: false } };
@@ -47,7 +48,7 @@ export default async function CheckoutPage() {
         whatsapp={store.whatsapp}
         onlineEnabled={onlinePaymentsAvailable()}
         prefill={{
-          email: customer?.email ?? cart.email ?? undefined,
+          email: (customer && !isPlaceholderEmail(customer.email) ? customer.email : null) ?? cart.email ?? undefined,
           phone: customer?.phone ?? address?.phone,
           name: address?.name ?? ([customer?.firstName, customer?.lastName].filter(Boolean).join(" ") || undefined),
           line1: address?.line1,

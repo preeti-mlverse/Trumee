@@ -3,13 +3,14 @@
 import { and, desc, eq, gt, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { nanoid } from "nanoid";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db, schema } from "@/db";
 import { CUSTOMER_COOKIE, hashPassword, requireCustomer, startCustomerSession, verifyPassword } from "@/lib/auth";
 import { listProducts } from "@/lib/catalog";
 import { sendEmail, templates } from "@/lib/email";
+import { checkOtp, customerFromPhone, isPlaceholderEmail, OtpError, sendOtp } from "@/lib/social-auth";
 
 type State = { error?: string; ok?: string } | null;
 const safeNext = (n: unknown) => (typeof n === "string" && n.startsWith("/") && !n.startsWith("//") ? n : "/account");
@@ -82,6 +83,13 @@ export async function resetPassword(_: State, form: FormData): Promise<State> {
 export async function updateProfile(_: State, form: FormData): Promise<State> {
   const c = await requireCustomer();
   const phone = String(form.get("phone") ?? "").replace(/\D/g, "").slice(-10);
+  const email = String(form.get("email") ?? "").trim().toLowerCase();
+  if (email && isPlaceholderEmail(c.email)) {
+    if (!z.string().email().safeParse(email).success) return { error: "Please enter a valid email." };
+    const taken = await db.query.customers.findFirst({ where: sql`lower(${schema.customers.email}) = ${email}` });
+    if (taken && taken.id !== c.id) return { error: "That email belongs to another account — sign in with it instead." };
+    await db.update(schema.customers).set({ email }).where(eq(schema.customers.id, c.id));
+  }
   await db
     .update(schema.customers)
     .set({
@@ -157,4 +165,37 @@ export async function setDefaultAddress(id: number) {
   await db.update(schema.addresses).set({ isDefault: false }).where(eq(schema.addresses.customerId, c.id));
   await db.update(schema.addresses).set({ isDefault: true }).where(and(eq(schema.addresses.id, id), eq(schema.addresses.customerId, c.id)));
   revalidatePath("/account");
+}
+
+// ───────────────────────────── mobile OTP sign-in
+
+type OtpState = { error?: string; sent?: string; phone?: string } | null;
+const tenDigits = (v: unknown) => String(v ?? "").replace(/\D/g, "").slice(-10);
+
+/** Step 1: text a 6-digit code to the number. */
+export async function requestOtp(_: OtpState, form: FormData): Promise<OtpState> {
+  const phone = tenDigits(form.get("phone"));
+  if (!/^[6-9]\d{9}$/.test(phone)) return { error: "Enter your 10-digit mobile number." };
+  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+  try {
+    await sendOtp(phone, ip);
+    return { sent: `We’ve sent a 6-digit code to +91 ${phone.slice(0, 5)} ${phone.slice(5)}.`, phone };
+  } catch (e) {
+    return { error: e instanceof OtpError ? e.message : "Couldn’t send the code — please try again.", phone };
+  }
+}
+
+/** Step 2: check the code, then sign in (creating the account on first use). */
+export async function verifyOtp(_: OtpState, form: FormData): Promise<OtpState> {
+  const phone = tenDigits(form.get("phone"));
+  const code = String(form.get("code") ?? "").replace(/\D/g, "");
+  if (code.length !== 6) return { error: "Enter the 6-digit code.", sent: "", phone };
+  try {
+    checkOtp(phone, code);
+  } catch (e) {
+    return { error: e instanceof OtpError ? e.message : "That code isn’t right.", sent: "", phone };
+  }
+  const c = await customerFromPhone(phone);
+  await startCustomerSession(c.id);
+  redirect(safeNext(form.get("next")) + (c.created ? "?welcome=1" : ""));
 }

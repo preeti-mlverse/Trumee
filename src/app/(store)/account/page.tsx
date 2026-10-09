@@ -8,6 +8,7 @@ import { ProfileForm } from "@/components/store/account-forms";
 import { AddressBook } from "@/components/store/address-book";
 import { Container } from "@/components/store/ui";
 import { requireCustomer } from "@/lib/auth";
+import { isPlaceholderEmail } from "@/lib/social-auth";
 import { formatDate, inr } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "My account", robots: { index: false } };
@@ -75,8 +76,8 @@ export default async function AccountPage({ searchParams }: PageProps<"/account"
         </section>
         <aside>
           <h2 className="font-display text-3xl mb-5">Your details</h2>
-          <p className="text-sm text-muted mb-4">{c.email}</p>
-          <ProfileForm c={c} />
+          <p className="text-sm text-muted mb-4">{isPlaceholderEmail(c.email) ? `Signed in with +91 ${c.phone}` : c.email}</p>
+          <ProfileForm c={c} needsEmail={isPlaceholderEmail(c.email)} />
           <h2 className="font-display text-3xl mt-12 mb-5">Addresses</h2>
           <AddressBook addresses={addresses.map((a) => ({ id: a.id, data: a.data, isDefault: a.isDefault }))} />
           <div className="mt-10 text-sm space-y-2">

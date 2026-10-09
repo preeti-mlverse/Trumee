@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { LoginForm, RegisterForm } from "@/components/store/account-forms";
+import { GoogleButton, LoginForm, PhoneLogin, RegisterForm } from "@/components/store/account-forms";
 import { Container } from "@/components/store/ui";
 import { getCustomer } from "@/lib/auth";
+import { googleConfigured, otpConfigured } from "@/lib/social-auth";
 
 export const metadata: Metadata = { title: "Sign in", robots: { index: false, follow: true } };
 
 export default async function LoginPage({ searchParams }: PageProps<"/account/login">) {
-  const next = (await searchParams).next;
+  const sp = await searchParams;
+  const next = sp.next;
+  const google = googleConfigured();
+  const otp = otpConfigured();
   const nextPath = typeof next === "string" ? next : undefined;
   if (await getCustomer()) redirect(nextPath ?? "/account");
   return (
@@ -16,6 +20,14 @@ export default async function LoginPage({ searchParams }: PageProps<"/account/lo
         <section>
           <h1 className="font-display text-5xl">Sign in</h1>
           <p className="text-ink-soft mt-3 mb-8">Track orders, save addresses and check out faster.</p>
+          {sp.error === "google" && <p className="mb-6 text-sm text-sale">Google sign-in didn’t complete — please try again or use another way below.</p>}
+          {(google || otp) && (
+            <div className="space-y-4">
+              {google && <GoogleButton next={nextPath} />}
+              {otp && <PhoneLogin next={nextPath} />}
+              <p className="flex items-center gap-4 py-2 text-[11px] tracking-[0.2em] uppercase text-muted before:h-px before:flex-1 before:bg-line after:h-px after:flex-1 after:bg-line">or with email</p>
+            </div>
+          )}
           <LoginForm next={nextPath} />
         </section>
         <section className="md:border-l md:border-line md:pl-12 lg:pl-24">
