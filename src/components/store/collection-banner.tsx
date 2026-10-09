@@ -7,7 +7,7 @@ import { Breadcrumbs } from "./ui";
 
 /**
  * Split banner: type panel ⟷ up to three catwalk loops from the collection.
- * Categories sit on bone, edits on plum-black, so neighbouring pages invert.
+ * Categories sit on bone, edits on sea-black, so neighbouring pages invert.
  */
 export async function CollectionBanner({
   collectionId,
@@ -44,13 +44,13 @@ export async function CollectionBanner({
 
   return (
     <section className="px-2 sm:px-4 lg:px-6 pt-2 sm:pt-3">
-    <div className={cn("mx-auto max-w-[1400px] rounded-panel overflow-hidden lg:grid lg:grid-cols-12 lg:min-h-[560px] lg:h-[66svh] lg:max-h-[740px]", dark ? "bg-ink text-cream" : "bg-[#fffdf8]/75 text-ink")}>
+    <div className={cn("mx-auto max-w-[1400px] rounded-panel overflow-hidden lg:grid lg:grid-cols-12 lg:min-h-[560px] lg:h-[66svh] lg:max-h-[740px]", dark ? "bg-ink text-cream" : "bg-paper/75 text-ink")}>
       <div className="lg:col-span-5 flex flex-col justify-between px-4 sm:px-6 lg:px-12 pt-8 pb-10 lg:py-12">
         <div className={cn(dark && "[&_a]:text-cream/60 [&_a:hover]:text-cream [&_span]:text-cream/80")}>
           <Breadcrumbs items={[{ label: "Collections", href: "/collections" }, { label: title }]} />
         </div>
         <div className="mt-10 lg:mt-0">
-          <p className={cn("text-[11px] tracking-[0.3em] uppercase", dark ? "text-marigold" : "text-plum")}>
+          <p className={cn("text-[11px] tracking-[0.3em] uppercase", dark ? "text-sun" : "text-sea")}>
             {group === "edit" ? "The Edit" : group === "all" ? "Everything" : "Category"}
           </p>
           <h1 className="font-display text-[58px] sm:text-[84px] xl:text-[104px] leading-[0.9] mt-5">{title}</h1>

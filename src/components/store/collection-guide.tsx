@@ -18,7 +18,7 @@ export async function CollectionGuide({ handle, title, guideHtml, faqs }: { hand
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_1fr] gap-12 lg:gap-20">
             {guideHtml && (
               <article>
-                <p className="text-[11px] tracking-[0.3em] uppercase text-plum mb-4">The {title} guide</p>
+                <p className="text-[11px] tracking-[0.3em] uppercase text-sea mb-4">The {title} guide</p>
                 <div className="prose-trumee max-w-2xl [&_h2]:text-[28px] [&_h2]:sm:text-[34px] [&_h2]:leading-tight" dangerouslySetInnerHTML={{ __html: guideHtml }} />
               </article>
             )}

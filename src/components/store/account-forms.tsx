@@ -7,7 +7,7 @@ import type { CardProduct } from "@/lib/catalog";
 import { useWishlist } from "./cart-context";
 import { ProductGrid } from "./product-card";
 
-const input = "w-full rounded-xl border border-line bg-[#fffdf8] px-4 py-3 text-sm outline-none focus:border-ink";
+const input = "w-full rounded-xl border border-line bg-paper px-4 py-3 text-sm outline-none focus:border-ink";
 const btn = "w-full rounded-full bg-ink text-cream py-3.5 text-[11px] tracking-[0.22em] uppercase disabled:opacity-60";
 
 function Msg({ s }: { s: { error?: string; ok?: string } | null }) {

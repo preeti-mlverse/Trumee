@@ -27,7 +27,7 @@ export default async function AccountPage({ searchParams }: PageProps<"/account"
     <Container className="pt-12 sm:pt-16">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] tracking-[0.3em] uppercase text-plum">{welcome ? "Welcome to Trumee" : "My account"}</p>
+          <p className="text-[11px] tracking-[0.3em] uppercase text-sea">{welcome ? "Welcome to Trumee" : "My account"}</p>
           <h1 className="font-display text-5xl sm:text-6xl mt-2">Hello, {c.firstName || "there"}</h1>
         </div>
         <form action={logout}>

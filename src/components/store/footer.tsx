@@ -45,11 +45,11 @@ export function Footer({ store }: { store: StoreSettings }) {
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.3fr)_2fr]">
           <div>
             <p className="font-display text-4xl sm:text-5xl leading-[1]">
-              Dressed for days that <em className="font-normal text-marigold-soft">don’t follow a plan.</em>
+              Dressed for days that <em className="font-normal text-sun-soft">don’t follow a plan.</em>
             </p>
             <p className="mt-4 text-sm text-cream/60 max-w-sm">{store.tagline}. Designed in Gurgaon for spontaneous getaways and barefoot evenings.</p>
             <div className="mt-8">
-              <p className="text-[11px] tracking-[0.26em] uppercase mb-3 text-marigold">Join the list</p>
+              <p className="text-[11px] tracking-[0.26em] uppercase mb-3 text-sun">Join the list</p>
               <p className="text-sm text-cream/60 mb-4">New drops, styling notes and members-only offers. No spam, ever.</p>
               <NewsletterForm />
             </div>
@@ -57,11 +57,11 @@ export function Footer({ store }: { store: StoreSettings }) {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
             {COLS.map((c) => (
               <div key={c.title}>
-                <p className="text-[11px] tracking-[0.26em] uppercase mb-5 text-marigold">{c.title}</p>
+                <p className="text-[11px] tracking-[0.26em] uppercase mb-5 text-sun">{c.title}</p>
                 <ul className="space-y-1">
                   {c.links.map(([label, href]) => (
                     <li key={href}>
-                      <Link href={href} className="inline-block py-1 text-sm text-cream/75 hover:text-marigold">
+                      <Link href={href} className="inline-block py-1 text-sm text-cream/75 hover:text-sun">
                         {label}
                       </Link>
                     </li>
@@ -83,7 +83,7 @@ export function Footer({ store }: { store: StoreSettings }) {
           </div>
         </div>
         <Link href="/" aria-label="Trumee home" className="block mt-16 -mb-[0.08em] text-center select-none">
-          <Wordmark className="block text-[17vw] lg:text-[208px] tracking-[0.12em] [padding-left:0.12em] text-cream/95 hover:text-marigold transition-colors duration-500" />
+          <Wordmark className="block text-[17vw] lg:text-[208px] tracking-[0.12em] [padding-left:0.12em] text-cream/95 hover:text-sun transition-colors duration-500" />
         </Link>
         <div className="mt-8 pt-6 border-t border-cream/15 flex flex-col sm:flex-row gap-4 items-center justify-between text-xs text-cream/50">
           <p>

@@ -18,15 +18,15 @@ export function ReviewForm({ productId }: { productId: number }) {
       </button>
     );
 
-  const input = "w-full rounded-xl border border-line bg-[#fffdf8] px-4 py-3 text-sm outline-none focus:border-ink";
+  const input = "w-full rounded-xl border border-line bg-paper px-4 py-3 text-sm outline-none focus:border-ink";
   return (
-    <form action={action} className="max-w-xl space-y-4 rounded-3xl bg-[#fffdf8]/70 p-6">
+    <form action={action} className="max-w-xl space-y-4 rounded-3xl bg-paper/70 p-6">
       <input type="hidden" name="productId" value={productId} />
       <input type="hidden" name="rating" value={rating} />
       <div className="flex gap-1" role="radiogroup" aria-label="Rating">
         {[1, 2, 3, 4, 5].map((n) => (
           <button type="button" key={n} onClick={() => setRating(n)} aria-label={`${n} star${n > 1 ? "s" : ""}`} role="radio" aria-checked={rating === n}>
-            <Star className={cn("size-6", n <= rating ? "fill-plum text-plum" : "text-muted")} strokeWidth={1.3} />
+            <Star className={cn("size-6", n <= rating ? "fill-sea text-sea" : "text-muted")} strokeWidth={1.3} />
           </button>
         ))}
       </div>

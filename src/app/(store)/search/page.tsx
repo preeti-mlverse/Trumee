@@ -17,7 +17,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   return (
     <Container className="pt-12">
       <form action="/search" className="max-w-2xl mb-10">
-        <p className="text-[11px] tracking-[0.26em] uppercase text-plum mb-3">Search</p>
+        <h1 className="text-[11px] tracking-[0.26em] uppercase text-sea mb-3">{q ? `Search results for “${q}”` : "Search"}</h1>
         <input
           name="q"
           defaultValue={q}

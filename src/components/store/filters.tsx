@@ -20,7 +20,7 @@ export function Filters({ facets, total }: { facets: { sizes: string[]; types: s
   const pathname = usePathname();
   const sp = useSearchParams();
   const [open, setOpen] = useState(false);
-  const [pending, start] = useTransition();
+  const [, start] = useTransition();
 
   const selectedSizes = sp.get("size")?.split(",").filter(Boolean) ?? [];
   const selectedTypes = sp.get("type")?.split(",").filter(Boolean) ?? [];
@@ -104,11 +104,10 @@ export function Filters({ facets, total }: { facets: { sizes: string[]; types: s
     <>
       {/* Docks flush under the header on the same sand backdrop, so the two read as one bar */}
       <div className="sticky top-16 lg:top-[72px] z-30 -mx-4 sm:-mx-6 lg:-mx-10 px-2 sm:px-4 lg:px-6 pt-1 pb-2 mb-6 sm:mb-8 bg-(--sky-top) after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-gradient-to-b after:from-(--sky-top) after:to-transparent">
-      <div className="mx-auto max-w-[1400px] flex items-center justify-between gap-4 rounded-full border border-ink/[0.06] bg-[#fffdf8]/90 px-4 sm:px-5 py-0.5 sm:py-1 shadow-[0_6px_18px_-14px_rgba(34,16,30,0.35)]">
+      <div className="mx-auto max-w-[1400px] flex items-center justify-between gap-4 rounded-full border border-ink/[0.06] bg-paper/90 px-4 sm:px-5 py-0.5 sm:py-1 shadow-[0_6px_18px_-14px_rgba(22,22,22,0.35)]">
         <button onClick={() => setOpen(true)} className="flex items-center gap-2 py-2 text-xs tracking-[0.16em] uppercase">
-          <SlidersHorizontal className="size-4" strokeWidth={1.5} /> Filter {activeCount > 0 && <span className="text-plum">({activeCount})</span>}
+          <SlidersHorizontal className="size-4" strokeWidth={1.5} /> Filter {activeCount > 0 && <span className="text-sea">({activeCount})</span>}
         </button>
-        <p className={cn("text-xs text-muted hidden sm:block transition-opacity", pending && "opacity-40")}>{total} {total === 1 ? "piece" : "pieces"}</p>
         <label className="flex items-center gap-2 text-xs tracking-[0.16em] uppercase">
           <span className="hidden sm:inline">Sort</span>
           <select
@@ -129,7 +128,7 @@ export function Filters({ facets, total }: { facets: { sizes: string[]; types: s
       {open && (
         <div className="fixed inset-0 z-50" role="dialog" aria-label="Filters">
           <div className="absolute inset-0 bg-ink/40 animate-fade-in" onClick={() => setOpen(false)} />
-          <aside className="absolute inset-y-2 left-2 w-[calc(100%-1rem)] max-w-sm bg-[#fffdf8] rounded-3xl overflow-hidden flex flex-col animate-fade-in">
+          <aside className="absolute inset-y-2 left-2 w-[calc(100%-1rem)] max-w-sm bg-paper rounded-3xl overflow-hidden flex flex-col animate-fade-in">
             <div className="flex items-center justify-between px-6 h-16 border-b border-line">
               <h2 className="font-display text-2xl">Filter</h2>
               <button onClick={() => setOpen(false)} aria-label="Close filters" className="p-2 -mr-2">

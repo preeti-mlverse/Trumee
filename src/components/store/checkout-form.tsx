@@ -128,7 +128,7 @@ export function CheckoutForm({
       name: "Trumee",
       description: "Order payment",
       prefill: res.prefill,
-      theme: { color: "#22101e" },
+      theme: { color: "#161616" },
       handler: async (r: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => {
         const v = await verifyPayment(res.token, r);
         if (v.ok) finish(v.url);
@@ -144,7 +144,7 @@ export function CheckoutForm({
   };
 
   const input = (name: string) =>
-    cn("w-full rounded-xl border bg-[#fffdf8] px-4 py-3 text-sm outline-none focus:border-ink transition-colors", error?.field === name ? "border-sale" : "border-line");
+    cn("w-full rounded-xl border bg-paper px-4 py-3 text-sm outline-none focus:border-ink transition-colors", error?.field === name ? "border-sale" : "border-line");
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_440px] gap-10 lg:gap-16 items-start">
@@ -186,7 +186,7 @@ export function CheckoutForm({
 
         <fieldset>
           <legend className="font-display text-2xl mb-4">Payment</legend>
-          <div className="rounded-3xl border border-line overflow-hidden divide-y divide-line bg-[#fffdf8]/60">
+          <div className="rounded-3xl border border-line overflow-hidden divide-y divide-line bg-paper/60">
             <PayOption
               checked={method === "razorpay"}
               onChange={() => setMethod("razorpay")}
@@ -232,7 +232,7 @@ export function CheckoutForm({
       </form>
 
       {/* Summary */}
-      <aside className="rounded-panel bg-[#fffdf8]/80 p-6 sm:p-8 lg:sticky lg:top-24">
+      <aside className="rounded-panel bg-paper/80 p-6 sm:p-8 lg:sticky lg:top-24">
         <h2 className="font-display text-2xl">Order summary</h2>
         <ul className="mt-6 space-y-4">
           {cart.lines.map((l) => (
@@ -260,7 +260,7 @@ export function CheckoutForm({
             if (next.totals.discountApplied) setCode("");
           }}
         >
-          <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Discount code" className="flex-1 rounded-full border border-line bg-[#fffdf8] px-4 py-2.5 text-sm outline-none focus:border-ink uppercase" />
+          <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Discount code" className="flex-1 rounded-full border border-line bg-paper px-4 py-2.5 text-sm outline-none focus:border-ink uppercase" />
           <button className="rounded-full border border-ink px-4 text-[11px] tracking-[0.18em] uppercase hover:bg-ink hover:text-cream">Apply</button>
         </form>
         {codeMsg && <p className={cn("text-xs mt-2", t.discountApplied ? "text-sage" : "text-sale")}>{codeMsg}</p>}
@@ -311,8 +311,8 @@ export function CheckoutForm({
 
       {sim && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-ink/50 p-4" role="dialog" aria-label="Test payment">
-          <div className="bg-[#fffdf8] rounded-3xl max-w-sm w-full p-7">
-            <p className="text-[11px] tracking-[0.24em] uppercase text-plum">Test mode</p>
+          <div className="bg-paper rounded-3xl max-w-sm w-full p-7">
+            <p className="text-[11px] tracking-[0.24em] uppercase text-sea">Test mode</p>
             <h3 className="font-display text-2xl mt-2">Simulated payment</h3>
             <p className="text-sm text-muted mt-3">
               Razorpay keys aren’t configured yet, so no real payment is taken. Add <code>RAZORPAY_KEY_ID</code> and <code>RAZORPAY_KEY_SECRET</code> to go live.

@@ -27,7 +27,7 @@ export function CartDrawer() {
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-label="Shopping bag">
       <div className="absolute inset-0 bg-ink/40 animate-fade-in" onClick={() => setOpen(false)} />
-      <aside className="absolute inset-y-2 right-2 w-[calc(100%-1rem)] max-w-[440px] bg-[#fffdf8] rounded-3xl overflow-hidden flex flex-col animate-slide-in">
+      <aside className="absolute inset-y-2 right-2 w-[calc(100%-1rem)] max-w-[440px] bg-paper rounded-3xl overflow-hidden flex flex-col animate-slide-in">
         <div className="flex items-center justify-between px-5 sm:px-6 h-16 border-b border-line">
           <h2 className="font-display text-2xl">Your bag {cart?.count ? <span className="text-muted text-lg">({cart.count})</span> : null}</h2>
           <button onClick={() => setOpen(false)} aria-label="Close bag" className="p-2 -mr-2">
@@ -88,7 +88,7 @@ export function CartDrawer() {
                 </li>
               ))}
             </ul>
-            <div className="border-t border-line px-5 sm:px-6 py-5 space-y-2 bg-[#fffdf8]">
+            <div className="border-t border-line px-5 sm:px-6 py-5 space-y-2 bg-paper">
               <Row label="Subtotal" value={inr(t!.subtotal)} />
               {t!.discountTotal > 0 && <Row label={`Discount (${t!.discountApplied})`} value={"−" + inr(t!.discountTotal)} className="text-sage" />}
               <Row label="Shipping" value={t!.shipping ? inr(t!.shipping) : "Free"} />

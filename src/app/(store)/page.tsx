@@ -56,13 +56,21 @@ function Panel({ className, style, children }: { className?: string; style?: Rea
 
 /** "Shop by mood": occasion and craft tags that already power the collection filters. */
 const MOODS = [
-  { key: "vacation", group: "occasion", title: "Getaway", sub: "Vacation-ready", tint: "from-[#fbd9bf] via-[#f2ab82] to-[#e2835c]" },
-  { key: "casuals", group: "occasion", title: "Everyday", sub: "Easy casuals", tint: "from-[#e3ebf3] via-[#b9cbe0] to-[#8ea8c6]" },
-  { key: "office", group: "occasion", title: "Nine to five", sub: "Office-ready", tint: "from-[#eedcea] via-[#cfa7c5] to-[#a37096]" },
-  { key: "crochet", group: "detail", title: "Crochet", sub: "Hand-finished lace", tint: "from-[#f8eedd] via-[#e7cfa6] to-[#cfa86f]" },
-  { key: "embroidery", group: "detail", title: "Embroidered", sub: "Thread-work florals", tint: "from-[#fadadd] via-[#eaa6ae] to-[#cf7383]" },
-  { key: "schiffli", group: "detail", title: "Schiffli", sub: "Scallops & eyelets", tint: "from-[#dfeee6] via-[#a9cdbb] to-[#73a690]" },
+  { key: "vacation", group: "occasion", title: "Getaway", sub: "Vacation-ready", tone: "sea" },
+  { key: "casuals", group: "occasion", title: "Everyday", sub: "Easy casuals", tone: "sand" },
+  { key: "office", group: "occasion", title: "Nine to five", sub: "Office-ready", tone: "shade" },
+  { key: "crochet", group: "detail", title: "Crochet", sub: "Hand-finished lace", tone: "sun" },
+  { key: "embroidery", group: "detail", title: "Embroidered", sub: "Thread-work florals", tone: "sea" },
+  { key: "schiffli", group: "detail", title: "Schiffli", sub: "Scallops & eyelets", tone: "sand" },
 ] as const;
+
+/** The four brand treatments (sea · sand · shade · sun) the mood cards rotate through. */
+const TONES = {
+  sea: { card: "bg-gradient-to-br from-sea-soft via-[#c3dbe9] to-[#9cc2d9] text-ink", sub: "text-sea-dark", print: "#1d6188" },
+  sand: { card: "bg-gradient-to-br from-paper via-sand to-[#e5d4b6] text-ink", sub: "text-muted", print: "#161616" },
+  shade: { card: "bg-gradient-to-br from-ink via-ink-soft to-ink text-cream", sub: "text-sun", print: "#f5e0a3" },
+  sun: { card: "bg-gradient-to-br from-[#fbf0d2] via-sun-soft to-[#e9bf55] text-ink", sub: "text-ink/70", print: "#161616" },
+} as const;
 
 export default async function Home() {
   const [home, categories, edits, bestsellers, fresh, underPrice, withVideo, posts] = await Promise.all([
@@ -118,15 +126,15 @@ export default async function Home() {
     <>
       <Hero slides={home.heroSlides} clips={heroClips} shop={shop} />
 
-      {/* Craft words — slim marigold ribbon tucked under the hero, same width */}
+      {/* Craft words — slim sun ribbon tucked under the hero, same width */}
       <div aria-hidden>
-        <div className="bg-marigold text-ink overflow-hidden py-2 sm:py-2.5">
+        <div className="bg-sun text-ink overflow-hidden py-2 sm:py-2.5">
           <div className="flex w-max animate-marquee-slow whitespace-nowrap font-display italic text-[17px] sm:text-[21px] leading-none">
             {[0, 1].map((k) => (
               <span key={k} className="flex">
                 {CRAFT_WORDS.map((t) => (
                   <span key={t} className="px-4 sm:px-6 flex items-center gap-8 sm:gap-12">
-                    {t} <span className="not-italic text-[0.5em] text-plum">✦</span>
+                    {t} <span className="not-italic text-[0.5em] text-sea">✦</span>
                   </span>
                 ))}
               </span>
@@ -137,15 +145,8 @@ export default async function Home() {
 
       {/* Categories — bento mosaic */}
       <Container className="relative pt-10 sm:pt-14">
-        <Doodle kind="sprig" className="hidden md:block absolute right-[38%] top-6 size-24 text-plum/25" />
-        <SectionHeading
-          eyebrow="Discover"
-          title="Shop by"
-          accent="category"
-          text="Six silhouettes, one easy spirit — from breezy dresses to crochet-trimmed tops."
-          href="/collections/all"
-          linkLabel="Shop all clothing"
-        />
+        <Doodle kind="sprig" className="hidden md:block absolute right-[38%] top-6 size-24 text-sea/25" />
+        <SectionHeading eyebrow="Discover" title="Shop by" accent="category" />
         <Reveal stagger className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:auto-rows-[340px] xl:auto-rows-[380px]">
           {bento.map((c) => {
             const m = CATEGORY_MEDIA[c.handle];
@@ -161,32 +162,32 @@ export default async function Home() {
               />
             );
           })}
-          <ImageWord word="Boho" image="/images/lifestyle/hero-pink-wall.webp" href="/collections/free-spirited" className="col-span-2 py-10 lg:py-0 bg-[#fffdf8]/70" />
+          <ImageWord word="Boho" image="linear-gradient(120deg, #134560 0%, #2b7aa5 38%, #d9a21b 72%, #161616 100%)" href="/collections/free-spirited" className="col-span-2 py-10 lg:py-0 bg-paper/70" />
         </Reveal>
       </Container>
 
       {/* Shop by mood — gradient cards with a floating product cut-out */}
       <Container className="relative pt-16 sm:pt-24">
-        <Doodle kind="bloom" className="hidden md:block absolute left-[46%] top-12 size-20 text-marigold/40" />
-        <SectionHeading eyebrow="Find your vibe" title="Shop by" accent="mood" text="Pick the plan — or the craft — and we’ll bring the outfit." />
+        <Doodle kind="bloom" className="hidden md:block absolute left-[46%] top-12 size-20 text-sun/40" />
+        <SectionHeading eyebrow="Find your vibe" title="Shop by" accent="mood" />
         <Reveal stagger className="grid grid-cols-2 lg:grid-cols-6 gap-2.5 sm:gap-4">
           {moods.map((m) => (
             <Link
               key={m.key}
               href={`/collections/all?${m.group}=${m.key}`}
-              className={`group relative h-72 sm:h-80 overflow-hidden rounded-card bg-gradient-to-br ${m.tint} p-4 sm:p-5 flex flex-col justify-between shadow-[0_18px_40px_-28px_rgba(34,16,30,0.6)] transition-transform duration-500 hover:-translate-y-1.5`}
+              className={`group relative h-72 sm:h-80 overflow-hidden rounded-card ${TONES[m.tone].card} p-4 sm:p-5 flex flex-col justify-between shadow-[0_18px_40px_-28px_rgba(22,22,22,0.6)] transition-transform duration-500 hover:-translate-y-1.5`}
             >
-              <span aria-hidden className="absolute inset-0" style={blockPrint("#22101e", 0.07)} />
+              <span aria-hidden className="absolute inset-0" style={blockPrint(TONES[m.tone].print, 0.08)} />
               <span className="relative z-10">
-                <span className="block text-[10px] tracking-[0.26em] uppercase text-ink/70">{m.sub}</span>
-                <span className="block font-display italic text-[30px] sm:text-[34px] leading-none mt-1.5 text-ink">{m.title}</span>
+                <span className={`block text-[10px] tracking-[0.26em] uppercase ${TONES[m.tone].sub}`}>{m.sub}</span>
+                <span className="block font-display italic text-[30px] sm:text-[34px] leading-none mt-1.5">{m.title}</span>
               </span>
               {m.image && (
                 <span className="absolute right-0 bottom-0 left-6 sm:left-8 top-[30%] rounded-t-[999px] overflow-hidden transition-transform duration-700 origin-bottom group-hover:scale-[1.04] [mask-image:linear-gradient(to_bottom,transparent,#000_22%)]">
                   <Image src={m.image} alt="" fill sizes="(min-width:1024px) 14vw, 40vw" className="object-cover object-top" />
                 </span>
               )}
-              <span className="relative z-10 inline-flex w-fit items-center gap-1.5 rounded-full bg-[#fffdf8] px-3 py-1 text-[12px] text-ink shadow-sm">
+              <span className={`relative z-10 inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-[12px] shadow-sm ${m.tone === "shade" ? "bg-sun text-ink" : "bg-paper text-ink"}`}>
                 {m.total} styles <ArrowUpRight className="size-3.5 transition-transform group-hover:rotate-45" />
               </span>
             </Link>
@@ -197,12 +198,7 @@ export default async function Home() {
       {/* Products — tabbed rail */}
       {tabs.length > 0 && (
         <Container className="pt-16 sm:pt-24">
-          <SectionHeading
-            eyebrow="Fresh picks"
-            title="Just dropped,"
-            accent="made for repeat wear"
-            text="Thoughtfully made pieces in breathable fabrics — for everyday comfort, effortless layering and last-minute getaways."
-          />
+          <SectionHeading eyebrow="Fresh picks" title="Just dropped," accent="made for repeat wear" />
           <ProductRail
             list="Home"
             lead={{ image: "/images/lifestyle/cafe-chair.webp", eyebrow: "Most loved", title: "The pieces everyone’s wearing", href: "/collections/all?sort=best-selling", cta: "Shop bestsellers" }}
@@ -213,7 +209,7 @@ export default async function Home() {
 
       {/* Reels — dark rounded panel */}
       {clips.length > 0 && (
-        <Panel className="bg-ink text-cream pt-14 sm:pt-20 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-10 overflow-hidden" style={blockPrint("#f2d38c", 0.05)}>
+        <Panel className="bg-ink text-cream pt-14 sm:pt-20 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-10 overflow-hidden" style={blockPrint("#f5e0a3", 0.05)}>
           <SectionHeading dark eyebrow="Watch & shop" title="See it" accent="move" />
           <ReelRail clips={clips} />
         </Panel>
@@ -222,14 +218,7 @@ export default async function Home() {
       {/* The Edits — moodboard index */}
       {spotlightEdits.length > 0 && (
         <Container className="pt-16 sm:pt-24">
-          <SectionHeading
-            eyebrow="Moodboards"
-            title="The"
-            accent="Edits"
-            text="Stories told in fabric — pick a mood and we’ll dress it."
-            href="/collections"
-            linkLabel="Explore all edits"
-          />
+          <SectionHeading eyebrow="Moodboards" title="The" accent="Edits" />
           <EditSpotlight edits={spotlightEdits} />
         </Container>
       )}
@@ -247,9 +236,9 @@ export default async function Home() {
           <Image src="/images/lifestyle/lake-wide.webp" alt="" fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover opacity-35 -z-10" />
           <div className="absolute inset-0 bg-gradient-to-br from-ink via-ink/85 to-ink/40 -z-10" />
           <div className="max-w-md">
-            <p className="text-[11px] tracking-[0.3em] uppercase text-marigold">Nomadic Escapes</p>
+            <p className="text-[11px] tracking-[0.3em] uppercase text-sun">Nomadic Escapes</p>
             <h2 className="font-display text-[52px] sm:text-[80px] leading-[0.9] mt-6">
-              For your <em className="font-normal text-marigold-soft">soul’s</em> expedition
+              For your <em className="font-normal text-sun-soft">soul’s</em> expedition
             </h2>
             <p className="mt-7 text-cream/75 leading-relaxed text-[15px]">
               Adventure is more than travel — it’s a mindset. Pieces for spontaneous weekend getaways, barefoot evenings and stories that start with “why not?”
@@ -258,7 +247,7 @@ export default async function Home() {
               <Image src="/images/lifestyle/lake-rust.webp" alt="" width={400} height={500} className="aspect-[4/5] object-cover rounded-2xl" />
               <Image src="/images/lifestyle/stone-wall.webp" alt="" width={400} height={500} className="aspect-[4/5] object-cover rounded-2xl mt-10" />
             </div>
-            <PillLink href="/collections/escape-edit" tone="marigold" className="mt-10">
+            <PillLink href="/collections/escape-edit" tone="sun" className="mt-10">
               Escape in style
             </PillLink>
           </div>
@@ -287,7 +276,7 @@ export default async function Home() {
       </Container>
 
       {/* The Trumee promise — craft & quality */}
-      <Panel className="bg-[#fffdf8]/75 py-16 sm:py-20 px-4 sm:px-6 lg:px-10" style={blockPrint("#6b2a5a", 0.07)}>
+      <Panel className="bg-paper/75 py-16 sm:py-20 px-4 sm:px-6 lg:px-10" style={blockPrint("#1d6188", 0.07)}>
         <SectionHeading eyebrow="The Trumee promise" title="Crafted to be worn, loved," accent="and worn again" />
         <Reveal stagger className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {CRAFT_IMAGES.map((c) => (
@@ -305,8 +294,8 @@ export default async function Home() {
         </Reveal>
       </Panel>
 
-      {/* Love notes — lace-edged marigold panel with a slow ribbon of cards */}
-      <Panel className="bg-marigold text-ink pt-16 sm:pt-20 pb-14 sm:pb-16 overflow-hidden" style={blockPrint("#22101e", 0.06)}>
+      {/* Love notes — lace-edged sun panel with a slow ribbon of cards */}
+      <Panel className="bg-sun text-ink pt-16 sm:pt-20 pb-14 sm:pb-16 overflow-hidden" style={blockPrint("#161616", 0.06)}>
         <p className="text-[11px] tracking-[0.3em] uppercase text-center">Love notes</p>
         <p className="font-display text-center text-[40px] sm:text-[60px] leading-[1] mt-3 px-4">
           Words from <em className="font-normal">our girls</em>
@@ -315,11 +304,11 @@ export default async function Home() {
           <div className="flex w-max gap-4 animate-ribbon hover:[animation-play-state:paused]">
             {[0, 1, 2].flatMap((k) =>
               home.testimonials.map((t) => (
-                <figure key={`${k}-${t.name}`} aria-hidden={k > 0} className="w-[300px] sm:w-[380px] shrink-0 rounded-3xl bg-[#fffdf8]/70 p-7 sm:p-8 flex flex-col shadow-[0_16px_40px_-30px_rgba(34,16,30,0.6)]">
-                  <Quote className="size-7 mb-4 fill-plum/15 text-plum/40" strokeWidth={1} aria-hidden />
+                <figure key={`${k}-${t.name}`} aria-hidden={k > 0} className="w-[300px] sm:w-[380px] shrink-0 rounded-3xl bg-paper/70 p-7 sm:p-8 flex flex-col shadow-[0_16px_40px_-30px_rgba(22,22,22,0.6)]">
+                  <Quote className="size-7 mb-4 fill-sea/15 text-sea/40" strokeWidth={1} aria-hidden />
                   <blockquote className="font-display text-[22px] sm:text-[24px] leading-snug flex-1">{t.text}</blockquote>
                   <figcaption className="mt-6 flex items-center gap-3 text-[12px] tracking-[0.2em] uppercase">
-                    <span className="size-9 rounded-full bg-ink text-marigold grid place-items-center font-display text-lg normal-case tracking-normal">{t.name[0]}</span>
+                    <span className="size-9 rounded-full bg-ink text-sun grid place-items-center font-display text-lg normal-case tracking-normal">{t.name[0]}</span>
                     {t.name}
                   </figcaption>
                 </figure>
@@ -340,7 +329,7 @@ export default async function Home() {
                   {p.coverUrl && <Image src={p.coverUrl} alt="" fill sizes="(min-width:768px) 33vw, 100vw" className="object-cover object-top transition-transform duration-700 group-hover:scale-105" />}
                   {p.publishedAt && <span className="glass absolute left-3 top-3 rounded-full px-3 py-1 text-[11px] tracking-[0.12em] uppercase">{formatDate(p.publishedAt)}</span>}
                 </div>
-                <h3 className="font-display text-[28px] leading-tight mt-5 group-hover:text-plum">{p.title}</h3>
+                <h3 className="font-display text-[28px] leading-tight mt-5 group-hover:text-sea">{p.title}</h3>
                 <p className="text-sm text-muted mt-2 line-clamp-2">{p.excerpt}</p>
               </Link>
             ))}
@@ -352,8 +341,8 @@ export default async function Home() {
       <Container className="pt-16 sm:pt-20">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
           {PROMISES.map(([I, title, text]) => (
-            <div key={title} className="rounded-3xl bg-[#fffdf8]/70 flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center p-5 sm:p-6">
-              <span className="size-11 shrink-0 rounded-full bg-ink text-marigold grid place-items-center">
+            <div key={title} className="rounded-3xl bg-paper/70 flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center p-5 sm:p-6">
+              <span className="size-11 shrink-0 rounded-full bg-ink text-sun grid place-items-center">
                 <I className="size-5" strokeWidth={1.4} />
               </span>
               <div>

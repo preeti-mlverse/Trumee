@@ -75,10 +75,11 @@ export type IntegrationSettings = {
 /**
  * One hero slide. `layout` picks the composition:
  * motion = full-bleed campaign video · banner = a finished wide artwork shown whole + shoppable strip · scenic = full-bleed landscape photo ·
- * runway = catwalk loops side by side · split = photo beside a cream copy panel.
+ * runway = catwalk loops side by side · split = photo beside a cream copy panel ·
+ * duo = a brand-coloured copy panel beside two tall media panes (catwalk loops or photos).
  */
 export type HeroSlide = {
-  layout?: "motion" | "banner" | "scenic" | "runway" | "split";
+  layout?: "motion" | "banner" | "duo" | "scenic" | "runway" | "split";
   /** banner: collection whose pieces are shown in the shoppable strip; `featured` handles lead it */
   collection?: string;
   featured?: string[];
@@ -102,6 +103,10 @@ export type HeroSlide = {
   secondary?: { label: string; href: string };
   /** split: small detail tiles beside the copy */
   details?: { image: string; label: string; href: string }[];
+  /** duo: the two panes (video loops play while the slide is up) */
+  media?: { image: string; video?: string; href: string; label: string }[];
+  /** duo: panel colour — sea (umbrella blue) or sun (mustard) */
+  tone?: "sea" | "sun";
   /** Short name on the slide tab */
   tab?: string;
 };
@@ -209,47 +214,40 @@ export const DEFAULTS = {
         secondary: { label: "New in", href: "/collections/all?sort=newest" },
       },
       {
-        layout: "banner",
+        layout: "duo",
+        tone: "sea",
         tab: "Crisp & casual",
-        image: "/images/banners/shirts.webp",
-        mobileImage: "/images/banners/shirts-mobile.webp",
+        image: "/videos/trmsh02.webp",
         eyebrow: "The shirt edit",
-        title: "Crisp & casual",
-        accent: "shirts for your getaway",
-        text: "Denim, checks and schiffli-trimmed cotton — throw on, tie up, head out.",
+        title: "Crisp & casual,",
+        accent: "made to wander",
+        text: "Denim yokes, checks and schiffli-trimmed cotton — throw on, tie up, head out.",
         cta: "Shop shirts",
         href: "/collections/shirts",
         collection: "shirts",
         featured: ["checkered-yoke-denim-shirt-with-roll-up-sleeves"],
+        media: [
+          { image: "/videos/trmsh02.webp", video: "/videos/trmsh02.mp4", href: "/products/checkered-yoke-denim-shirt-with-roll-up-sleeves", label: "Checkered yoke denim shirt" },
+          { image: "/videos/trmsh01.webp", video: "/videos/trmsh01.mp4", href: "/products/red-cotton-check-shirt-with-schiffli-embroidery-and-hood", label: "Red check schiffli shirt" },
+        ],
       },
       {
-        layout: "banner",
+        layout: "duo",
+        tone: "sun",
         tab: "One-piece wonder",
-        image: "/images/banners/one-piece.webp",
-        mobileImage: "/images/banners/one-piece-mobile.webp",
+        image: "/images/products/ombre-cotton-schiffli-dungaree-style-jumpsuit/1.webp",
         eyebrow: "Jumpsuits & dungarees",
         title: "One-piece",
         accent: "wonder",
-        text: "Schiffli cotton with scalloped hems — one piece, zero effort, all day.",
+        text: "Schiffli cotton with scalloped hems and button straps — one piece, zero effort, all day.",
         cta: "Shop jumpsuits",
         href: "/collections/jumpsuit",
         collection: "jumpsuit",
         featured: ["ombre-cotton-schiffli-dungaree-style-jumpsuit"],
-      },
-      {
-        layout: "banner",
-        tab: "Match, set, style",
-        image: "/images/banners/coord.webp",
-        mobileImage: "/images/banners/coord-mobile.webp",
-        mobileFocus: "18% 0%",
-        eyebrow: "Co-ord sets",
-        title: "Match, set,",
-        accent: "style",
-        text: "Two pieces, endless outfits — wear them together or split them up.",
-        cta: "Shop co-ords",
-        href: "/collections/co-ord-sets",
-        collection: "co-ord-sets",
-        featured: ["mustard-artistic-print-cord-set-with-crochet-lace-accents"],
+        media: [
+          { image: "/images/products/ombre-cotton-schiffli-dungaree-style-jumpsuit/1.webp", href: "/products/ombre-cotton-schiffli-dungaree-style-jumpsuit", label: "Ombre schiffli dungaree" },
+          { image: "/images/products/scalloped-schiffli-cotton-jumpsuit-with-button-details/1.webp", href: "/products/scalloped-schiffli-cotton-jumpsuit-with-button-details", label: "Scalloped schiffli jumpsuit" },
+        ],
       },
     ],
     featuredCollections: ["main-character-energy", "in-her-element", "wander-x-wear", "after-the-rain", "free-spirited", "escape-edit"],

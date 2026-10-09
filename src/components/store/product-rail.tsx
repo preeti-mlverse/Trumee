@@ -39,7 +39,7 @@ export function ProductRail({ tabs, lead, list }: { tabs: RailTab[]; lead?: Rail
               }}
               className={cn(
                 "shrink-0 rounded-full px-4 sm:px-5 py-2 sm:py-2.5 text-[13px] sm:text-sm tracking-[0.02em] border transition-colors",
-                k === t ? "bg-ink text-cream border-ink" : "border-ink/15 bg-[#fffdf8]/60 hover:border-ink/50",
+                k === t ? "bg-ink text-cream border-ink" : "border-ink/15 bg-paper/60 hover:border-ink/50",
               )}
             >
               {x.label}
@@ -71,7 +71,7 @@ export function ProductRail({ tabs, lead, list }: { tabs: RailTab[]; lead?: Rail
             <Image src={lead.image} alt="" fill sizes="(min-width:1024px) 22vw, 60vw" className="object-cover animate-kenburns" />
             <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6">
-              <p className="text-[10px] tracking-[0.26em] uppercase text-marigold-soft">{lead.eyebrow}</p>
+              <p className="text-[10px] tracking-[0.26em] uppercase text-sun-soft">{lead.eyebrow}</p>
               <p className="font-display text-[30px] sm:text-[40px] leading-[0.95] mt-2">{lead.title}</p>
               <PillLink href={lead.href} className="mt-5 text-[12px] sm:text-[13px] pl-4 sm:pl-5">
                 {lead.cta}
@@ -96,7 +96,7 @@ export function RoundArrow({ onClick, label, children, dark }: { onClick: () => 
       aria-label={label}
       className={cn(
         "size-11 grid place-items-center rounded-full border transition-colors",
-        dark ? "border-cream/30 hover:bg-cream hover:text-ink" : "border-ink/20 bg-[#fffdf8]/60 hover:bg-ink hover:text-cream",
+        dark ? "border-cream/30 hover:bg-cream hover:text-ink" : "border-ink/20 bg-paper/60 hover:bg-ink hover:text-cream",
       )}
     >
       {children}

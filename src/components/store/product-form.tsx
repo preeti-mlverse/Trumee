@@ -45,7 +45,7 @@ export function ProductForm({ productId, title, options, variants, prepaidPercen
         {off > 0 && (
           <>
             <span className="text-muted line-through">{inr(display.compareAtPrice)}</span>
-            <span className="rounded-full text-[12px] font-medium bg-marigold text-ink px-3 py-1 tracking-wide">{off}% off</span>
+            <span className="rounded-full text-[12px] font-medium bg-sun text-ink px-3 py-1 tracking-wide">{off}% off</span>
           </>
         )}
       </div>
@@ -93,12 +93,12 @@ export function ProductForm({ productId, title, options, variants, prepaidPercen
               );
             })}
           </div>
-          {variant?.lowStock && variant.available && <p className="text-xs text-plum mt-3">Hurry — only a few left in {variant.option1}</p>}
+          {variant?.lowStock && variant.available && <p className="text-xs text-sea mt-3">Hurry — only a few left in {variant.option1}</p>}
         </div>
       )}
 
       <div className="mt-8 flex gap-3">
-        <div className="flex items-center rounded-full border border-line bg-[#fffdf8]/60">
+        <div className="flex items-center rounded-full border border-line bg-paper/60">
           <button aria-label="Decrease quantity" className="p-3.5" onClick={() => setQty((q) => Math.max(1, q - 1))}>
             <Minus className="size-3.5" />
           </button>
@@ -110,7 +110,7 @@ export function ProductForm({ productId, title, options, variants, prepaidPercen
         <button
           disabled={allSoldOut || !!busy}
           onClick={() => submit("add")}
-          className="flex-1 rounded-full bg-ink text-cream text-[13px] font-medium tracking-[0.12em] uppercase hover:bg-plum transition-colors disabled:opacity-50"
+          className="flex-1 rounded-full bg-ink text-cream text-[13px] font-medium tracking-[0.12em] uppercase hover:bg-sea transition-colors disabled:opacity-50"
         >
           {allSoldOut ? "Sold out" : busy === "add" ? "Adding…" : "Add to bag"}
         </button>
@@ -119,7 +119,7 @@ export function ProductForm({ productId, title, options, variants, prepaidPercen
           onClick={() => toggle(productId, title)}
           className="size-[52px] shrink-0 grid place-items-center rounded-full border border-line hover:border-ink"
         >
-          <Heart className={cn("size-5", ids.includes(productId) ? "fill-plum text-plum" : "")} strokeWidth={1.5} />
+          <Heart className={cn("size-5", ids.includes(productId) ? "fill-sea text-sea" : "")} strokeWidth={1.5} />
         </button>
       </div>
       {!allSoldOut && (

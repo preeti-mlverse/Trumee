@@ -31,7 +31,7 @@ export function CartPageView() {
             <div className="flex-1 flex flex-col">
               <div className="flex justify-between gap-4">
                 <div>
-                  <Link href={`/products/${l.handle}`} className="hover:text-plum">{l.title}</Link>
+                  <Link href={`/products/${l.handle}`} className="hover:text-sea">{l.title}</Link>
                   <p className="text-sm text-muted mt-1">Size: {l.variantTitle}</p>
                 </div>
                 <div className="text-right tabular-nums">
@@ -51,7 +51,7 @@ export function CartPageView() {
           </li>
         ))}
       </ul>
-      <aside className="rounded-panel bg-[#fffdf8]/80 p-6 sm:p-8 lg:sticky lg:top-24">
+      <aside className="rounded-panel bg-paper/80 p-6 sm:p-8 lg:sticky lg:top-24">
         <dl className="space-y-2 text-sm">
           <div className="flex justify-between"><dt>Subtotal</dt><dd className="tabular-nums">{inr(t.subtotal)}</dd></div>
           {t.discountTotal > 0 && <div className="flex justify-between text-sage"><dt>Discount ({t.discountApplied})</dt><dd>−{inr(t.discountTotal)}</dd></div>}

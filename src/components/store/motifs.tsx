@@ -58,3 +58,14 @@ export function Doodle({ kind = "sprig", className }: { kind?: "sprig" | "bloom"
     </svg>
   );
 }
+
+/** The brand's beach umbrella (from the logo): sea canopy with ribs, a black pole. A small signature mark. */
+export function Umbrella({ className, dark = false }: { className?: string; dark?: boolean }) {
+  return (
+    <svg aria-hidden viewBox="0 0 24 24" className={cn("inline-block shrink-0", className)}>
+      <path d="M2 11.5C2.6 6.4 6.9 3 12 3s9.4 3.4 10 8.5z" fill={dark ? "#d9a21b" : "#2b7aa5"} />
+      <path d="M12 3.2 9.6 11.5M12 3.2l2.4 8.3M12 3.2 5.4 11.5M12 3.2l6.6 8.3" stroke={dark ? "#161616" : "#fffdf9"} strokeOpacity="0.55" strokeWidth="0.9" fill="none" />
+      <path d="M12 11.5V21" stroke={dark ? "#faf6ef" : "#161616"} strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}

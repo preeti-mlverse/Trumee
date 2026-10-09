@@ -13,17 +13,27 @@ export function Reveal({ children, className, stagger = false, as: Tag = "div" }
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          setShown(true);
-          io.disconnect();
-        }
-      },
-      { rootMargin: "0px 0px 15% 0px", threshold: 0 },
-    );
+    // Anything that has reached (or been scrolled past) the bottom of the screen shows. Checking on
+    // scroll as well as via the observer means a fast jump (scrollbar drag, End key, anchor link)
+    // can never leave a section hidden.
+    const reached = () => el.getBoundingClientRect().top < window.innerHeight * 1.15;
+    let done = false;
+    const show = () => {
+      if (done) return;
+      done = true;
+      setShown(true);
+      io.disconnect();
+      removeEventListener("scroll", onScroll);
+    };
+    const onScroll = () => reached() && show();
+    const io = new IntersectionObserver(([e]) => (e.isIntersecting || reached()) && show(), { rootMargin: "0px 0px 15% 0px", threshold: 0 });
     io.observe(el);
-    return () => io.disconnect();
+    addEventListener("scroll", onScroll, { passive: true });
+    if (reached()) show();
+    return () => {
+      io.disconnect();
+      removeEventListener("scroll", onScroll);
+    };
   }, []);
   return (
     <Tag ref={ref as never} data-reveal={shown ? "in" : "out"} className={cn(stagger ? "reveal-stagger" : "reveal", className)}>

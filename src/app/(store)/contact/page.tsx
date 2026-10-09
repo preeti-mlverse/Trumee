@@ -33,11 +33,11 @@ export default async function ContactPage() {
           <ul className="mt-10 divide-y divide-line border-y border-line">
             {rows.map(({ icon: Icon, label, value, href }) => (
               <li key={label} className="flex items-start gap-4 py-4">
-                <Icon className="size-5 text-plum mt-0.5 shrink-0" strokeWidth={1.5} />
+                <Icon className="size-5 text-sea mt-0.5 shrink-0" strokeWidth={1.5} />
                 <div>
                   <p className="text-[11px] tracking-[0.2em] uppercase text-muted">{label}</p>
                   {href ? (
-                    <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener" className="hover:text-plum underline-offset-4 hover:underline">
+                    <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener" className="hover:text-sea underline-offset-4 hover:underline">
                       {value}
                     </a>
                   ) : (

@@ -44,7 +44,7 @@ export default async function OrderStatusPage({ params, searchParams }: PageProp
           }}
         />
       )}
-      <p className="text-[11px] tracking-[0.3em] uppercase text-plum">Order #{o.number}</p>
+      <p className="text-[11px] tracking-[0.3em] uppercase text-sea">Order #{o.number}</p>
       <h1 className="font-display text-5xl sm:text-6xl mt-3 leading-[1]">
         {o.status === "cancelled" ? "This order was cancelled" : isNew ? `Thank you, ${o.shippingAddress.name.split(" ")[0]}!` : "Your order"}
       </h1>
@@ -54,7 +54,7 @@ export default async function OrderStatusPage({ params, searchParams }: PageProp
         </p>
       )}
       {!confirmed && o.status !== "cancelled" && (
-        <p className="mt-4 text-sm bg-marigold/15 border border-marigold/50 px-4 py-3">
+        <p className="mt-4 text-sm bg-sun/15 border border-sun/50 px-4 py-3">
           We haven’t received the payment for this order yet. If money was deducted, it will be confirmed automatically within a few minutes.
         </p>
       )}
@@ -75,7 +75,7 @@ export default async function OrderStatusPage({ params, searchParams }: PageProp
       )}
 
       {tracking && (
-        <div className="mt-10 flex flex-wrap items-center gap-4 rounded-3xl bg-[#fffdf8]/80 border border-line/70 p-5">
+        <div className="mt-10 flex flex-wrap items-center gap-4 rounded-3xl bg-paper/80 border border-line/70 p-5">
           <Truck className="size-5" strokeWidth={1.5} />
           <p className="text-sm flex-1">
             Shipped{tracking.carrier ? ` with ${tracking.carrier}` : ""} · Tracking <strong>{tracking.trackingNumber}</strong>

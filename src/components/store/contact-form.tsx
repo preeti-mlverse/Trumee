@@ -10,7 +10,7 @@ export function ContactForm() {
     if (state?.ok) track("generate_lead", { method: "contact_form" });
   }, [state]);
   if (state?.ok) return <p className="mt-6 text-sage">{state.message}</p>;
-  const input = "w-full rounded-xl border border-line bg-[#fffdf8] px-4 py-3 text-sm outline-none focus:border-ink";
+  const input = "w-full rounded-xl border border-line bg-paper px-4 py-3 text-sm outline-none focus:border-ink";
   return (
     <form action={action} className="mt-6 space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

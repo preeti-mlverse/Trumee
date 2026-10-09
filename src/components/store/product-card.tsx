@@ -62,9 +62,9 @@ export function ProductCard({ p, list, index = 0, priority }: { p: CardProduct; 
           )}
           <div className="absolute left-2.5 top-2.5 sm:left-3 sm:top-3 flex flex-col items-start gap-1">
             {p.soldOut ? (
-              <span className="rounded-full bg-[#fffdf8] text-ink text-[10px] sm:text-[11px] tracking-[0.1em] uppercase px-2.5 sm:px-3 py-1">Sold out</span>
+              <span className="rounded-full bg-paper text-ink text-[10px] sm:text-[11px] tracking-[0.1em] uppercase px-2.5 sm:px-3 py-1">Sold out</span>
             ) : off >= 5 ? (
-              <span className="rounded-full bg-[#fffdf8] text-ink text-[10px] sm:text-[11px] font-medium tracking-[0.06em] px-2.5 sm:px-3 py-1 tabular-nums">{off}% off</span>
+              <span className="rounded-full bg-paper text-ink text-[10px] sm:text-[11px] font-medium tracking-[0.06em] px-2.5 sm:px-3 py-1 tabular-nums">{off}% off</span>
             ) : null}
           </div>
           {p.video && (
@@ -85,12 +85,12 @@ export function ProductCard({ p, list, index = 0, priority }: { p: CardProduct; 
         <div className="pt-3.5 px-0.5">
           <h3 className="text-[13px] sm:text-[15px] leading-snug line-clamp-2 text-ink-soft group-hover:text-ink">{p.title}</h3>
           <div className="mt-1.5 flex items-baseline gap-2 text-[15px] tabular-nums">
-            <span className={cn("font-medium", off > 0 && "text-plum")}>{inr(p.price)}</span>
+            <span className={cn("font-medium", off > 0 && "text-sea")}>{inr(p.price)}</span>
             {off > 0 && <span className="text-xs text-muted line-through">{inr(p.compareAtPrice)}</span>}
           </div>
           {p.reviewCount > 0 && p.rating && (
             <div className="mt-1 flex items-center gap-1 text-xs text-muted">
-              <Star className="size-3 fill-marigold text-marigold" /> {p.rating.toFixed(1)} ({p.reviewCount})
+              <Star className="size-3 fill-sun text-sun" /> {p.rating.toFixed(1)} ({p.reviewCount})
             </div>
           )}
         </div>
@@ -100,7 +100,7 @@ export function ProductCard({ p, list, index = 0, priority }: { p: CardProduct; 
         onClick={() => toggle(p.id, p.title)}
         className="glass absolute right-2.5 top-2.5 sm:right-3 sm:top-3 size-9 grid place-items-center rounded-full transition-transform hover:scale-110"
       >
-        <Heart className={cn("size-[17px]", saved ? "fill-plum text-plum" : "text-ink-soft")} strokeWidth={1.5} />
+        <Heart className={cn("size-[17px]", saved ? "fill-sea text-sea" : "text-ink-soft")} strokeWidth={1.5} />
       </button>
     </div>
   );

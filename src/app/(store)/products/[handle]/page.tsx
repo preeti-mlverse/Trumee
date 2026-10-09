@@ -100,7 +100,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
           <ProductGallery images={p.images} title={p.title} video={p.videoUrl ? { url: p.videoUrl, poster: p.videoPoster } : null} />
         </div>
         <div className="lg:sticky lg:top-24">
-          {p.productType && <p className="text-[11px] tracking-[0.26em] uppercase text-plum">{p.productType}</p>}
+          {p.productType && <p className="text-[11px] tracking-[0.26em] uppercase text-sea">{p.productType}</p>}
           <h1 className="font-display text-[34px] sm:text-[42px] leading-[1.08] mt-2">{p.title}</h1>
           {p.reviews.length > 0 && p.rating && (
             <a href="#reviews" className="mt-3 inline-flex items-center gap-2 text-sm text-muted">
@@ -122,8 +122,8 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
               <MessageCircle className="size-4" strokeWidth={1.5} /> Not sure about the fit? Ask our stylist on WhatsApp
             </a>
           </div>
-          <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-3 rounded-3xl border border-line/70 bg-[#fffdf8]/60 p-5 text-sm">
-            <p className="col-span-2 text-[11px] tracking-[0.24em] uppercase text-plum">At a glance</p>
+          <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-3 rounded-3xl border border-line/70 bg-paper/60 p-5 text-sm">
+            <p className="col-span-2 text-[11px] tracking-[0.24em] uppercase text-sea">At a glance</p>
             {glance.map(([k, v]) => (
               <div key={k}>
                 <dt className="text-[11px] tracking-[0.12em] uppercase text-muted">{k}</dt>
@@ -147,8 +147,8 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
 
       {notes.length > 0 && (
         <section className="mt-24 px-2 sm:px-4 lg:px-6">
-          <div className="mx-auto max-w-[1400px] rounded-panel bg-[#fffdf8]/75 py-14 sm:py-16 px-4 sm:px-6 lg:px-10">
-            <p className="flex items-center gap-3 text-[11px] tracking-[0.3em] uppercase text-plum">
+          <div className="mx-auto max-w-[1400px] rounded-panel bg-paper/75 py-14 sm:py-16 px-4 sm:px-6 lg:px-10">
+            <p className="flex items-center gap-3 text-[11px] tracking-[0.3em] uppercase text-sea">
               <Sparkles className="size-3.5" /> Why you’ll love it
             </p>
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -228,7 +228,7 @@ function Stars({ value }: { value: number }) {
   return (
     <span className="inline-flex" aria-label={`${value.toFixed(1)} out of 5 stars`}>
       {[1, 2, 3, 4, 5].map((n) => (
-        <Star key={n} className={cn("size-4", n <= Math.round(value) ? "fill-marigold text-marigold" : "text-line")} strokeWidth={1.3} />
+        <Star key={n} className={cn("size-4", n <= Math.round(value) ? "fill-sun text-sun" : "text-line")} strokeWidth={1.3} />
       ))}
     </span>
   );

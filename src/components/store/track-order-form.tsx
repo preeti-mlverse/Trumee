@@ -10,7 +10,7 @@ export function TrackOrderForm() {
   useEffect(() => {
     if (state?.url) router.push(state.url);
   }, [state, router]);
-  const input = "w-full rounded-xl border border-line bg-[#fffdf8] px-4 py-3 text-sm outline-none focus:border-ink";
+  const input = "w-full rounded-xl border border-line bg-paper px-4 py-3 text-sm outline-none focus:border-ink";
   return (
     <form action={action} className="mt-8 space-y-3">
       <input name="order" inputMode="numeric" placeholder="Order number" required className={input} aria-label="Order number" />

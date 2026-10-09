@@ -4,7 +4,8 @@ import { useEffect } from "react";
 
 /**
  * Sunlit backdrop: the page is one vacation day. Scrolling moves the sky from
- * dawn through noon and golden hour to dusk, with a soft sun arcing across.
+ * morning through a sea-breeze noon to golden hour, with a soft sun arcing across —
+ * always within the brand palette (sand, sea, sun).
  * Colours are written to CSS variables on <html>; the defaults in globals.css are dawn.
  */
 type RGB = [number, number, number];
@@ -12,11 +13,11 @@ const hex = (h: string): RGB => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2),
 
 //            at    sky top              sky bottom           sun
 const DAY: [number, RGB, RGB, RGB][] = [
-  [0.0, hex("#efdfc4"), hex("#f5ecdd"), hex("#f3c98c")], // dawn — warm sand
-  [0.25, hex("#fbe6c4"), hex("#f6efe3"), hex("#ffd98a")], // morning — pale gold
-  [0.5, hex("#f5f1e6"), hex("#e3edef"), hex("#fff3c4")], // noon — bone & washed sky
-  [0.75, hex("#f9d9a0"), hex("#f4c29c"), hex("#ffb347")], // golden hour — marigold
-  [1.0, hex("#e8b2ae"), hex("#b7a2c6"), hex("#ff7a5c")], // dusk — rose into lavender
+  [0.0, hex("#f6efe3"), hex("#faf6ef"), hex("#f5e0a3")], // morning — warm sand
+  [0.3, hex("#f3f2ec"), hex("#f7f5ef"), hex("#f8e8b8")], // late morning — sand, a hint of shade
+  [0.55, hex("#e9f1f4"), hex("#f7f4ec"), hex("#fbeec6")], // noon — sea breeze over sand
+  [0.8, hex("#f5ead3"), hex("#f9f2e4"), hex("#f0cf75")], // golden hour — the mustard sun
+  [1.0, hex("#e6eef1"), hex("#f4efe6"), hex("#e2bd5c")], // evening — cool sea, last of the sun
 ];
 
 const mix = (a: RGB, b: RGB, t: number) => a.map((v, i) => Math.round(v + (b[i] - v) * t)) as RGB;

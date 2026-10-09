@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { HeroSlide } from "@/lib/settings";
 import { cn, inr } from "@/lib/utils";
 import { LoopVideo } from "./loop-video";
+import { blockPrint } from "./motifs";
 import { PillLink } from "./ui";
 
 export type HeroClip = { handle: string; title: string; price: number; video: string; poster: string | null };
@@ -58,6 +59,8 @@ export function Hero({ slides, clips, shop = [] }: { slides: HeroSlide[]; clips:
           >
             {s.layout === "motion" ? (
               <Motion s={s} active={k === i} priority={k === 0} />
+            ) : s.layout === "duo" ? (
+              <Duo s={s} active={k === i} products={shop[k] ?? []} />
             ) : s.layout === "banner" ? (
               <Banner s={s} active={k === i} products={shop[k] ?? []} />
             ) : s.layout === "runway" ? (
@@ -74,12 +77,20 @@ export function Hero({ slides, clips, shop = [] }: { slides: HeroSlide[]; clips:
         <div className="absolute z-20 inset-x-0 bottom-0 px-5 sm:px-10 lg:px-12 pb-5 sm:pb-7 flex items-end justify-between gap-6 pointer-events-none">
           <div className="flex gap-2 sm:gap-5 pointer-events-auto" role="tablist">
             {slides.map((s, k) => (
-              <button key={k} role="tab" aria-selected={k === i} aria-label={`Show ${s.tab ?? s.eyebrow}`} onClick={() => setI(k)} className="group text-left w-12 sm:w-36 text-cream">
+              <button
+                key={k}
+                role="tab"
+                aria-selected={k === i}
+                aria-label={`Show ${s.tab ?? s.eyebrow}`}
+                onClick={() => setI(k)}
+                // Light (duo) slides need dark tabs to stay visible
+                className={cn("group text-left w-12 sm:w-36 transition-colors duration-700", slides[i].layout === "duo" ? "text-ink" : "text-cream")}
+              >
                 <span className="hidden sm:block text-[11px] tracking-[0.2em] uppercase mb-2 opacity-60 group-aria-selected:opacity-100 transition-opacity truncate">{s.tab ?? s.eyebrow}</span>
                 <span className="relative block h-[3px] rounded-full bg-current/25 overflow-hidden">
                   <span
                     key={k === i ? `run-${i}` : k}
-                    className={cn("absolute inset-y-0 left-0 rounded-full bg-marigold", k === i ? "w-0 animate-grow" : "w-0")}
+                    className={cn("absolute inset-y-0 left-0 rounded-full bg-sun", k === i ? "w-0 animate-grow" : "w-0")}
                     style={{ animationDuration: `${DURATION}ms` }}
                   />
                 </span>
@@ -159,9 +170,9 @@ function Motion({ s, active, priority }: { s: HeroSlide; active: boolean; priori
       {src && <LoopVideo key={src.video} src={src.video} poster={src.poster} playing={active} priority={priority} className="absolute inset-0 size-full object-center" />}
       <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/45 to-transparent pointer-events-none" />
       {active && (
-        <div className="absolute inset-x-3 bottom-14 sm:inset-x-auto sm:left-8 lg:left-10 sm:bottom-28 sm:w-[500px] glass rounded-[1.5rem] sm:rounded-[1.75rem] border border-white/70 p-5 sm:p-8 shadow-[0_20px_50px_-20px_rgba(34,16,30,0.45)]">
-          <p className="text-[11px] tracking-[0.3em] uppercase text-plum animate-word">{s.eyebrow}</p>
-          <Title s={s} className="mt-2 sm:mt-3 text-[34px] sm:text-[64px] xl:text-[72px] [&_em]:text-plum" />
+        <div className="absolute inset-x-3 bottom-14 sm:inset-x-auto sm:left-8 lg:left-10 sm:bottom-28 sm:w-[500px] glass rounded-[1.5rem] sm:rounded-[1.75rem] border border-white/70 p-5 sm:p-8 shadow-[0_20px_50px_-20px_rgba(22,22,22,0.45)]">
+          <p className="text-[11px] tracking-[0.3em] uppercase text-sea animate-word">{s.eyebrow}</p>
+          <Title s={s} className="mt-2 sm:mt-3 text-[34px] sm:text-[64px] xl:text-[72px] [&_em]:text-sea" />
           {s.text && <p className="hidden sm:block mt-4 text-[15px] text-ink-soft leading-relaxed animate-word [animation-delay:140ms]">{s.text}</p>}
           <div className="[&>div]:mt-4 sm:[&>div]:mt-6 max-sm:[&_a+a]:hidden">
             <Ctas s={s} active={active} dark />
@@ -193,7 +204,7 @@ function Banner({ s, active, products }: { s: HeroSlide; active: boolean; produc
         {active && (
           <div className="flex-1 flex items-center gap-8 xl:gap-12 pt-6 lg:pt-8 min-h-0">
             <div className="max-w-sm xl:max-w-md shrink-0">
-              <p className="text-[11px] tracking-[0.3em] uppercase text-marigold-soft animate-word">{s.eyebrow}</p>
+              <p className="text-[11px] tracking-[0.3em] uppercase text-sun-soft animate-word">{s.eyebrow}</p>
               <p className="sr-only" role="heading" aria-level={2}>
                 {s.title} {s.accent}
               </p>
@@ -212,7 +223,7 @@ function Banner({ s, active, products }: { s: HeroSlide; active: boolean; produc
                     <span className="min-w-0 flex-1">
                       <span className="block text-[13px] leading-snug line-clamp-2">{p.title}</span>
                       <span className="mt-1 flex items-baseline gap-2 text-[13px] tabular-nums">
-                        <span className="text-marigold-soft">{inr(p.price)}</span>
+                        <span className="text-sun-soft">{inr(p.price)}</span>
                         {p.compareAtPrice != null && p.compareAtPrice > p.price && <span className="text-cream/50 line-through text-[11px]">{inr(p.compareAtPrice)}</span>}
                       </span>
                     </span>
@@ -234,13 +245,91 @@ function Banner({ s, active, products }: { s: HeroSlide; active: boolean; produc
         </Link>
         {active && (
           <div className="px-2 pt-5">
-            <p className="text-[11px] tracking-[0.3em] uppercase text-marigold-soft animate-word">{s.eyebrow}</p>
-            <Title s={s} className="mt-2 text-[40px] [&_em]:text-marigold-soft" />
+            <p className="text-[11px] tracking-[0.3em] uppercase text-sun-soft animate-word">{s.eyebrow}</p>
+            <Title s={s} className="mt-2 text-[40px] [&_em]:text-sun-soft" />
             <div className="[&>div]:mt-4 [&_a+a]:hidden">
               <Ctas s={s} active={active} />
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+const DUO_TONES = {
+  sea: { panel: "bg-sea-soft", accent: "text-sea", print: "#1d6188", disc: "bg-sea-bright/15" },
+  sun: { panel: "bg-sun-soft", accent: "text-ink", print: "#161616", disc: "bg-sun/35" },
+} as const;
+
+/**
+ * Brand-coloured copy panel (sea or sun, block-print texture, a soft "sun" disc) beside two tall
+ * media panes — catwalk loops play while the slide is up; the second pane sits lower, editorial-style.
+ * Phones: panes on top, copy beneath.
+ */
+function Duo({ s, active, products }: { s: HeroSlide; active: boolean; products: HeroProduct[] }) {
+  const tab = active ? 0 : -1;
+  const t = DUO_TONES[s.tone ?? "sea"];
+  const media = s.media ?? [];
+  return (
+    <div className={cn("absolute inset-0 flex flex-col-reverse lg:grid lg:grid-cols-12 text-ink overflow-hidden", t.panel)}>
+      <span aria-hidden className="absolute inset-0" style={blockPrint(t.print, 0.06)} />
+      <span aria-hidden className={cn("absolute -left-24 -bottom-24 size-[420px] lg:size-[560px] rounded-full blur-2xl", t.disc)} />
+
+      {/* Copy */}
+      <div className="relative lg:col-span-5 flex flex-col justify-center px-5 sm:px-10 lg:pl-12 xl:pl-16 lg:pr-6 pt-5 pb-16 sm:pb-24 lg:py-16">
+        {active && (
+          <>
+            <p className={cn("text-[11px] tracking-[0.3em] uppercase animate-word", t.accent)}>{s.eyebrow}</p>
+            <Title s={s} className={cn("mt-3 text-[40px] sm:text-[64px] xl:text-[80px]", s.tone === "sun" ? "[&_em]:text-sea" : "[&_em]:text-sea")} />
+            {s.text && <p className="hidden sm:block mt-5 max-w-md text-[15px] text-ink-soft leading-relaxed animate-word [animation-delay:140ms]">{s.text}</p>}
+            <div className="[&>div]:mt-5 sm:[&>div]:mt-7">
+              <Ctas s={s} active={active} dark />
+            </div>
+            {products.length > 0 && (
+              <div className="hidden lg:flex gap-2.5 mt-8 animate-word [animation-delay:240ms]">
+                {products.slice(0, 3).map((p) => (
+                  <Link key={p.handle} href={`/products/${p.handle}`} tabIndex={tab} className="group w-[92px] shrink-0">
+                    <span className="relative block aspect-[3/4] rounded-2xl overflow-hidden bg-paper ring-1 ring-ink/10">
+                      {p.image && <Image src={p.image} alt={p.title} fill sizes="92px" className="object-cover transition-transform duration-500 group-hover:scale-105" />}
+                    </span>
+                    <span className="mt-1.5 block text-[12px] tabular-nums font-medium">{inr(p.price)}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Two tall panes */}
+      {/* Bottom padding keeps the panes clear of the slide arrows */}
+      <div className="relative flex-1 min-h-0 lg:col-span-7 grid grid-cols-2 gap-2.5 sm:gap-4 px-3 sm:px-6 lg:pl-0 lg:pr-10 pt-3 sm:pt-6 lg:pt-8 lg:pb-24">
+        {media.slice(0, 2).map((m, j) => (
+          <Link
+            key={m.href}
+            href={m.href}
+            tabIndex={tab}
+            className={cn(
+              "group relative overflow-hidden rounded-[1.5rem] lg:rounded-panel bg-ink shadow-[0_30px_60px_-30px_rgba(22,22,22,0.55)] transition-all duration-1000",
+              j === 1 && "lg:mt-12",
+              active ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6",
+            )}
+            style={{ transitionDelay: active ? `${j * 150}ms` : "0ms" }}
+          >
+            {m.video ? (
+              <LoopVideo src={m.video} poster={m.image} playing={active} className="absolute inset-0 size-full object-[50%_20%]" />
+            ) : (
+              <Image src={m.image} alt={m.label} fill sizes="(min-width:1024px) 30vw, 50vw" className={cn("object-cover object-[50%_20%]", active && "animate-kenburns")} />
+            )}
+            <span className="glass absolute left-3 right-3 bottom-3 hidden sm:flex items-center justify-between gap-2 rounded-full pl-4 pr-1.5 py-1.5 text-[12px] text-ink">
+              <span className="truncate">{m.label}</span>
+              <span className="size-7 shrink-0 rounded-full bg-ink text-cream grid place-items-center transition-transform group-hover:rotate-45">
+                <ArrowUpRight className="size-3.5" />
+              </span>
+            </span>
+          </Link>
+        ))}
       </div>
     </div>
   );
@@ -265,8 +354,8 @@ function Scenic({ s, active, priority }: { s: HeroSlide; active: boolean; priori
       </div>
       {active && (
         <div className="absolute inset-x-0 bottom-0 px-5 sm:px-10 lg:px-12 pb-24 sm:pb-32 max-w-2xl">
-          <p className="text-[11px] tracking-[0.3em] uppercase text-marigold-soft animate-word">{s.eyebrow}</p>
-          <Title s={s} className="mt-3 text-[50px] sm:text-[76px] xl:text-[92px] [&_em]:text-marigold-soft" />
+          <p className="text-[11px] tracking-[0.3em] uppercase text-sun-soft animate-word">{s.eyebrow}</p>
+          <Title s={s} className="mt-3 text-[50px] sm:text-[76px] xl:text-[92px] [&_em]:text-sun-soft" />
           {s.text && <p className="mt-5 max-w-md text-[15px] sm:text-base text-cream/85 leading-relaxed animate-word [animation-delay:140ms]">{s.text}</p>}
           <Ctas s={s} active={active} />
         </div>
@@ -298,10 +387,10 @@ function Runway({ s, clips, active }: { s: HeroSlide; clips: HeroClip[]; active:
       {active && (
         <div className="absolute inset-x-0 bottom-0 px-5 sm:px-10 lg:px-12 pb-24 sm:pb-32 pointer-events-none">
           <div className="max-w-3xl pointer-events-auto">
-            <p className="text-[11px] tracking-[0.3em] uppercase text-marigold-soft animate-word flex items-center gap-2">
+            <p className="text-[11px] tracking-[0.3em] uppercase text-sun-soft animate-word flex items-center gap-2">
               <span className="size-2 rounded-full bg-sale animate-pulse" /> {s.eyebrow}
             </p>
-            <Title s={s} className="mt-3 text-[46px] sm:text-[72px] xl:text-[88px] [&_em]:text-marigold-soft" />
+            <Title s={s} className="mt-3 text-[46px] sm:text-[72px] xl:text-[88px] [&_em]:text-sun-soft" />
             {s.text && <p className="mt-5 max-w-md text-[15px] text-cream/85 leading-relaxed animate-word [animation-delay:140ms]">{s.text}</p>}
             <Ctas s={s} active={active} />
           </div>
@@ -319,11 +408,11 @@ function Split({ s, active }: { s: HeroSlide; active: boolean }) {
         <Image key={active ? "on" : "off"} src={s.image} alt="" fill sizes="(min-width:1024px) 50vw, 100vw" className={cn("object-cover object-[50%_20%]", active && "animate-kenburns")} />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent lg:hidden" />
       </div>
-      <div className="absolute inset-x-0 bottom-0 lg:relative lg:inset-auto bg-transparent lg:bg-[#fffdf8] text-cream lg:text-ink flex flex-col justify-end lg:justify-center px-5 sm:px-10 lg:px-16 pb-24 sm:pb-32 lg:pb-16 lg:pt-16">
+      <div className="absolute inset-x-0 bottom-0 lg:relative lg:inset-auto bg-transparent lg:bg-paper text-cream lg:text-ink flex flex-col justify-end lg:justify-center px-5 sm:px-10 lg:px-16 pb-24 sm:pb-32 lg:pb-16 lg:pt-16">
         {active && (
           <>
-            <p className="text-[11px] tracking-[0.3em] uppercase text-marigold-soft lg:text-plum animate-word">{s.eyebrow}</p>
-            <Title s={s} className="mt-3 text-[48px] sm:text-[72px] xl:text-[88px] [&_em]:text-marigold-soft lg:[&_em]:text-plum" />
+            <p className="text-[11px] tracking-[0.3em] uppercase text-sun-soft lg:text-sea animate-word">{s.eyebrow}</p>
+            <Title s={s} className="mt-3 text-[48px] sm:text-[72px] xl:text-[88px] [&_em]:text-sun-soft lg:[&_em]:text-sea" />
             {s.text && <p className="mt-5 max-w-md text-[15px] text-cream/85 lg:text-ink-soft leading-relaxed animate-word [animation-delay:140ms]">{s.text}</p>}
             <div className="lg:hidden">
               <Ctas s={s} active={active} />

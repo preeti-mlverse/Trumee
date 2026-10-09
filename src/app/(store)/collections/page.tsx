@@ -12,7 +12,7 @@ export default async function CollectionsIndex() {
   const [edits, cats] = await Promise.all([listCollections("edit"), listCollections("category")]);
   return (
     <Container className="pt-14">
-      <SectionHeading eyebrow="Moodboards" title="The Edits" />
+      <SectionHeading as="h1" eyebrow="Collections" title="The Edits" accent="& categories" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {edits.map((c) => (
           <Link key={c.id} href={`/collections/${c.handle}`} className="group relative aspect-[4/5] overflow-hidden bg-ink">

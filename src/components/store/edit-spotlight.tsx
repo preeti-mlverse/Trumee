@@ -26,8 +26,8 @@ export function EditSpotlight({ edits }: { edits: SpotlightEdit[] }) {
   if (!e) return null;
   return (
     <div className="grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-3 sm:gap-4">
-      <div className="relative rounded-panel bg-[#fffdf8] overflow-hidden flex flex-col px-6 sm:px-10 pt-9 pb-6 min-h-[420px] lg:min-h-[620px]">
-        <p className="text-[11px] tracking-[0.3em] uppercase text-plum text-center">Our moodboards</p>
+      <div className="relative rounded-panel bg-paper overflow-hidden flex flex-col px-6 sm:px-10 pt-9 pb-6 min-h-[420px] lg:min-h-[620px]">
+        <p className="text-[11px] tracking-[0.3em] uppercase text-sea text-center">Our moodboards</p>
         <ul className="flex-1 flex flex-col justify-center gap-1 sm:gap-2 py-8 text-center">
           {edits.map((x, k) => (
             <li key={x.handle}>
@@ -50,7 +50,7 @@ export function EditSpotlight({ edits }: { edits: SpotlightEdit[] }) {
               <span key={r} className="flex">
                 {["Timeless fits, free spirit", "Designed to be noticed", "Made for getaways", "Crafted in India"].map((t) => (
                   <span key={t} className="px-5 flex items-center gap-5">
-                    {t} <span className="size-1 rounded-full bg-plum" />
+                    {t} <span className="size-1 rounded-full bg-sea" />
                   </span>
                 ))}
               </span>
@@ -74,7 +74,7 @@ export function EditSpotlight({ edits }: { edits: SpotlightEdit[] }) {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent to-transparent" />
         <div key={e.handle} className="glass-dark absolute inset-x-3 bottom-3 sm:inset-x-auto sm:right-5 sm:bottom-5 sm:w-[420px] rounded-3xl border border-cream/15 p-6 sm:p-7 text-cream animate-word">
-          <p className="text-[10px] tracking-[0.28em] uppercase text-marigold-soft">The edit</p>
+          <p className="text-[10px] tracking-[0.28em] uppercase text-sun-soft">The edit</p>
           <p className="font-display text-[34px] sm:text-[40px] leading-[1] mt-2">{e.title}</p>
           {e.text && <p className="text-[15px] text-cream/80 mt-3 leading-relaxed line-clamp-3">{e.text}</p>}
           <PillLink href={`/collections/${e.handle}`} className="mt-6">

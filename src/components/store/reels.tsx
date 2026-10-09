@@ -33,7 +33,7 @@ export function ReelRail({ clips }: { clips: HeroClip[] }) {
             <div className="glass-dark absolute inset-x-2 bottom-2 rounded-2xl p-3 border border-cream/10">
               <p className="text-[13px] leading-snug line-clamp-2">{c.title}</p>
               <div className="mt-2 flex items-center justify-between text-[13px]">
-                <span className="text-marigold-soft tabular-nums">{inr(c.price)}</span>
+                <span className="text-sun-soft tabular-nums">{inr(c.price)}</span>
                 <span className="size-7 rounded-full bg-cream text-ink grid place-items-center transition-transform group-hover:rotate-45">
                   <ArrowUpRight className="size-3.5" />
                 </span>
@@ -69,11 +69,12 @@ export function ImageWord({ word, image, href, className }: { word: string; imag
     <Link href={href} className={cn("group relative flex flex-col items-center justify-center rounded-card overflow-hidden", className)} aria-label={`Shop ${word.toLowerCase()} styles`}>
       <span
         className="text-image font-sans font-extrabold uppercase tracking-[-0.04em] text-[27vw] sm:text-[18vw] lg:text-[12vw] xl:text-[190px] leading-[0.85] transition-[background-position] duration-[2000ms] bg-[position:50%_30%] group-hover:bg-[position:50%_60%]"
-        style={{ backgroundImage: `url(${image})` }}
+        // `image` may be a photo path or a CSS gradient
+        style={{ backgroundImage: image.includes("gradient(") ? image : `url(${image})`, backgroundSize: image.includes("gradient(") ? "200% 200%" : undefined }}
       >
         {word}
       </span>
-      <span className="mt-2 text-[11px] tracking-[0.3em] uppercase text-plum">Shop the mood →</span>
+      <span className="mt-2 text-[11px] tracking-[0.3em] uppercase text-sea">Shop the mood →</span>
     </Link>
   );
 }

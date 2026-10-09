@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Umbrella } from "./motifs";
 
 export function Container({ className, children }: { className?: string; children: React.ReactNode }) {
   return <div className={cn("mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10", className)}>{children}</div>;
@@ -15,7 +16,7 @@ export function Wordmark({ className }: { className?: string }) {
 export function DotLink({ href, children, dark = false, className }: { href: string; children: React.ReactNode; dark?: boolean; className?: string }) {
   return (
     <Link href={href} className={cn("group inline-flex items-center gap-2.5 py-1.5 text-[13px] sm:text-sm tracking-[0.04em]", className)}>
-      <span className={cn("size-1.5 rounded-full transition-transform group-hover:scale-150", dark ? "bg-marigold" : "bg-plum")} />
+      <span className={cn("size-1.5 rounded-full transition-transform group-hover:scale-150", dark ? "bg-sun" : "bg-sea")} />
       <span className={cn("border-b border-transparent transition-colors", dark ? "group-hover:border-cream/60" : "group-hover:border-ink/60")}>{children}</span>
     </Link>
   );
@@ -31,7 +32,7 @@ export function PillLink({
 }: {
   href: string;
   children: React.ReactNode;
-  tone?: "light" | "dark" | "marigold";
+  tone?: "light" | "dark" | "sun";
   className?: string;
   tabIndex?: number;
 }) {
@@ -41,14 +42,14 @@ export function PillLink({
       tabIndex={tabIndex}
       className={cn(
         "group inline-flex items-center gap-4 rounded-full pl-6 pr-1.5 py-1.5 text-[13px] sm:text-sm font-medium tracking-[0.04em] transition-colors",
-        tone === "light" && "bg-[#fffdf8] text-ink hover:bg-white",
+        tone === "light" && "bg-paper text-ink hover:bg-white",
         tone === "dark" && "bg-ink text-cream hover:bg-ink-soft",
-        tone === "marigold" && "bg-marigold text-ink hover:bg-marigold-soft",
+        tone === "sun" && "bg-sun text-ink hover:bg-sun-soft",
         className,
       )}
     >
       {children}
-      <span className={cn("size-9 sm:size-10 rounded-full grid place-items-center transition-transform duration-300 group-hover:rotate-45", tone === "dark" ? "bg-marigold text-ink" : "bg-ink text-cream")}>
+      <span className={cn("size-9 sm:size-10 rounded-full grid place-items-center transition-transform duration-300 group-hover:rotate-45", tone === "dark" ? "bg-sun text-ink" : "bg-ink text-cream")}>
         <ArrowUpRight className="size-4" strokeWidth={1.6} />
       </span>
     </Link>
@@ -64,10 +65,13 @@ export function SectionHeading({
   href,
   linkLabel = "View all",
   dark = false,
+  as: Heading = "h2",
   className,
 }: {
   eyebrow?: string;
   title: string;
+  /** Use "h1" when this is the page's main heading */
+  as?: "h1" | "h2";
   /** Optional italic word(s) appended to the title */
   accent?: string;
   text?: string;
@@ -79,16 +83,21 @@ export function SectionHeading({
   return (
     <div className={cn("flex flex-col sm:flex-row sm:items-end justify-between gap-5 sm:gap-10 mb-8 sm:mb-12", className)}>
       <div className="max-w-3xl">
-        {eyebrow && <p className={cn("text-[11px] tracking-[0.28em] uppercase mb-3", dark ? "text-marigold" : "text-plum")}>{eyebrow}</p>}
-        <h2 className="font-display text-[40px] sm:text-[64px] leading-[0.98]">
+        {eyebrow && (
+          <p className={cn("flex items-center gap-2 text-[11px] tracking-[0.28em] uppercase mb-3", dark ? "text-sun" : "text-sea")}>
+            <Umbrella dark={dark} className="size-4 -mt-0.5" />
+            {eyebrow}
+          </p>
+        )}
+        <Heading className="font-display text-[40px] sm:text-[64px] leading-[0.98]">
           {title}
           {accent && (
             <>
               {" "}
-              <em className={cn("font-normal", dark ? "text-marigold-soft" : "text-plum")}>{accent}</em>
+              <em className={cn("font-normal", dark ? "text-sun-soft" : "text-sea")}>{accent}</em>
             </>
           )}
-        </h2>
+        </Heading>
       </div>
       {(text || href) && (
         <div className="sm:max-w-sm sm:text-left shrink-0">
@@ -130,14 +139,14 @@ export function Breadcrumbs({ items }: { items: { label: string; href?: string }
   );
 }
 
-export function Button({ className, variant = "dark", ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "dark" | "outline" | "plum" }) {
+export function Button({ className, variant = "dark", ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "dark" | "outline" | "sea" }) {
   return (
     <button
       {...props}
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-full px-8 py-3.5 text-[13px] font-medium tracking-[0.08em] uppercase transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
         variant === "dark" && "bg-ink text-cream hover:bg-ink-soft",
-        variant === "plum" && "bg-plum text-cream hover:bg-plum-dark",
+        variant === "sea" && "bg-sea text-cream hover:bg-sea-dark",
         variant === "outline" && "border border-ink hover:bg-ink hover:text-cream",
         className,
       )}
@@ -151,7 +160,7 @@ export function Field({ label, error, className, ...props }: React.InputHTMLAttr
       <span className="block text-xs text-muted mb-1.5">{label}</span>
       <input
         {...props}
-        className="w-full rounded-xl border border-line bg-[#fffdf8] px-4 py-3 text-sm outline-none focus:border-ink transition-colors aria-[invalid=true]:border-sale"
+        className="w-full rounded-xl border border-line bg-paper px-4 py-3 text-sm outline-none focus:border-ink transition-colors aria-[invalid=true]:border-sale"
         aria-invalid={!!error}
       />
       {error && <span className="block text-xs text-sale mt-1">{error}</span>}

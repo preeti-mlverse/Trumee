@@ -31,7 +31,7 @@ export function DeliveryChecker({ prepaidPercent = 0 }: { prepaidPercent?: numbe
   };
 
   return (
-    <div className="rounded-3xl bg-[#fffdf8]/70 border border-line/70 p-5">
+    <div className="rounded-3xl bg-paper/70 border border-line/70 p-5">
       <p className="flex items-center gap-2 text-sm font-medium">
         <MapPin className="size-4" strokeWidth={1.5} /> Check delivery date
       </p>
@@ -42,9 +42,9 @@ export function DeliveryChecker({ prepaidPercent = 0 }: { prepaidPercent?: numbe
           inputMode="numeric"
           placeholder="Enter pincode"
           aria-label="Pincode"
-          className="flex-1 rounded-full border border-line bg-[#fffdf8] px-4 py-2.5 text-sm outline-none focus:border-ink tabular-nums"
+          className="flex-1 rounded-full border border-line bg-paper px-4 py-2.5 text-sm outline-none focus:border-ink tabular-nums"
         />
-        <button disabled={busy} className="rounded-full bg-ink text-cream px-5 text-[12px] tracking-[0.12em] uppercase hover:bg-plum transition-colors disabled:opacity-50">
+        <button disabled={busy} className="rounded-full bg-ink text-cream px-5 text-[12px] tracking-[0.12em] uppercase hover:bg-sea transition-colors disabled:opacity-50">
           {busy ? <Loader2 className="size-4 animate-spin" /> : "Check"}
         </button>
       </form>
@@ -109,7 +109,7 @@ export function SizeGuideButton() {
       {open && (
         <div className="fixed inset-0 z-50 grid place-items-center p-4" role="dialog" aria-label="Size guide">
           <div className="absolute inset-0 bg-ink/50" onClick={() => setOpen(false)} />
-          <div className="relative bg-[#fffdf8] rounded-3xl w-full max-w-xl max-h-[90vh] overflow-auto p-6 sm:p-8 animate-fade-in">
+          <div className="relative bg-paper rounded-3xl w-full max-w-xl max-h-[90vh] overflow-auto p-6 sm:p-8 animate-fade-in">
             <button onClick={() => setOpen(false)} aria-label="Close size guide" className="absolute top-4 right-4 p-1">
               <X className="size-5" />
             </button>
@@ -161,7 +161,7 @@ export function TrustBadges({ className, codEnabled = true }: { className?: stri
     <ul className={cn("grid grid-cols-2 gap-3", className)}>
       {items.map(({ icon: I, t, s }) => (
         <li key={t} className="flex items-start gap-2.5">
-          <I className="size-5 text-plum shrink-0" strokeWidth={1.4} />
+          <I className="size-5 text-sea shrink-0" strokeWidth={1.4} />
           <span className="text-xs leading-snug">
             <span className="block font-medium text-ink">{t}</span>
             <span className="text-muted">{s}</span>

@@ -103,7 +103,7 @@ export function ThirdPartyTags({ ga4, pixel, clarity }: { ga4: string; pixel: st
         `}</Script>
       )}
       {hasTags && !asked && (
-        <div className="fixed bottom-3 inset-x-3 sm:left-auto sm:right-5 sm:bottom-5 sm:max-w-sm z-40 bg-[#fffdf8] rounded-3xl border border-line shadow-2xl shadow-ink/10 p-5 animate-fade-in">
+        <div className="fixed bottom-3 inset-x-3 sm:left-auto sm:right-5 sm:bottom-5 sm:max-w-sm z-40 bg-paper rounded-3xl border border-line shadow-2xl shadow-ink/10 p-5 animate-fade-in">
           <p className="text-sm leading-relaxed">
             We use cookies to run the store and, with your OK, to measure ads and improve your experience.{" "}
             <Link href="/pages/privacy-policy" className="underline underline-offset-2">

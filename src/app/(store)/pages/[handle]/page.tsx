@@ -33,13 +33,13 @@ export default async function ContentPage({ params }: PageProps<"/pages/[handle]
       {isAbout && (
         <section className="bg-ink text-cream lg:grid lg:grid-cols-12 lg:h-[calc(100svh-108px)] lg:min-h-[560px] lg:max-h-[860px]">
           <div className="lg:col-span-5 flex flex-col justify-end px-4 sm:px-10 lg:px-14 pt-12 pb-10 lg:py-14">
-            <p className="text-[11px] tracking-[0.3em] uppercase text-marigold">Our story</p>
+            <p className="text-[11px] tracking-[0.3em] uppercase text-sun">Our story</p>
             <h1 className="font-display text-[52px] sm:text-7xl xl:text-[88px] leading-[0.92] tracking-[-0.015em] mt-5">Style meets sense</h1>
             <p className="mt-6 max-w-md text-cream/75 leading-relaxed">
               A design-led label from Gurgaon, making easygoing, feel-good clothes for escape-seekers and life-lovers — with a little tech woven into every thread.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/collections/all" className="rounded-full bg-marigold text-ink px-7 py-3.5 text-[11px] font-semibold tracking-[0.22em] uppercase hover:bg-cream transition-colors">
+              <Link href="/collections/all" className="rounded-full bg-sun text-ink px-7 py-3.5 text-[11px] font-semibold tracking-[0.22em] uppercase hover:bg-cream transition-colors">
                 Shop the collection
               </Link>
               <Link href="/contact" className="rounded-full border border-cream/40 px-7 py-3.5 text-[11px] tracking-[0.22em] uppercase hover:bg-cream hover:text-ink transition-colors">

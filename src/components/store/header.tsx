@@ -32,15 +32,15 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
   return (
     <>
       {announcement.enabled && (
-        <div className="bg-marigold-soft text-ink text-[9.5px] sm:text-[11px] tracking-[0.14em] sm:tracking-[0.24em] uppercase text-center py-2.5 px-3 whitespace-nowrap overflow-hidden text-ellipsis">
+        <div className="bg-sun-soft text-ink text-[9.5px] sm:text-[11px] tracking-[0.14em] sm:tracking-[0.24em] uppercase text-center py-2.5 px-3 whitespace-nowrap overflow-hidden text-ellipsis">
           {announcement.href ? <Link href={announcement.href} className="inline-block py-1.5 -my-1.5">{announcement.text}</Link> : announcement.text}
         </div>
       )}
       {/* Full-width bar, edge to edge; the page content always starts below it. */}
       <header
         className={cn(
-          "sticky top-0 z-40 w-full bg-gradient-to-r from-[#f5e6cf] via-[#f2d6b3] to-[#eebf9c] text-plum-dark border-b border-[#d9a77c]/30 transition-shadow duration-300",
-          scrolled && "shadow-[0_8px_24px_-14px_rgba(75,27,63,0.35)]",
+          "sticky top-0 z-40 w-full bg-cream/90 backdrop-blur-md text-ink border-b border-line transition-shadow duration-300",
+          scrolled && "shadow-[0_8px_24px_-14px_rgba(22,22,22,0.25)]",
         )}
       >
         <div className="mx-auto max-w-[1440px] px-3 sm:px-6 lg:px-10 h-16 lg:h-[72px] grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center">
@@ -54,17 +54,17 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
                   <Link
                     href={item.href}
                     className={cn(
-                      "relative py-4 inline-block hover:text-plum transition-colors",
-                      isActive(item, pathname) && "text-plum after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-2.5 after:size-1 after:rounded-full after:bg-plum",
+                      "relative py-4 inline-block hover:text-sea transition-colors",
+                      isActive(item, pathname) && "text-sea after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-2.5 after:size-1 after:rounded-full after:bg-sea",
                     )}
                   >
                     {item.label}
                   </Link>
                   {item.children?.length ? (
                     <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 transition-all absolute -left-5 top-full pt-2">
-                      <div className="bg-[#fffdf8] text-ink rounded-2xl border border-line/70 shadow-2xl shadow-ink/25 min-w-60 p-2">
+                      <div className="bg-paper text-ink rounded-2xl border border-line/70 shadow-2xl shadow-ink/25 min-w-60 p-2">
                         {item.children.map((c) => (
-                          <Link key={c.href} href={c.href} className="block rounded-xl px-4 py-2.5 normal-case tracking-normal text-sm text-ink-soft hover:text-plum hover:bg-sand/60">
+                          <Link key={c.href} href={c.href} className="block rounded-xl px-4 py-2.5 normal-case tracking-normal text-sm text-ink-soft hover:text-sea hover:bg-sand/60">
                             {c.label}
                           </Link>
                         ))}
@@ -76,7 +76,7 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
             </nav>
           </div>
 
-          <Link href="/" className="text-plum-dark" aria-label="Trumee home">
+          <Link href="/" className="text-sea-dark" aria-label="Trumee home">
             <Wordmark className="text-[24px] lg:text-[30px]" />
           </Link>
 
@@ -91,7 +91,7 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
               <Heart className="size-5" strokeWidth={1.5} />
               {ids.length > 0 && <Badge n={ids.length} />}
             </Link>
-            <button aria-label="Open bag" className="relative size-10 grid place-items-center rounded-full bg-plum text-cream hover:bg-plum-dark transition-colors" onClick={() => setOpen(true)}>
+            <button aria-label="Open bag" className="relative size-10 grid place-items-center rounded-full bg-sea text-cream hover:bg-sea-dark transition-colors" onClick={() => setOpen(true)}>
               <ShoppingBag className="size-[18px]" strokeWidth={1.5} />
               {!!cart?.count && <Badge n={cart.count} />}
             </button>
@@ -103,7 +103,7 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
       {menu && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-ink/40 animate-fade-in" onClick={() => setMenu(false)} />
-          <div className="absolute inset-y-2 left-2 w-[86%] max-w-sm bg-[#fffdf8] text-ink rounded-3xl overflow-hidden flex flex-col animate-fade-in">
+          <div className="absolute inset-y-2 left-2 w-[86%] max-w-sm bg-paper text-ink rounded-3xl overflow-hidden flex flex-col animate-fade-in">
             <div className="flex items-center justify-between px-5 h-16 border-b border-line">
               <Wordmark className="text-xl" />
               <button aria-label="Close menu" onClick={() => setMenu(false)} className="p-2 -mr-2">
@@ -146,7 +146,7 @@ const ICON = "size-10 grid place-items-center rounded-full hover:bg-white/60 tra
 
 function Badge({ n }: { n: number }) {
   return (
-    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-marigold text-ink text-[10px] font-medium grid place-items-center px-1">
+    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-sun text-ink text-[10px] font-medium grid place-items-center px-1">
       {n > 99 ? "99+" : n}
     </span>
   );

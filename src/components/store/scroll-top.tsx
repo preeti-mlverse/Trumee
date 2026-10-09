@@ -37,7 +37,7 @@ export function ScrollTop() {
     >
       <svg viewBox="0 0 48 48" className="absolute inset-0 size-full -rotate-90" aria-hidden>
         <circle cx="24" cy="24" r={R} fill="none" stroke="currentColor" strokeOpacity="0.12" strokeWidth="2" />
-        <circle cx="24" cy="24" r={R} fill="none" stroke="var(--color-plum)" strokeWidth="2" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - p)} />
+        <circle cx="24" cy="24" r={R} fill="none" stroke="var(--color-sea)" strokeWidth="2" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - p)} />
       </svg>
       <ArrowUp className="size-4" strokeWidth={1.8} />
     </button>

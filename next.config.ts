@@ -2,7 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    formats: ["image/avif", "image/webp"],
+    // WebP only: sources are already WebP, and AVIF encoding is ~2x slower and far more
+    // memory-hungry — on a small server it delays first loads and can crash the process.
+    formats: ["image/webp"],
   },
   // Permanent redirects for Shopify URL patterns so old links, bookmarks and
   // Google results keep their equity. Product-handle renames live in the DB (redirects table).
