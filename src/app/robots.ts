@@ -25,6 +25,8 @@ const AI_CRAWLERS = [
 ];
 
 export default function robots(): MetadataRoute.Robots {
+  // Test copies (NOINDEX=1, e.g. new.trumee.in) are closed to every crawler
+  if (process.env.NOINDEX === "1") return { rules: [{ userAgent: "*", disallow: "/" }] };
   return {
     rules: [
       { userAgent: "*", allow: "/", disallow: PRIVATE },

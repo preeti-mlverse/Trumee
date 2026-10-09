@@ -1,5 +1,7 @@
 # Deploying Trumee on your own VPS
 
+> First time? Start with **docs/TEST_SITE_SETUP.md** — the same steps for a test copy on new.trumee.in.
+
 Tested setup: Ubuntu 22.04/24.04, **2 GB RAM minimum** (4 GB recommended), Node 22, PostgreSQL 16, Nginx.
 
 ## 1. Server basics
@@ -19,11 +21,12 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
 All products, collections, pages, settings and orders live in the local database, so copy it — don't start empty.
 
-On **your PC**:
+On **your PC** (PowerShell — don't use `>` to save the dump, it corrupts the file):
 
-```bash
-docker exec trumee-db pg_dump -U trumee -Fc trumee > trumee.dump
-scp trumee.dump user@YOUR_SERVER:/tmp/
+```powershell
+docker exec trumee-db pg_dump -U trumee -Fc -f /tmp/trumee.dump trumee
+docker cp trumee-db:/tmp/trumee.dump .	rumee.dump
+scp .	rumee.dump root@YOUR_SERVER:/tmp/
 ```
 
 On the **server**:
@@ -58,6 +61,7 @@ cp .env.example .env && nano .env
 | `SHIPROCKET_*` | see docs/SHIPROCKET_SETUP.md |
 | `RESEND_API_KEY`, `EMAIL_FROM` | order emails (Resend) |
 | `CRON_SECRET` | `openssl rand -hex 24` |
+| `NOINDEX` | `1` on test copies (hides them from Google); leave empty on the live site |
 
 ```bash
 npm run build
