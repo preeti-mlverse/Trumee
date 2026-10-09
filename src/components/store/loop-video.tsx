@@ -34,7 +34,7 @@ export function LoopVideo({
     const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { rootMargin: "200px 0px", threshold: 0.15 });
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [src]);
 
   const shouldPlay = !reduced && (playing ?? (!hoverOnly && visible));
 
@@ -45,12 +45,16 @@ export function LoopVideo({
       if (el.preload === "none") el.preload = "auto";
       el.play().catch(() => {});
     } else el.pause();
-  }, [shouldPlay]);
+  }, [shouldPlay, src]);
+
+  // Our own clips also ship as AV1 (~35% smaller, same look): browsers that decode it take that,
+  // the rest (older Safari/iPhone) fall through to the H.264 MP4. A missing AV1 file also falls through.
+  const av1 = src.startsWith("/videos/") && src.endsWith(".mp4") ? src.replace(/\.mp4$/, ".av1.mp4") : null;
 
   return (
     <video
+      key={src}
       ref={ref}
-      src={src}
       poster={poster ?? undefined}
       muted
       loop
@@ -60,6 +64,9 @@ export function LoopVideo({
       className={cn("object-cover", className)}
       onMouseEnter={hoverOnly && playing === undefined ? (e) => !reduced && e.currentTarget.play().catch(() => {}) : undefined}
       onMouseLeave={hoverOnly && playing === undefined ? (e) => e.currentTarget.pause() : undefined}
-    />
+    >
+      {av1 && <source src={av1} type='video/mp4; codecs="av01.0.08M.08"' />}
+      <source src={src} type="video/mp4" />
+    </video>
   );
 }

@@ -7,7 +7,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { HeroSlide } from "@/lib/settings";
 import { cn, inr } from "@/lib/utils";
 import { LoopVideo } from "./loop-video";
-import { blockPrint } from "./motifs";
 import { PillLink } from "./ui";
 
 export type HeroClip = { handle: string; title: string; price: number; video: string; poster: string | null };
@@ -258,12 +257,12 @@ function Banner({ s, active, products }: { s: HeroSlide; active: boolean; produc
 }
 
 const DUO_TONES = {
-  sea: { panel: "bg-sea-soft", accent: "text-sea", print: "#1d6188", disc: "bg-sea-bright/15" },
-  sun: { panel: "bg-sun-soft", accent: "text-ink", print: "#161616", disc: "bg-sun/35" },
+  sea: { accent: "text-ink", scene: "/images/scenic/goa-coast.webp", pos: "object-[50%_60%]" },
+  sun: { accent: "text-ink", scene: "/images/scenic/palm-sunset.webp", pos: "object-[50%_40%]" },
 } as const;
 
 /**
- * Brand-coloured copy panel (sea or sun, block-print texture, a soft "sun" disc) beside two tall
+ * Copy over a soft scenic backdrop (Goa coast for shirts, palm sunset for one-pieces) beside two tall
  * media panes — catwalk loops play while the slide is up; the second pane sits lower, editorial-style.
  * Phones: panes on top, copy beneath.
  */
@@ -272,22 +271,23 @@ function Duo({ s, active, products }: { s: HeroSlide; active: boolean; products:
   const t = DUO_TONES[s.tone ?? "sea"];
   const media = s.media ?? [];
   return (
-    <div className={cn("absolute inset-0 flex flex-col-reverse lg:grid lg:grid-cols-12 text-ink overflow-hidden", t.panel)}>
-      <span aria-hidden className="absolute inset-0" style={blockPrint(t.print, 0.06)} />
-      <span aria-hidden className={cn("absolute -left-24 -bottom-24 size-[420px] lg:size-[560px] rounded-full blur-2xl", t.disc)} />
+    <div className="absolute inset-0 flex flex-col-reverse lg:grid lg:grid-cols-12 text-ink overflow-hidden bg-cream">
+      {/* Scenic backdrop, washed into the sand so it reads as atmosphere, not a second picture */}
+      <Image src={t.scene} alt="" fill sizes="100vw" className={cn("object-cover opacity-90 saturate-[0.9]", t.pos, active && "animate-kenburns")} />
+      <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-cream via-cream/75 to-cream/10 lg:bg-gradient-to-r lg:from-cream/95 lg:via-cream/60 lg:to-cream/0" />
 
       {/* Copy */}
       <div className="relative lg:col-span-5 flex flex-col justify-center px-5 sm:px-10 lg:pl-12 xl:pl-16 lg:pr-6 pt-5 pb-16 sm:pb-24 lg:py-16">
         {active && (
           <>
             <p className={cn("text-[11px] tracking-[0.3em] uppercase animate-word", t.accent)}>{s.eyebrow}</p>
-            <Title s={s} className={cn("mt-3 text-[40px] sm:text-[64px] xl:text-[80px]", s.tone === "sun" ? "[&_em]:text-sea" : "[&_em]:text-sea")} />
+            <Title s={s} className={"mt-3 text-[40px] sm:text-[64px] lg:text-[min(80px,7.5vh)] [&_em]:text-sea-bright"} />
             {s.text && <p className="hidden sm:block mt-5 max-w-md text-[15px] text-ink-soft leading-relaxed animate-word [animation-delay:140ms]">{s.text}</p>}
             <div className="[&>div]:mt-5 sm:[&>div]:mt-7">
               <Ctas s={s} active={active} dark />
             </div>
             {products.length > 0 && (
-              <div className="hidden lg:flex gap-2.5 mt-8 animate-word [animation-delay:240ms]">
+              <div className="hidden [@media(min-width:1024px)_and_(min-height:940px)]:flex gap-2.5 mt-8 animate-word [animation-delay:240ms]">
                 {products.slice(0, 3).map((p) => (
                   <Link key={p.handle} href={`/products/${p.handle}`} tabIndex={tab} className="group w-[92px] shrink-0">
                     <span className="relative block aspect-[3/4] rounded-2xl overflow-hidden bg-paper ring-1 ring-ink/10">

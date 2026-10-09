@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
     // WebP only: sources are already WebP, and AVIF encoding is ~2x slower and far more
     // memory-hungry — on a small server it delays first loads and can crash the process.
     formats: ["image/webp"],
+    // Resized variants are kept for 30 days (default 4h) so the server re-encodes rarely.
+    // Replacing a photo under the same file name can take up to that long to show — use a new name.
+    minimumCacheTTL: 2592000,
   },
   // Permanent redirects for Shopify URL patterns so old links, bookmarks and
   // Google results keep their equity. Product-handle renames live in the DB (redirects table).

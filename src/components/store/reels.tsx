@@ -17,7 +17,7 @@ export function ReelRail({ clips }: { clips: HeroClip[] }) {
   const scroll = (dir: 1 | -1) => rail.current?.scrollBy({ left: dir * rail.current.clientWidth * 0.8, behavior: "smooth" });
   return (
     <div className="relative">
-      <div className="hidden lg:flex absolute -top-[92px] right-0 gap-2">
+      <div className="hidden lg:flex absolute -top-[76px] right-0 gap-2">
         <RoundArrow dark onClick={() => scroll(-1)} label="Previous reels">
           <ArrowLeft className="size-4" />
         </RoundArrow>

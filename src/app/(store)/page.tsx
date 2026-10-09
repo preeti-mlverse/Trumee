@@ -209,8 +209,8 @@ export default async function Home() {
 
       {/* Reels — dark rounded panel */}
       {clips.length > 0 && (
-        <Panel className="bg-ink text-cream pt-14 sm:pt-20 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-10 overflow-hidden" style={blockPrint("#f5e0a3", 0.05)}>
-          <SectionHeading dark eyebrow="Watch & shop" title="See it" accent="move" />
+        <Panel className="bg-ink text-cream pt-8 sm:pt-11 pb-8 sm:pb-11 px-4 sm:px-6 lg:px-10 overflow-hidden" style={blockPrint("#f5e0a3", 0.05)}>
+          <SectionHeading dark eyebrow="Watch & shop" title="See it" accent="move" className="mb-6 sm:mb-8" />
           <ReelRail clips={clips} />
         </Panel>
       )}

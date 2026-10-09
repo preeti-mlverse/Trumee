@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { Breadcrumbs, Container } from "@/components/store/ui";
 import { CRAFT_IMAGES } from "@/lib/trust";
 
+const SCENIC = [
+  { label: "Goa coastline with palms (homepage backdrop)", href: "https://unsplash.com/photos/faFlARh2q3I" },
+  { label: "Palm silhouette at sunset (homepage backdrop)", href: "https://unsplash.com/photos/I9qh1Q_tgfU" },
+];
+
 export const metadata: Metadata = { title: "Image credits", robots: { index: false, follow: true }, alternates: { canonical: "/credits" } };
 
 /** Attribution for openly licensed photography used on the site (required by CC BY / CC BY-SA). */
@@ -28,6 +33,22 @@ export default function CreditsPage() {
               ) : (
                 c.license.name
               )}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="text-ink-soft mt-10">Scenic backdrops are from Unsplash, used under the Unsplash License.</p>
+      <ul className="mt-4 divide-y divide-line border-y border-line text-sm">
+        {SCENIC.map((c) => (
+          <li key={c.href} className="py-4 flex flex-wrap gap-x-2">
+            <a href={c.href} target="_blank" rel="noopener" className="underline underline-offset-4">
+              {c.label}
+            </a>
+            <span className="text-muted">
+              ·{" "}
+              <a href="https://unsplash.com/license" target="_blank" rel="noopener license" className="underline underline-offset-4">
+                Unsplash License
+              </a>
             </span>
           </li>
         ))}

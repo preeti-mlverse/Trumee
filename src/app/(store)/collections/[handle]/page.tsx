@@ -66,9 +66,7 @@ export default async function CollectionPage({ params, searchParams }: PageProps
       />
       <CollectionBanner
         collectionId={c.id}
-        handle={handle}
         title={c.title}
-        descriptionHtml={c.descriptionHtml}
         imageUrl={c.imageUrl}
         group={c.group === "category" || c.group === "all" ? c.group : "edit"}
       />

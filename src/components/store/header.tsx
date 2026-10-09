@@ -32,7 +32,7 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
   return (
     <>
       {announcement.enabled && (
-        <div className="bg-sun-soft text-ink text-[9.5px] sm:text-[11px] tracking-[0.14em] sm:tracking-[0.24em] uppercase text-center py-2.5 px-3 whitespace-nowrap overflow-hidden text-ellipsis">
+        <div className="bg-sun text-ink text-[9.5px] sm:text-[11px] tracking-[0.14em] sm:tracking-[0.24em] uppercase text-center py-2.5 px-3 whitespace-nowrap overflow-hidden text-ellipsis">
           {announcement.href ? <Link href={announcement.href} className="inline-block py-1.5 -my-1.5">{announcement.text}</Link> : announcement.text}
         </div>
       )}
