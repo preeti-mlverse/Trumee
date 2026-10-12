@@ -1,79 +1,75 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Flame, Sparkles, Tag } from "lucide-react";
-import Image from "next/image";
+import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import { useRef, useState } from "react";
 import type { CardProduct } from "@/lib/catalog";
 import { cn } from "@/lib/utils";
 import { ProductCard } from "./product-card";
 import { useAutoAdvance } from "./use-auto-advance";
-import { DotLink, PillLink } from "./ui";
 
+/** One shelf: its products plus the colour "feature tile" that opens the rail. */
 export type RailTab = {
   label: string;
   items: CardProduct[];
   href: string;
-  /** One-line promise shown on the tab card */
-  sub?: string;
-  /** Total pieces in this list (shown as "24 styles") */
+  /** Total pieces in this list */
   count?: number;
-  icon?: "flame" | "sparkles" | "tag";
+  tone: "sun" | "ink" | "sea";
+  feature: { kicker: string; big: string; line: string };
 };
 
-const ICONS = { flame: Flame, sparkles: Sparkles, tag: Tag };
-export type RailLead = { image: string; eyebrow: string; title: string; href: string; cta: string };
+const TONE = {
+  sun: { tile: "bg-sun text-ink", kicker: "text-ink/70", btn: "bg-ink text-cream", dot: "bg-sun" },
+  ink: { tile: "bg-ink text-cream", kicker: "text-sun-soft", btn: "bg-sun text-ink", dot: "bg-ink" },
+  sea: { tile: "bg-sea-bright text-cream", kicker: "text-sea-soft", btn: "bg-cream text-ink", dot: "bg-sea-bright" },
+} as const;
 
 /**
- * Horizontal product rail with pill tabs. An optional lifestyle "lead" tile opens the rail,
- * so each list starts with a mood before the product grid.
+ * Shelf of products behind a sliding segmented switch. Each list opens with a bold colour tile
+ * (big price / promise), then the cards; the rail steps along on its own.
  */
-export function ProductRail({ tabs, lead, list }: { tabs: RailTab[]; lead?: RailLead; list: string }) {
+export function ProductRail({ tabs, list }: { tabs: RailTab[]; list: string }) {
   const [t, setT] = useState(0);
   const rail = useRef<HTMLDivElement>(null);
   useAutoAdvance(rail, 2600, t);
   const scroll = (dir: 1 | -1) => rail.current?.scrollBy({ left: dir * rail.current.clientWidth * 0.75, behavior: "smooth" });
   const tab = tabs[t];
+  const tone = TONE[tab.tone];
   const item = "shrink-0 snap-start w-[64vw] sm:w-[40vw] md:w-[30vw] lg:w-[calc((100%-3*20px)/4)] xl:w-[calc((100%-4*20px)/5)]";
 
   return (
     <div>
-      {/* Shelf tabs: three big, clear choices — the active one is solid ink */}
-      <div role="tablist" className="grid grid-flow-col auto-cols-[78%] sm:auto-cols-auto sm:grid-flow-row sm:grid-cols-3 gap-3 sm:gap-4 overflow-x-auto scrollbar-none snap-x -mx-4 px-4 sm:mx-0 sm:px-0">
-        {tabs.map((x, k) => {
-          const I = ICONS[x.icon ?? "sparkles"];
-          const on = k === t;
-          return (
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 sm:mb-8">
+        {/* Segmented switch with a sliding indicator */}
+        <div
+          role="tablist"
+          className="relative grid w-full lg:w-auto rounded-full bg-paper border border-ink/10 p-1.5 shadow-[0_10px_30px_-22px_rgba(22,22,22,0.6)]"
+          style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
+        >
+          <span
+            aria-hidden
+            className="absolute top-1.5 bottom-1.5 left-1.5 rounded-full bg-ink transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)]"
+            style={{ width: `calc((100% - 12px) / ${tabs.length})`, transform: `translateX(${t * 100}%)` }}
+          />
+          {tabs.map((x, k) => (
             <button
               key={x.label}
               role="tab"
-              aria-selected={on}
+              aria-selected={k === t}
               onClick={() => {
                 setT(k);
                 rail.current?.scrollTo({ left: 0, behavior: "smooth" });
               }}
-              className={cn(
-                "group snap-start text-left rounded-card border px-5 py-4 sm:px-6 sm:py-5 flex items-center gap-4 transition-all duration-300",
-                on ? "bg-ink text-cream border-ink shadow-[0_18px_40px_-24px_rgba(22,22,22,0.7)]" : "bg-paper/80 border-ink/10 hover:border-ink/40 hover:-translate-y-0.5",
-              )}
+              className={cn("relative z-10 flex items-center justify-center gap-2 rounded-full px-3 sm:px-7 py-3 sm:py-3.5 transition-colors duration-500", k === t ? "text-cream" : "text-ink/70 hover:text-ink")}
             >
-              <span className={cn("size-11 sm:size-12 shrink-0 rounded-full grid place-items-center transition-colors", on ? "bg-sun text-ink" : "bg-sand text-sea")}>
-                <I className="size-5" strokeWidth={1.6} />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block font-display text-[26px] sm:text-[30px] leading-none">{x.label}</span>
-                {x.sub && <span className={cn("block mt-1.5 text-[13px] truncate", on ? "text-cream/70" : "text-muted")}>{x.sub}</span>}
-              </span>
-              {x.count != null && (
-                <span className={cn("hidden md:inline-flex shrink-0 rounded-full px-3 py-1 text-[12px] tabular-nums", on ? "bg-cream/15 text-cream" : "bg-sand text-ink-soft")}>{x.count} styles</span>
-              )}
+              <span className={cn("size-2 rounded-full shrink-0", TONE[x.tone].dot, k === t && "ring-2 ring-cream/60")} />
+              <span className="font-display text-[19px] sm:text-[24px] leading-none whitespace-nowrap">{x.label}</span>
+              {x.count != null && <span className={cn("hidden sm:inline text-[12px] tabular-nums", k === t ? "text-cream/60" : "text-muted")}>{x.count}</span>}
             </button>
-          );
-        })}
-      </div>
-
-      <div className="flex items-center justify-between gap-4 mt-6 mb-4 sm:mt-8 sm:mb-5">
-        <DotLink href={tab.href}>Shop all {tab.label.toLowerCase()}</DotLink>
-        <div className="hidden lg:flex gap-2">
+          ))}
+        </div>
+        <div className="hidden lg:flex items-center gap-2">
           <RoundArrow onClick={() => scroll(-1)} label="Previous products">
             <ArrowLeft className="size-4" />
           </RoundArrow>
@@ -88,19 +84,22 @@ export function ProductRail({ tabs, lead, list }: { tabs: RailTab[]; lead?: Rail
         key={t}
         className="flex gap-3 sm:gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10 scroll-px-4 sm:scroll-px-6 lg:scroll-px-10 animate-fade-in"
       >
-        {lead && (
-          <div className={cn(item, "relative aspect-[2/3] rounded-card overflow-hidden bg-ink text-cream")}>
-            <Image src={lead.image} alt="" fill sizes="(min-width:1024px) 22vw, 60vw" className="object-cover animate-kenburns" />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6">
-              <p className="text-[10px] tracking-[0.26em] uppercase text-sun-soft">{lead.eyebrow}</p>
-              <p className="font-display text-[30px] sm:text-[40px] leading-[0.95] mt-2">{lead.title}</p>
-              <PillLink href={lead.href} className="mt-5 text-[12px] sm:text-[13px] pl-4 sm:pl-5">
-                {lead.cta}
-              </PillLink>
-            </div>
-          </div>
-        )}
+        {/* Feature tile */}
+        <Link href={tab.href} className={cn(item, "group relative aspect-[2/3] rounded-card overflow-hidden p-6 sm:p-7 flex flex-col justify-between isolate", tone.tile)}>
+          <span aria-hidden className="absolute -right-16 -top-16 size-56 rounded-full bg-white/10 transition-transform duration-700 group-hover:scale-125" />
+          <span aria-hidden className="absolute -left-10 bottom-24 size-32 rounded-full bg-white/[0.07]" />
+          <span className={cn("relative text-[11px] tracking-[0.28em] uppercase", tone.kicker)}>{tab.feature.kicker}</span>
+          <span className="relative">
+            <span className="block font-display leading-[0.85] text-[64px] sm:text-[84px] tracking-[-0.02em]">{tab.feature.big}</span>
+            <span className="block mt-4 text-[15px] leading-snug opacity-85 max-w-[16rem]">{tab.feature.line}</span>
+          </span>
+          <span className={cn("relative inline-flex w-fit items-center gap-3 rounded-full pl-5 pr-1.5 py-1.5 text-sm font-medium", tone.btn)}>
+            Shop all{tab.count != null ? ` ${tab.count}` : ""}
+            <span className="size-8 rounded-full bg-white/20 grid place-items-center transition-transform duration-300 group-hover:rotate-45">
+              <ArrowUpRight className="size-4" />
+            </span>
+          </span>
+        </Link>
         {tab.items.map((p, i) => (
           <div key={p.id} className={item}>
             <ProductCard p={p} list={`${list} – ${tab.label}`} index={i} priority={i < 3} />

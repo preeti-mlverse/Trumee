@@ -5,11 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { db, schema } from "@/db";
 import { EditPanels, type EditPanel } from "@/components/store/edit-panels";
-import { Lookbook, type Look } from "@/components/store/lookbook";
 import { Hero, type HeroClip, type HeroProduct } from "@/components/store/hero";
 import { LoopVideo } from "@/components/store/loop-video";
 import { blockPrint, Doodle } from "@/components/store/motifs";
-import { ProductRail } from "@/components/store/product-rail";
+import { ProductRail, type RailTab } from "@/components/store/product-rail";
 import { CategoryTile, ImageWord, ReelRail } from "@/components/store/reels";
 import { Reveal } from "@/components/store/reveal";
 import { Container, DotLink, PillLink, SectionHeading } from "@/components/store/ui";
@@ -140,7 +139,6 @@ export default async function Home() {
   const bento = ["dresses", "tops", "skirts", "co-ord-sets", "jumpsuit", "shirts"]
     .map((h) => categories.find((c) => c.handle === h))
     .filter((c): c is (typeof categories)[number] => !!c);
-  const card = (p: (typeof withVideo.items)[number]) => ({ handle: p.handle, title: p.title, price: p.price, compareAtPrice: p.compareAtPrice, image: p.images[0]?.url ?? null });
   // Hero: the production slides, then the Summer Bloom and New Arrivals campaign art as slides 4 and 5
   const heroSlides: HeroSlide[] = [...home.heroSlides.slice(0, 3), ...CAMPAIGN_SLIDES];
   // Shoppable strip under each banner slide: the pictured piece first, then the rest of its collection
@@ -156,12 +154,6 @@ export default async function Home() {
     }),
   );
   const editTiles = EDIT_TILES.map((t) => ({ ...t, c: edits.find((e) => e.handle === t.handle) })).filter((t) => !!t.c);
-  const looks: Look[] = withVideo.items
-    .filter((p) => p.video?.poster)
-    .map((p, i, all) => {
-      const pair = all.slice(i + 1).concat(all.slice(0, i)).find((q) => q.productType !== p.productType) ?? null;
-      return { image: p.video!.poster!, alt: p.title, products: pair ? [card(p), card(pair)] : [card(p)] };
-    });
   // Each mood card gets a different product photo (bestsellers overlap across tags)
   const moodLists = await Promise.all(MOODS.map((m) => listProducts({ tagGroups: [[m.key]], limit: 8, sort: "best-selling" })));
   const used = new Set<number>();
@@ -172,6 +164,13 @@ export default async function Home() {
   });
   // Edits: location photography + live style counts
   const editCounts = await Promise.all(spotlightEdits.map((e) => listProducts({ collectionId: edits.find((x) => x.handle === e.handle)?.id, limit: 1 })));
+  const editLists = await Promise.all(spotlightEdits.map((e) => listProducts({ collectionId: edits.find((x) => x.handle === e.handle)?.id, limit: 24, sort: "best-selling" })));
+  const pickedPieces = new Set<number>();
+  const editPieces = editLists.map((l) => {
+    const p = l.items.find((x) => !pickedPieces.has(x.id) && (x.video?.poster || x.images[0])) ?? null;
+    if (p) pickedPieces.add(p.id);
+    return p ? { handle: p.handle, title: p.title, price: p.price, image: p.video?.poster ?? p.images[0]!.url } : null;
+  });
   const editPanels: EditPanel[] = spotlightEdits.map((e, k) => ({
     ...e,
     title: e.title.replace(/\s+-\s+.*$/, ""),
@@ -179,11 +178,12 @@ export default async function Home() {
     vibe: EDIT_ART[e.handle]?.vibe ?? "The edit",
     focus: EDIT_ART[e.handle]?.focus,
     count: editCounts[k].total,
+    piece: editPieces[k],
   }));
-  const tabs = [
-    { label: "Bestsellers", sub: "The pieces everyone’s wearing", icon: "flame" as const, count: bestsellers.total, items: bestsellers.items, href: "/collections/all?sort=best-selling" },
-    { label: "New in", sub: "Fresh off the studio rail", icon: "sparkles" as const, count: fresh.total, items: fresh.items, href: "/collections/all?sort=newest" },
-    { label: "Under ₹999", sub: "Big style, small price", icon: "tag" as const, count: underPrice.total, items: underPrice.items, href: "/collections/all?max=999" },
+  const tabs: RailTab[] = [
+    { label: "Under ₹999", tone: "sun" as const, count: underPrice.total, items: underPrice.items, href: "/collections/all?max=999", feature: { kicker: "Steal deals", big: "₹999", line: "& under — boho tops, skirts and dresses that cost less than dinner out." } },
+    { label: "Bestsellers", tone: "ink" as const, count: bestsellers.total, items: bestsellers.items, href: "/collections/all?sort=best-selling", feature: { kicker: "Most loved", big: "Fan faves", line: "The pieces our girls keep coming back for — sold out once, restocked." } },
+    { label: "New in", tone: "sea" as const, count: fresh.total, items: fresh.items, href: "/collections/all?sort=newest", feature: { kicker: "Just landed", big: "Fresh drop", line: "Crochet trims, schiffli and summer prints, straight off the studio rail." } },
   ].filter((t) => t.items.length);
 
   return (
@@ -207,10 +207,10 @@ export default async function Home() {
         </div>
       </div>
 
-      {/* Signature collections — categories on top; edits and a photo-filled word below */}
+      {/* Shop by Category — categories on top; edits and a photo-filled word below */}
       <Container className="pt-10 sm:pt-14">
         <div className="flex items-end justify-between gap-6 mb-6 sm:mb-8">
-          <h2 className="font-display text-[34px] sm:text-[56px] leading-none">Discover signature collections</h2>
+          <h2 className="font-display text-[34px] sm:text-[56px] leading-none">Shop by Category</h2>
           <DotLink href="/collections" className="shrink-0 hidden sm:inline-flex">
             Explore all collections
           </DotLink>
@@ -239,17 +239,6 @@ export default async function Home() {
           ))}
         </Reveal>
       </Container>
-
-      {/* Lookbook — focus carousel with the pieces worn */}
-      {looks.length > 2 && (
-        <div className="mt-16 sm:mt-24">
-          <Lookbook
-            title="Sunlit Wardrobe"
-            text="Breezy cottons, crochet trims and schiffli details — styled for long brunches, coastal escapes and golden-hour plans. Watch the looks come into focus and shop each one."
-            looks={looks}
-          />
-        </div>
-      )}
 
       {/* Shop by mood — full-photo cards in a staggered (mirrored) rhythm; the brand tone is a slim band */}
       <Container className="pt-16 sm:pt-24">
@@ -282,19 +271,15 @@ export default async function Home() {
       {/* Products — tabbed rail */}
       {tabs.length > 0 && (
         <Container className="pt-16 sm:pt-24">
-          <SectionHeading eyebrow="Shop the favourites" title="Most-wanted," accent="right now" />
-          <ProductRail
-            list="Home"
-            lead={{ image: "/images/lifestyle/cafe-chair.webp", eyebrow: "Most loved", title: "The pieces everyone’s wearing", href: "/collections/all?sort=best-selling", cta: "Shop bestsellers" }}
-            tabs={tabs}
-          />
+          <SectionHeading eyebrow="Under ₹999 · Bestsellers · New in" title="Shop the" accent="shelf" />
+          <ProductRail list="Home" tabs={tabs} />
         </Container>
       )}
 
-      {/* Reels — dark rounded panel */}
+      {/* Try-on videos — dark rounded panel */}
       {clips.length > 0 && (
         <Panel bg="bg-ink text-cream overflow-hidden" className="pt-8 sm:pt-11 pb-8 sm:pb-11 px-4 sm:px-6 lg:px-10" style={blockPrint("#f5e0a3", 0.05)}>
-          <SectionHeading dark eyebrow="Watch & shop" title="See it" accent="move" className="mb-6 sm:mb-8" />
+          <SectionHeading dark eyebrow="Real fit · real fabric" title="Try-on videos," accent="see the fit" className="mb-6 sm:mb-8" />
           <ReelRail clips={clips} />
         </Panel>
       )}

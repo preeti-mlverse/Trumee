@@ -4,10 +4,22 @@ import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn, inr } from "@/lib/utils";
 import { useAutoAdvance } from "./use-auto-advance";
 
-export type EditPanel = { handle: string; title: string; image: string; text: string; count: number; vibe: string; /** CSS object-position */ focus?: string };
+export type EditPiece = { handle: string; title: string; price: number; image: string };
+export type EditPanel = {
+  handle: string;
+  title: string;
+  image: string;
+  text: string;
+  count: number;
+  vibe: string;
+  /** CSS object-position */
+  focus?: string;
+  /** A piece from this edit that no other panel shows */
+  piece?: EditPiece | null;
+};
 
 const TICK = 4500;
 
@@ -46,7 +58,7 @@ export function EditPanels({ edits }: { edits: EditPanel[] }) {
               )}
               style={{ flexBasis: 0 }}
             >
-              <Image src={e.image} alt="" fill sizes="(min-width:1024px) 60vw, 70vw" style={{ objectPosition: e.focus }} className={cn("object-cover transition-transform duration-[1200ms]", on ? "scale-100" : "scale-110")} />
+              <Image src={e.piece?.image ?? e.image} alt={e.piece?.title ?? ""} fill sizes="(min-width:1024px) 60vw, 70vw" style={{ objectPosition: e.piece ? "50% 20%" : e.focus }} className={cn("object-cover transition-transform duration-[1200ms]", on ? "scale-100" : "scale-110")} />
               <div className={cn("absolute inset-0 transition-colors duration-700", on ? "bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" : "bg-ink/45")} />
 
               {/* Closed: vertical title */}
@@ -58,6 +70,25 @@ export function EditPanels({ edits }: { edits: EditPanel[] }) {
               >
                 {e.title}
               </span>
+
+              {/* Open: the featured piece */}
+              {e.piece && (
+                <span
+                  className={cn(
+                    "absolute right-5 top-5 flex items-center gap-3 rounded-2xl bg-paper/90 backdrop-blur text-ink p-2 pr-4 shadow-lg transition-all duration-700",
+                    on ? "opacity-100 translate-y-0 delay-500" : "opacity-0 -translate-y-3",
+                  )}
+                >
+                  <span className="relative size-12 rounded-xl overflow-hidden bg-sand shrink-0">
+                    <Image src={e.piece.image} alt="" fill sizes="48px" className="object-cover object-top" />
+                  </span>
+                  <span className="max-w-[13rem]">
+                    <span className="block text-[10px] tracking-[0.22em] uppercase text-sea">Featured piece</span>
+                    <span className="block text-[13px] leading-snug line-clamp-1 mt-0.5">{e.piece.title}</span>
+                    <span className="block text-[13px] font-medium tabular-nums">{inr(e.piece.price)}</span>
+                  </span>
+                </span>
+              )}
 
               {/* Open: the story */}
               <div className={cn("absolute inset-x-0 bottom-0 p-7 lg:p-9 transition-all duration-700", on ? "opacity-100 translate-y-0 delay-300" : "opacity-0 translate-y-6 pointer-events-none")}>
@@ -82,12 +113,17 @@ export function EditPanels({ edits }: { edits: EditPanel[] }) {
       <div ref={rail} className="md:hidden flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-none -mx-4 px-4 scroll-px-4">
         {edits.map((e) => (
           <Link key={e.handle} href={`/collections/${e.handle}`} className="relative shrink-0 snap-start w-[78vw] aspect-[3/4] overflow-hidden rounded-card bg-ink text-cream isolate">
-            <Image src={e.image} alt="" fill sizes="80vw" style={{ objectPosition: e.focus }} className="object-cover" />
+            <Image src={e.piece?.image ?? e.image} alt={e.piece?.title ?? ""} fill sizes="80vw" style={{ objectPosition: e.piece ? "50% 20%" : e.focus }} className="object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/15 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-5">
               <span className="text-[10px] tracking-[0.24em] uppercase text-sun-soft">{e.vibe}</span>
               <p className="font-display text-[34px] leading-none mt-2">{e.title}</p>
               <p className="mt-2 text-[13px] text-cream/80 line-clamp-2">{e.text}</p>
+              {e.piece && (
+                <p className="mt-2 text-[12px] text-cream/90">
+                  Featured: {e.piece.title} · {inr(e.piece.price)}
+                </p>
+              )}
               <span className="mt-4 inline-flex items-center gap-2 text-sm">
                 Explore {e.count} styles <ArrowUpRight className="size-4" />
               </span>
