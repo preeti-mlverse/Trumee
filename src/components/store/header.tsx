@@ -76,7 +76,7 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
             </nav>
           </div>
 
-          <Link href="/" className="text-sea-dark" aria-label="Trumee home">
+          <Link href="/" className="text-ink" aria-label="Trumee home">
             <Wordmark className="text-[24px] lg:text-[30px]" />
           </Link>
 

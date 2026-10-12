@@ -27,6 +27,7 @@ export function CheckoutForm({
   codEnabled,
   codMax,
   codFee,
+  codNote,
   processingDays,
   whatsapp,
   onlineEnabled = true,
@@ -36,6 +37,7 @@ export function CheckoutForm({
   codEnabled: boolean;
   codMax: number | null;
   codFee: number;
+  codNote: string;
   processingDays: string;
   whatsapp: string;
   /** False when Razorpay isn't set up on this server: online payment is shown as unavailable. */
@@ -204,7 +206,7 @@ export function CheckoutForm({
               checked={method === "cod"}
               disabled={!codAllowed}
               onChange={() => setMethod("cod")}
-              title={`Cash on delivery${codFee ? ` (+${inr(codFee)})` : ""}`}
+              title={`Cash on delivery${codFee ? ` · +${inr(codFee)} COD fee` : ""}`}
               sub={
                 !codEnabled
                   ? "Not available right now"
@@ -212,13 +214,18 @@ export function CheckoutForm({
                     ? "Not available for this pincode"
                     : codAllowed
                       ? t.prepaidAvailable > 0
-                        ? `Pay when it arrives · pay online instead to save ${inr(t.prepaidAvailable)}`
+                        ? `Pay when it arrives · pay online instead to save ${inr(t.prepaidAvailable + codFee)}`
                         : "Pay in cash or UPI when your order arrives"
                       : `Available on orders up to ${inr(codMax)}`
               }
               icon={<Wallet className="size-4" />}
             />
           </div>
+          {method === "cod" && codAllowed && codNote && (
+            <p className="mt-3 flex items-start gap-2.5 rounded-2xl bg-sea-soft/60 text-ink px-4 py-3 text-[13px] leading-snug">
+              <RotateCcw className="size-4 mt-0.5 shrink-0 text-sea" strokeWidth={1.6} /> {codNote}
+            </p>
+          )}
         </fieldset>
 
         {error && (

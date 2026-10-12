@@ -44,6 +44,7 @@ export default async function CheckoutPage() {
         codEnabled={shipping.codEnabled}
         codMax={shipping.codMaxOrder}
         codFee={shipping.codFee}
+        codNote={shipping.codNote}
         processingDays={shipping.processingDays}
         whatsapp={store.whatsapp}
         onlineEnabled={onlinePaymentsAvailable()}

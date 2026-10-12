@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function StoreLayout({ children }: LayoutProps<"/">) {
-  const [store, nav, integrations] = await Promise.all([getSettings("store"), getSettings("navigation"), getSettings("integrations")]);
+  const [store, nav, integrations, shipping, payments] = await Promise.all([getSettings("store"), getSettings("navigation"), getSettings("integrations"), getSettings("shipping"), getSettings("payments")]);
   return (
     <div className="font-sans flex flex-col min-h-dvh">
       <SkyBackdrop />
@@ -28,7 +28,7 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
         <WishlistProvider>
           <Header nav={nav} announcement={store.announcement} />
           <main className="flex-1">{children}</main>
-          <Footer store={store} />
+          <Footer store={store} shipping={shipping} payments={payments} />
           <CartDrawer />
           <ScrollTop />
           <Suspense>

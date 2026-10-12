@@ -157,9 +157,10 @@ export default async function SettingsPage() {
           <SettingsForm section="cod">
             <Toggle label="Offer cash on delivery" name="codEnabled" defaultChecked={shipping.codEnabled} help="When Shiprocket is connected, COD is also hidden for pincodes no courier can collect cash in." />
             <div className="grid sm:grid-cols-2 gap-4">
-              <Field label="COD fee" name="codFee" type="number" prefix="₹" defaultValue={rs(shipping.codFee)} help="Added to COD orders; 0 = free" />
+              <Field label="COD fee" name="codFee" type="number" prefix="₹" defaultValue={rs(shipping.codFee)} help="Added to every COD order (e.g. 100); 0 = free" />
               <Field label="COD order limit" name="codMaxOrder" type="number" prefix="₹" defaultValue={rs(shipping.codMaxOrder)} help="Blank = no limit" />
             </div>
+            <TextArea label="Message for COD shoppers" name="codNote" defaultValue={shipping.codNote} rows={2} help="Shown at checkout when cash on delivery is chosen — reassure them returns are still easy." />
           </SettingsForm>
         </Section>
 

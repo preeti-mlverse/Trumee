@@ -1,13 +1,11 @@
-import { desc, eq } from "drizzle-orm";
-import { ArrowUpRight, Quote, RotateCcw, ShieldCheck, Truck, Wallet } from "lucide-react";
+import { ArrowUpRight, Quote } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { db, schema } from "@/db";
 import { EditPanels, type EditPanel } from "@/components/store/edit-panels";
 import { Hero, type HeroClip, type HeroProduct } from "@/components/store/hero";
 import { LoopVideo } from "@/components/store/loop-video";
-import { blockPrint, Doodle } from "@/components/store/motifs";
+import { blockPrint } from "@/components/store/motifs";
 import { ProductRail, type RailTab } from "@/components/store/product-rail";
 import { CategoryTile, ImageWord, ReelRail } from "@/components/store/reels";
 import { Reveal } from "@/components/store/reveal";
@@ -15,7 +13,7 @@ import { Container, DotLink, PillLink, SectionHeading } from "@/components/store
 import { listCollections, listProducts } from "@/lib/catalog";
 import { getSettings, type HeroSlide } from "@/lib/settings";
 import { CRAFT_IMAGES } from "@/lib/trust";
-import { formatDate, stripHtml } from "@/lib/utils";
+import { stripHtml } from "@/lib/utils";
 
 export const revalidate = 300;
 export const metadata: Metadata = {
@@ -62,7 +60,7 @@ const CAMPAIGN_SLIDES: HeroSlide[] = [
 
 /** Second row of the collections grid: edits shown with location photography. */
 const EDIT_TILES = [
-  { handle: "wander-x-wear", image: "/images/lifestyle/lake-wide.webp" },
+  { handle: "wander-x-wear", image: "/images/lifestyle/forest-walk.webp" },
   { handle: "free-spirited", image: "/images/lifestyle/terrace-red.webp" },
   { handle: "in-her-element", image: "/images/lifestyle/stone-rust.webp" },
 ];
@@ -79,12 +77,7 @@ const EDIT_ART: Record<string, { image: string; vibe: string; focus?: string }> 
 
 const CRAFT_WORDS = ["Crochet lace", "Schiffli embroidery", "Sanganeri prints", "Breathable cotton", "Designed in India", "Made for getaways", "Cash on delivery"];
 
-const PROMISES = [
-  [Truck, "Pan-India delivery", "Flat ₹29 shipping, 2–8 days"],
-  [RotateCcw, "Easy returns", "7-day return window"],
-  [Wallet, "Cash on delivery", "Pay when it arrives"],
-  [ShieldCheck, "Secure checkout", "UPI, cards & netbanking"],
-] as const;
+
 
 /** Edge-to-edge colour band; content keeps the page width unless `full`. */
 function Panel({ bg, className, style, full, tight, children }: { bg: string; className?: string; style?: React.CSSProperties; full?: boolean; tight?: boolean; children: React.ReactNode }) {
@@ -388,22 +381,6 @@ export default async function Home() {
       </Panel>
 
 
-      {/* Promises */}
-      <Container className="pt-8 sm:pt-10">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
-          {PROMISES.map(([I, title, text]) => (
-            <div key={title} className="rounded-3xl bg-paper/70 flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center p-5 sm:p-6">
-              <span className="size-11 shrink-0 rounded-full bg-ink text-sun grid place-items-center">
-                <I className="size-5" strokeWidth={1.4} />
-              </span>
-              <div>
-                <p className="text-[15px] font-medium">{title}</p>
-                <p className="text-[13px] text-muted mt-0.5">{text}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Container>
     </>
   );
 }

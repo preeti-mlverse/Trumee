@@ -1,6 +1,6 @@
-import { Mail, MessageCircle, Phone } from "lucide-react";
+import { BadgePercent, Mail, MessageCircle, Phone, RotateCcw, ShieldCheck, Truck, Wallet } from "lucide-react";
 import Link from "next/link";
-import type { StoreSettings } from "@/lib/settings";
+import type { PaymentSettings, ShippingSettings, StoreSettings } from "@/lib/settings";
 import { NewsletterForm } from "./newsletter-form";
 import { Wordmark } from "./ui";
 
@@ -37,9 +37,28 @@ const COLS = [
   },
 ];
 
-export function Footer({ store }: { store: StoreSettings }) {
+const rs = (p: number) => `₹${Math.round(p / 100).toLocaleString("en-IN")}`;
+
+export function Footer({ store, shipping, payments }: { store: StoreSettings; shipping: ShippingSettings; payments: PaymentSettings }) {
+  const perks = [
+    [Truck, shipping.flatRate ? `Flat ${rs(shipping.flatRate)} shipping` : "Free shipping across India"],
+    payments.prepaidDiscountPercent ? [BadgePercent, `${payments.prepaidDiscountPercent}% off on prepaid orders`] : null,
+    shipping.codEnabled ? [Wallet, `Cash on delivery${shipping.codFee ? ` (+${rs(shipping.codFee)})` : ""}`] : null,
+    [RotateCcw, "Easy 7-day returns & exchanges"],
+    [ShieldCheck, "Secure checkout"],
+  ].filter((x): x is [typeof Truck, string] => !!x);
   return (
-    <footer className="mt-10 sm:mt-14 bg-ink text-cream">
+    <footer className="mt-8 sm:mt-10 bg-ink text-cream">
+      {/* Thin trust strip, attached to the top of the footer */}
+      <div className="bg-sun text-ink">
+        <ul className="mx-auto max-w-[1400px] px-4 sm:px-10 lg:px-14 py-2.5 sm:py-3 flex flex-wrap items-center justify-center lg:justify-between gap-x-6 gap-y-1.5 text-[12px] sm:text-[13px] font-medium">
+          {perks.map(([I, t]) => (
+            <li key={t} className="flex items-center gap-2 whitespace-nowrap">
+              <I className="size-4" strokeWidth={1.7} /> {t}
+            </li>
+          ))}
+        </ul>
+      </div>
       <div className="mx-auto max-w-[1400px] overflow-hidden px-5 sm:px-10 lg:px-14 pt-16 pb-8">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.3fr)_2fr]">
           <div>

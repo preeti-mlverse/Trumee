@@ -2,7 +2,7 @@
 
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CardProduct } from "@/lib/catalog";
 import { cn } from "@/lib/utils";
 import { ProductCard } from "./product-card";
@@ -31,7 +31,18 @@ const TONE = {
  */
 export function ProductRail({ tabs, list }: { tabs: RailTab[]; list: string }) {
   const [t, setT] = useState(0);
+  const [manual, setManual] = useState(false);
   const rail = useRef<HTMLDivElement>(null);
+  const box = useRef<HTMLDivElement>(null);
+  // Under ₹999 → Bestsellers → New in → … every 9s while on screen; a tap on a tab takes over
+  useEffect(() => {
+    if (manual || tabs.length < 2) return;
+    let visible = false;
+    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.2 });
+    if (box.current) io.observe(box.current);
+    const id = setInterval(() => visible && !document.hidden && setT((x) => (x + 1) % tabs.length), 9000);
+    return () => (clearInterval(id), io.disconnect());
+  }, [manual, tabs.length]);
   useAutoAdvance(rail, 2600, t);
   const scroll = (dir: 1 | -1) => rail.current?.scrollBy({ left: dir * rail.current.clientWidth * 0.75, behavior: "smooth" });
   const tab = tabs[t];
@@ -39,7 +50,7 @@ export function ProductRail({ tabs, list }: { tabs: RailTab[]; list: string }) {
   const item = "shrink-0 snap-start w-[64vw] sm:w-[40vw] md:w-[30vw] lg:w-[calc((100%-3*20px)/4)] xl:w-[calc((100%-4*20px)/5)]";
 
   return (
-    <div>
+    <div ref={box}>
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6 sm:mb-8">
         {/* Tabs: big serif labels on a hairline, a mustard bar slides under the active one */}
         <div role="tablist" className="relative grid w-full lg:max-w-3xl border-b border-ink/15" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
@@ -55,6 +66,7 @@ export function ProductRail({ tabs, list }: { tabs: RailTab[]; list: string }) {
               aria-selected={k === t}
               onClick={() => {
                 setT(k);
+                setManual(true);
                 rail.current?.scrollTo({ left: 0, behavior: "smooth" });
               }}
               className={cn(

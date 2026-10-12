@@ -73,14 +73,15 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
     ["Care", p.care ?? "Gentle hand wash, dry in shade"],
     ["Dispatch", `Ships in ${shipping.processingDays}`],
     ["Returns", "7-day returns & exchanges"],
-    ["Payment", shipping.codEnabled ? "Online or cash on delivery" : "UPI, cards, netbanking"],
+    ["Payment", [payments.prepaidDiscountPercent ? `${payments.prepaidDiscountPercent}% off online` : "Pay online", shipping.codEnabled ? `COD${shipping.codFee ? ` +₹${shipping.codFee / 100}` : ""}` : null].filter(Boolean).join(" · ")],
+    ["Shipping", shipping.flatRate ? `₹${shipping.flatRate / 100} across India` : "Free across India"],
   ];
   const details = [
     { title: "Description", html: p.descriptionHtml, open: true },
     { title: "Fabric & care", html: `${p.fabric ? `<p><strong>Fabric:</strong> ${p.fabric}</p>` : ""}<p>${p.care ?? "Gentle hand wash in cold water. Dry in shade."}</p>` },
     {
       title: "Shipping & returns",
-      html: `<p>Ships in ${shipping.processingDays}. ${shipping.deliveryEstimates.map((d) => `${d.label}: ${d.days}`).join(" · ")}.</p><p>Easy returns and size exchanges within 7 days of delivery on unworn pieces with tags. <a href="/pages/returns-policy">Read the returns & exchange policy</a>.</p>`,
+      html: `<p>${shipping.flatRate ? `Flat ₹${shipping.flatRate / 100} shipping` : "Free shipping"} across India. Ships in ${shipping.processingDays}. ${shipping.deliveryEstimates.map((d) => `${d.label}: ${d.days}`).join(" · ")}.</p><p>Easy returns and size exchanges within 7 days of delivery on unworn pieces with tags. <a href="/pages/returns-policy">Read the returns & exchange policy</a>.</p>`,
     },
   ];
 

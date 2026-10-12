@@ -23,6 +23,8 @@ export type ShippingSettings = {
   freeShippingThreshold: number | null; // paise; null = never free
   codEnabled: boolean;
   codFee: number; // paise
+  /** Reassurance shown when a shopper picks cash on delivery (returns still easy) */
+  codNote: string;
   codMaxOrder: number | null; // paise
   processingDays: string;
   deliveryEstimates: { label: string; days: string }[];
@@ -153,15 +155,16 @@ export const DEFAULTS = {
     social: { instagram: "https://www.instagram.com/trumee.in/", youtube: "https://www.youtube.com/@trumeestudio", facebook: "https://www.facebook.com/trumee.in" },
     announcement: {
       enabled: true,
-      text: "Flat ₹29 shipping across India · Easy 7-day returns",
+      text: "Free shipping across India · 5% off when you pay online · Easy 7-day returns",
       href: "/pages/shipping-policy",
     },
   } satisfies StoreSettings,
   shipping: {
-    flatRate: 2900,
+    flatRate: 0,
     freeShippingThreshold: null,
     codEnabled: true,
-    codFee: 0,
+    codFee: 10000,
+    codNote: "Easy 7-day returns & size exchanges on COD orders too — refunds go straight to your UPI or bank account.",
     codMaxOrder: 500000,
     processingDays: "1–2 business days",
     deliveryEstimates: [
@@ -171,7 +174,7 @@ export const DEFAULTS = {
     ],
   } satisfies ShippingSettings,
   payments: {
-    prepaidDiscountPercent: 0,
+    prepaidDiscountPercent: 5,
     prepaidDiscountMax: null,
     prepaidDiscountMinOrder: 0,
     methods: { upi: true, card: true, netbanking: true, wallet: true, emi: true, paylater: true },

@@ -71,6 +71,7 @@ const SCHEMAS = {
     codEnabled: checkbox,
     codFee: rupees,
     codMaxOrder: optRupees,
+    codNote: z.string().trim().max(200),
   }),
   shipping: z.object({
     flatRate: rupees,
