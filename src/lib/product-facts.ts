@@ -72,3 +72,30 @@ export function dayRange(text: string | undefined, fallback: [number, number]): 
   const m = text?.match(/(\d+)\s*[–-]\s*(\d+)/);
   return m ? [Number(m[1]), Number(m[2])] : fallback;
 }
+
+/**
+ * Colour families for "Shop by colour" and the colour filter. Each product is tagged
+ * `colour-<key>` (see scripts/tag-colour-families.ts); the URL uses ?colour=<key>.
+ */
+export const COLOUR_FAMILIES = [
+  { key: "red", label: "Red & maroon", swatch: "#b3262e", names: ["Red", "Maroon", "Scarlet", "Wine"] },
+  { key: "pink", label: "Pink & peach", swatch: "#e48aa0", names: ["Pink", "Peach", "Rose", "Blush", "Coral"] },
+  { key: "yellow", label: "Mustard & yellow", swatch: "#d9a21b", names: ["Mustard", "Yellow"] },
+  { key: "rust", label: "Rust & earth", swatch: "#a8502f", names: ["Rust", "Brown", "Tan"] },
+  { key: "blue", label: "Blue & navy", swatch: "#24507a", names: ["Blue", "Navy", "Denim"] },
+  { key: "green", label: "Green & olive", swatch: "#6b7a3a", names: ["Green", "Olive", "Sage"] },
+  { key: "purple", label: "Purple & mauve", swatch: "#8b6aa8", names: ["Purple", "Mauve", "Lavender", "Lilac"] },
+  { key: "white", label: "White & cream", swatch: "#efe8da", names: ["White", "Cream", "Ivory"] },
+  { key: "black", label: "Black & monochrome", swatch: "#161616", names: ["Black", "Black/White"] },
+  { key: "multi", label: "Multicolour", swatch: "conic-gradient(#b3262e, #d9a21b, #6b7a3a, #24507a, #8b6aa8, #e48aa0, #b3262e)", names: ["Multicolor", "Pastel"] },
+] as const;
+
+export type ColourKey = (typeof COLOUR_FAMILIES)[number]["key"];
+export const colourTag = (key: string) => `colour-${key}`;
+
+/** Family for a colour name ("Navy" → blue), or null when unknown. */
+export function colourFamily(name: string | undefined | null) {
+  if (!name) return null;
+  const n = name.trim().toLowerCase();
+  return COLOUR_FAMILIES.find((f) => f.names.some((x) => x.toLowerCase() === n)) ?? null;
+}

@@ -14,7 +14,7 @@ const PRICES = [
 ];
 
 type Opt = { value: string; label: string };
-export function Filters({ facets, total }: { facets: { sizes: string[]; types: string[]; fabrics: string[]; occasions: Opt[]; details: Opt[] }; total: number }) {
+export function Filters({ facets, total }: { facets: { sizes: string[]; types: string[]; fabrics: string[]; occasions: Opt[]; details: Opt[]; colours: (Opt & { swatch: string })[] }; total: number }) {
   const { sizes, types } = facets;
   const router = useRouter();
   const pathname = usePathname();
@@ -27,7 +27,7 @@ export function Filters({ facets, total }: { facets: { sizes: string[]; types: s
   const list = (k: string) => sp.get(k)?.split(",").filter(Boolean) ?? [];
   const price = `${sp.get("min") ?? ""}-${sp.get("max") ?? ""}`;
   const activeCount =
-    selectedSizes.length + selectedTypes.length + list("fabric").length + list("occasion").length + list("detail").length + (price !== "-" ? 1 : 0) + (sp.get("instock") ? 1 : 0);
+    selectedSizes.length + selectedTypes.length + list("fabric").length + list("occasion").length + list("detail").length + list("colour").length + (price !== "-" ? 1 : 0) + (sp.get("instock") ? 1 : 0);
 
   const set = (patch: Record<string, string | null>) => {
     const next = new URLSearchParams(sp.toString());
@@ -67,6 +67,27 @@ export function Filters({ facets, total }: { facets: { sizes: string[]; types: s
           {facets.fabrics.map((f) => (
             <Check key={f} label={f} checked={list("fabric").includes(f)} onChange={() => toggleList("fabric", list("fabric"), f)} />
           ))}
+        </Group>
+      )}
+      {facets.colours.length > 0 && (
+        <Group title="Colour">
+          <div className="grid grid-cols-2 gap-2">
+            {facets.colours.map((c) => {
+              const on = list("colour").includes(c.value);
+              return (
+                <button
+                  key={c.value}
+                  type="button"
+                  onClick={() => toggleList("colour", list("colour"), c.value)}
+                  aria-pressed={on}
+                  className={cn("flex items-center gap-2.5 rounded-full border px-2 py-1.5 text-left text-[13px] transition-colors", on ? "border-ink bg-ink text-cream" : "border-line hover:border-ink")}
+                >
+                  <span className="size-5 shrink-0 rounded-full ring-1 ring-ink/15" style={{ background: c.swatch }} />
+                  <span className="truncate">{c.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </Group>
       )}
       {facets.occasions.length > 0 && (

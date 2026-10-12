@@ -1,4 +1,5 @@
 import "server-only";
+import { COLOUR_FAMILIES, colourTag } from "./product-facts";
 import { and, asc, desc, eq, exists, gte, ilike, inArray, lte, max, min, or, sql, sum } from "drizzle-orm";
 import { db, schema } from "@/db";
 
@@ -267,6 +268,7 @@ export async function getFacets(collectionId?: number) {
     types: [...new Set(rows.map((r) => r.type).filter(Boolean))].sort(),
     fabrics: FABRIC_FAMILIES.filter((f) => prod.some((p) => p.fabric?.toLowerCase().startsWith(f.toLowerCase()))),
     occasions: present(OCCASIONS),
+    colours: COLOUR_FAMILIES.filter((f) => tags.has(colourTag(f.key))).map((f) => ({ value: f.key, label: f.label, swatch: f.swatch })),
     details: present(DETAILS),
   };
 }

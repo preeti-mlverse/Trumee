@@ -48,7 +48,7 @@ export function Footer({ store, shipping, payments }: { store: StoreSettings; sh
     [ShieldCheck, "Secure checkout"],
   ].filter((x): x is [typeof Truck, string] => !!x);
   return (
-    <footer className="mt-8 sm:mt-10 bg-ink text-cream">
+    <footer className="bg-ink text-cream">
       {/* Thin trust strip, attached to the top of the footer */}
       <div className="bg-sun text-ink">
         <ul className="mx-auto max-w-[1400px] px-4 sm:px-10 lg:px-14 py-2.5 sm:py-3 flex flex-wrap items-center justify-center lg:justify-between gap-x-6 gap-y-1.5 text-[12px] sm:text-[13px] font-medium">

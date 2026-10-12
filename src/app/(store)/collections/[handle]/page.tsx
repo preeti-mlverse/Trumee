@@ -9,7 +9,7 @@ import { redirectOrNotFound } from "@/lib/redirects";
 import { breadcrumbLd, collectionLd, faqLd } from "@/lib/seo";
 import { stripHtml, truncate } from "@/lib/utils";
 
-const FILTER_KEYS = ["size", "type", "min", "max", "instock", "sort", "fabric", "occasion", "detail"];
+const FILTER_KEYS = ["size", "type", "min", "max", "instock", "sort", "fabric", "occasion", "detail", "colour"];
 
 async function load(handle: string) {
   if (handle === "all")

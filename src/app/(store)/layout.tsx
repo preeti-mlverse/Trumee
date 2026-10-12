@@ -27,7 +27,7 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
       <CartProvider>
         <WishlistProvider>
           <Header nav={nav} announcement={store.announcement} />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 pb-8 sm:pb-10 has-[>[data-flush-end]:last-child]:pb-0">{children}</main>
           <Footer store={store} shipping={shipping} payments={payments} />
           <CartDrawer />
           <ScrollTop />

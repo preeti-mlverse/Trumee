@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { DETAILS, getFacets, listProducts, OCCASIONS } from "@/lib/catalog";
+import { COLOUR_FAMILIES, colourTag } from "@/lib/product-facts";
 import { isSortKey } from "@/lib/sorts";
 import { Filters } from "./filters";
 import { ProductGrid } from "./product-card";
@@ -28,6 +29,7 @@ export async function Listing({ sp, collectionId, q, listName, basePath }: { sp:
       tagGroups: [
         one(sp.occasion)?.split(",").filter((t) => t in OCCASIONS) ?? [],
         one(sp.detail)?.split(",").filter((t) => t in DETAILS) ?? [],
+        one(sp.colour)?.split(",").filter((k) => COLOUR_FAMILIES.some((f) => f.key === k)).map(colourTag) ?? [],
       ],
       minPrice: min ? Number(min) * 100 : undefined,
       maxPrice: max ? Number(max) * 100 : undefined,

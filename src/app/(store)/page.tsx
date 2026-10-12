@@ -13,6 +13,7 @@ import { Container, DotLink, PillLink, SectionHeading } from "@/components/store
 import { listCollections, listProducts } from "@/lib/catalog";
 import { getSettings, type HeroSlide } from "@/lib/settings";
 import { CRAFT_IMAGES } from "@/lib/trust";
+import { COLOUR_FAMILIES, colourTag } from "@/lib/product-facts";
 import { stripHtml } from "@/lib/utils";
 
 export const revalidate = 300;
@@ -80,9 +81,9 @@ const CRAFT_WORDS = ["Crochet lace", "Schiffli embroidery", "Sanganeri prints", 
 
 
 /** Edge-to-edge colour band; content keeps the page width unless `full`. */
-function Panel({ bg, className, style, full, tight, children }: { bg: string; className?: string; style?: React.CSSProperties; full?: boolean; tight?: boolean; children: React.ReactNode }) {
+function Panel({ bg, className, style, full, tight, flush, children }: { bg: string; className?: string; style?: React.CSSProperties; full?: boolean; tight?: boolean; flush?: boolean; children: React.ReactNode }) {
   return (
-    <section className={`relative ${tight ? "mt-8 sm:mt-12" : "mt-16 sm:mt-24"} ${bg}`} style={style}>
+    <section data-flush-end={flush || undefined} className={`relative ${flush ? "mt-0" : tight ? "mt-8 sm:mt-12" : "mt-16 sm:mt-24"} ${bg}`} style={style}>
       <div className={`relative mx-auto ${full ? "" : "max-w-[1400px]"} ${className ?? ""}`}>{children}</div>
     </section>
   );
@@ -173,6 +174,14 @@ export default async function Home() {
     count: editCounts[k].total,
     piece: editPieces[k],
   }));
+  const colourLists = await Promise.all(COLOUR_FAMILIES.map((f) => listProducts({ tagGroups: [[colourTag(f.key)]], limit: 12, sort: "best-selling" })));
+  const usedForColour = new Set<number>();
+  const colours = COLOUR_FAMILIES.map((f, i) => {
+    const l = colourLists[i];
+    const pick = l.items.find((p) => !usedForColour.has(p.id) && p.images[0]) ?? l.items[0];
+    if (pick) usedForColour.add(pick.id);
+    return { ...f, total: l.total, image: pick?.images[0]?.url ?? null };
+  }).filter((c) => c.total > 0);
   const tabs: RailTab[] = [
     { label: "Under ₹999", tone: "sun" as const, count: underPrice.total, items: underPrice.items, href: "/collections/all?max=999", feature: { kicker: "Steal deals", big: "₹999", line: "& under — boho tops, skirts and dresses that cost less than dinner out." } },
     { label: "Bestsellers", tone: "ink" as const, count: bestsellers.total, items: bestsellers.items, href: "/collections/all?sort=best-selling", feature: { kicker: "Most loved", big: "Fan faves", line: "The pieces our girls keep coming back for — sold out once, restocked." } },
@@ -316,6 +325,34 @@ export default async function Home() {
         </div>
       </Panel>
 
+      {/* Shop by colour — one card per colour family, swatch + a piece in that colour */}
+      {colours.length > 0 && (
+        <Container className="pt-8 sm:pt-12">
+          <SectionHeading eyebrow="Find your shade" title="Shop by" accent="colour" />
+          <Reveal stagger className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+            {colours.map((c) => (
+              <Link
+                key={c.key}
+                href={`/collections/all?colour=${c.key}`}
+                className="group relative block overflow-hidden rounded-card bg-paper border border-ink/[0.06] isolate transition-transform duration-500 hover:-translate-y-1"
+              >
+                <span className="relative block aspect-[4/5] overflow-hidden bg-sand">
+                  {c.image && <Image src={c.image} alt="" fill sizes="(min-width:1024px) 18vw, 45vw" className="object-cover object-top transition-transform duration-700 group-hover:scale-105" />}
+                  <span aria-hidden className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/35 to-transparent" />
+                </span>
+                <span className="relative flex items-center gap-3 px-4 pb-4 pt-0">
+                  <span className="-mt-6 size-12 shrink-0 rounded-full ring-4 ring-paper shadow-md" style={{ background: c.swatch }} />
+                  <span className="min-w-0 pt-2.5">
+                    <span className="block font-display text-[20px] sm:text-[22px] leading-tight truncate">{c.label}</span>
+                    <span className="block text-[12px] text-muted">{c.total} styles →</span>
+                  </span>
+                </span>
+              </Link>
+            ))}
+          </Reveal>
+        </Container>
+      )}
+
       {/* Details */}
       <Container className="pt-16 sm:pt-24">
         <SectionHeading eyebrow="In the spotlight" title="Details that" accent="do the talking" />
@@ -357,7 +394,7 @@ export default async function Home() {
       </Panel>
 
       {/* Customer reviews — sun band with a slow ribbon of cards */}
-      <Panel bg="bg-sun text-ink overflow-hidden" full tight className="pt-10 sm:pt-12 pb-10 sm:pb-12" style={blockPrint("#161616", 0.06)}>
+      <Panel bg="bg-sun text-ink overflow-hidden" full flush className="pt-10 sm:pt-12 pb-10 sm:pb-12" style={blockPrint("#161616", 0.06)}>
         <p className="text-[11px] tracking-[0.3em] uppercase text-center">Customer reviews</p>
         <h2 className="font-display text-center text-[40px] sm:text-[60px] leading-[1] mt-3 px-4">
           Real reviews, <em className="font-normal">real love</em>
