@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { db, schema } from "@/db";
 import { EditSpotlight } from "@/components/store/edit-spotlight";
+import { Lookbook, type Look } from "@/components/store/lookbook";
 import { Hero, type HeroClip, type HeroProduct } from "@/components/store/hero";
 import { LoopVideo } from "@/components/store/loop-video";
 import { blockPrint, Doodle } from "@/components/store/motifs";
@@ -13,7 +14,7 @@ import { CategoryTile, ImageWord, ReelRail } from "@/components/store/reels";
 import { Reveal } from "@/components/store/reveal";
 import { Container, DotLink, PillLink, SectionHeading } from "@/components/store/ui";
 import { listCollections, listProducts } from "@/lib/catalog";
-import { getSettings } from "@/lib/settings";
+import { getSettings, type HeroSlide } from "@/lib/settings";
 import { CRAFT_IMAGES } from "@/lib/trust";
 import { formatDate, stripHtml } from "@/lib/utils";
 
@@ -33,6 +34,39 @@ const CATEGORY_MEDIA: Record<string, { image: string; video?: string }> = {
   shirts: { image: "/videos/trmsh01.webp", video: "/videos/trmsh01.mp4" },
   "co-ord-sets": { image: "/videos/trmcs01.webp", video: "/videos/trmcs01.mp4" },
 };
+
+/** Campaign artwork (titles are painted into the image) shown as hero slides 4 and 5. */
+const CAMPAIGN_SLIDES: HeroSlide[] = [
+  {
+    layout: "art",
+    tab: "Summer Bloom",
+    image: "/images/campaign/summer-bloom.webp",
+    eyebrow: "New collection",
+    title: "Summer Bloom",
+    text: "Floral cami dresses for sunlit days",
+    cta: "Shop Summer Bloom",
+    href: "/search?q=floral",
+    secondary: { label: "View collection", href: "/collections/main-character-energy" },
+  },
+  {
+    layout: "art",
+    tab: "New arrivals",
+    image: "/images/campaign/new-arrivals.webp",
+    eyebrow: "Trumee",
+    title: "New Arrivals",
+    text: "Sequin halter tops and floral wrap dresses",
+    cta: "Shop New Arrivals",
+    href: "/collections/all?sort=newest",
+    secondary: { label: "Bestsellers", href: "/collections/all?sort=best-selling" },
+  },
+];
+
+/** Second row of the collections grid: edits shown with location photography. */
+const EDIT_TILES = [
+  { handle: "wander-x-wear", image: "/images/lifestyle/lake-wide.webp" },
+  { handle: "free-spirited", image: "/images/lifestyle/terrace-red.webp" },
+  { handle: "in-her-element", image: "/images/lifestyle/stone-rust.webp" },
+];
 
 const CRAFT_WORDS = ["Crochet lace", "Schiffli embroidery", "Sanganeri prints", "Breathable cotton", "Designed in India", "Made for getaways", "Cash on delivery"];
 
@@ -62,6 +96,9 @@ const MOODS = [
   { key: "schiffli", group: "detail", title: "Schiffli", sub: "Scallops & eyelets", tone: "sand" },
 ] as const;
 
+/** Slim brand-colour band on each mood card */
+const MOOD_BAND = { sea: "bg-sea-bright", sand: "bg-sand", shade: "bg-ink", sun: "bg-sun" } as const;
+
 /** The four brand treatments (sea · sand · shade · sun) the mood cards rotate through. */
 const TONES = {
   sea: { card: "bg-gradient-to-br from-sea-soft via-[#c3dbe9] to-[#9cc2d9] text-ink", sub: "text-sea-dark", print: "#1d6188" },
@@ -71,7 +108,7 @@ const TONES = {
 } as const;
 
 export default async function Home() {
-  const [home, categories, edits, bestsellers, fresh, underPrice, withVideo, posts] = await Promise.all([
+  const [home, categories, edits, bestsellers, fresh, underPrice, withVideo] = await Promise.all([
     getSettings("home"),
     listCollections("category"),
     listCollections("edit"),
@@ -79,7 +116,6 @@ export default async function Home() {
     listProducts({ sort: "newest", limit: 10 }),
     listProducts({ maxPrice: 99900, sort: "best-selling", limit: 10 }),
     listProducts({ withVideo: true, limit: 24, sort: "best-selling" }),
-    db.select().from(schema.blogPosts).where(eq(schema.blogPosts.published, true)).orderBy(desc(schema.blogPosts.publishedAt)).limit(3),
   ]);
 
   const clips: HeroClip[] = withVideo.items.map((p) => ({ handle: p.handle, title: p.title, price: p.price, video: p.video!.url, poster: p.video!.poster }));
@@ -94,6 +130,9 @@ export default async function Home() {
   const bento = ["dresses", "tops", "skirts", "co-ord-sets", "jumpsuit", "shirts"]
     .map((h) => categories.find((c) => c.handle === h))
     .filter((c): c is (typeof categories)[number] => !!c);
+  const card = (p: (typeof withVideo.items)[number]) => ({ handle: p.handle, title: p.title, price: p.price, compareAtPrice: p.compareAtPrice, image: p.images[0]?.url ?? null });
+  // Hero: the production slides, then the Summer Bloom and New Arrivals campaign art as slides 4 and 5
+  const heroSlides: HeroSlide[] = [...home.heroSlides.slice(0, 3), ...CAMPAIGN_SLIDES];
   // Shoppable strip under each banner slide: the pictured piece first, then the rest of its collection
   const shop: HeroProduct[][] = await Promise.all(
     home.heroSlides.map(async (s) => {
@@ -106,6 +145,13 @@ export default async function Home() {
         .map((p) => ({ handle: p.handle, title: p.title, price: p.price, compareAtPrice: p.compareAtPrice, image: p.images[0]?.url ?? null }));
     }),
   );
+  const editTiles = EDIT_TILES.map((t) => ({ ...t, c: edits.find((e) => e.handle === t.handle) })).filter((t) => !!t.c);
+  const looks: Look[] = withVideo.items
+    .filter((p) => p.video?.poster)
+    .map((p, i, all) => {
+      const pair = all.slice(i + 1).concat(all.slice(0, i)).find((q) => q.productType !== p.productType) ?? null;
+      return { image: p.video!.poster!, alt: p.title, products: pair ? [card(p), card(pair)] : [card(p)] };
+    });
   // Each mood card gets a different product photo (bestsellers overlap across tags)
   const moodLists = await Promise.all(MOODS.map((m) => listProducts({ tagGroups: [[m.key]], limit: 8, sort: "best-selling" })));
   const used = new Set<number>();
@@ -122,7 +168,7 @@ export default async function Home() {
 
   return (
     <>
-      <Hero slides={home.heroSlides} clips={heroClips} shop={shop} />
+      <Hero slides={heroSlides} clips={heroClips} shop={shop} />
 
       {/* Craft words — slim sun ribbon tucked under the hero, same width */}
       <div aria-hidden>
@@ -141,11 +187,15 @@ export default async function Home() {
         </div>
       </div>
 
-      {/* Categories — bento mosaic */}
-      <Container className="relative pt-10 sm:pt-14">
-        <Doodle kind="sprig" className="hidden md:block absolute right-[38%] top-6 size-24 text-sea/25" />
-        <SectionHeading eyebrow="Discover" title="Shop by" accent="category" />
-        <Reveal stagger className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:auto-rows-[340px] xl:auto-rows-[380px]">
+      {/* Signature collections — categories on top; edits and a photo-filled word below */}
+      <Container className="pt-10 sm:pt-14">
+        <div className="flex items-end justify-between gap-6 mb-6 sm:mb-8">
+          <h2 className="font-display text-[34px] sm:text-[56px] leading-none">Discover signature collections</h2>
+          <DotLink href="/collections" className="shrink-0 hidden sm:inline-flex">
+            Explore all collections
+          </DotLink>
+        </div>
+        <Reveal stagger className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-12 gap-3 sm:gap-5 lg:auto-rows-[380px]">
           {bento.map((c) => {
             const m = CATEGORY_MEDIA[c.handle];
             return (
@@ -156,37 +206,53 @@ export default async function Home() {
                 image={m?.image ?? c.imageUrl ?? ""}
                 video={m?.video}
                 poster={m?.image}
-                className="aspect-[3/4] lg:aspect-auto"
+                className="aspect-[3/4] lg:aspect-auto lg:col-span-2"
               />
             );
           })}
-          <ImageWord word="Boho" image="linear-gradient(120deg, #134560 0%, #2b7aa5 38%, #d9a21b 72%, #161616 100%)" href="/collections/free-spirited" className="col-span-2 py-10 lg:py-0 bg-paper/70" />
+          {editTiles.slice(0, 2).map((t) => (
+            <CategoryTile key={t.handle} href={`/collections/${t.handle}`} title={t.c!.title.replace(/\s+-\s+.*$/, "")} image={t.image} className="aspect-[3/4] lg:aspect-auto lg:col-span-3" />
+          ))}
+          <ImageWord word="Boho" image="/images/lifestyle/pink-stairs.webp" href="/collections/free-spirited" className="col-span-2 sm:col-span-1 lg:col-span-3 py-10 lg:py-0 bg-paper border border-line" textClass="text-[24vw] sm:text-[11vw] lg:text-[6vw] xl:text-[92px]" />
+          {editTiles.slice(2, 3).map((t) => (
+            <CategoryTile key={t.handle} href={`/collections/${t.handle}`} title={t.c!.title.replace(/\s+-\s+.*$/, "")} image={t.image} className="aspect-[3/4] lg:aspect-auto lg:col-span-3" />
+          ))}
         </Reveal>
       </Container>
 
-      {/* Shop by mood — gradient cards with a floating product cut-out */}
-      <Container className="relative pt-16 sm:pt-24">
-        <Doodle kind="bloom" className="hidden md:block absolute left-[46%] top-12 size-20 text-sun/40" />
+      {/* Lookbook — focus carousel with the pieces worn */}
+      {looks.length > 2 && (
+        <div className="mt-16 sm:mt-24">
+          <Lookbook
+            title="Sunlit Wardrobe"
+            text="Breezy cottons, crochet trims and schiffli details — styled for long brunches, coastal escapes and golden-hour plans. Watch the looks come into focus and shop each one."
+            looks={looks}
+          />
+        </div>
+      )}
+
+      {/* Shop by mood — full-photo cards in a staggered (mirrored) rhythm; the brand tone is a slim band */}
+      <Container className="pt-16 sm:pt-24">
         <SectionHeading eyebrow="Find your vibe" title="Shop by" accent="mood" />
-        <Reveal stagger className="grid grid-cols-2 lg:grid-cols-6 gap-2.5 sm:gap-4">
-          {moods.map((m) => (
+        <Reveal stagger className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 lg:pb-10">
+          {moods.map((m, i) => (
             <Link
               key={m.key}
               href={`/collections/all?${m.group}=${m.key}`}
-              className={`group relative h-72 sm:h-80 overflow-hidden rounded-card ${TONES[m.tone].card} p-4 sm:p-5 flex flex-col justify-between shadow-[0_18px_40px_-28px_rgba(22,22,22,0.6)] transition-transform duration-500 hover:-translate-y-1.5`}
+              className={`group relative block aspect-[3/4] lg:aspect-[3/4.6] overflow-hidden rounded-card bg-ink isolate ${i % 2 ? "lg:translate-y-10" : ""}`}
             >
-              <span aria-hidden className="absolute inset-0" style={blockPrint(TONES[m.tone].print, 0.08)} />
-              <span className="relative z-10">
-                <span className={`block text-[10px] tracking-[0.26em] uppercase ${TONES[m.tone].sub}`}>{m.sub}</span>
-                <span className="block font-display italic text-[30px] sm:text-[34px] leading-none mt-1.5">{m.title}</span>
-              </span>
-              {m.image && (
-                <span className="absolute right-0 bottom-0 left-6 sm:left-8 top-[30%] rounded-t-[999px] overflow-hidden transition-transform duration-700 origin-bottom group-hover:scale-[1.04] [mask-image:linear-gradient(to_bottom,transparent,#000_22%)]">
-                  <Image src={m.image} alt="" fill sizes="(min-width:1024px) 14vw, 40vw" className="object-cover object-top" />
+              {m.image && <Image src={m.image} alt="" fill sizes="(min-width:1024px) 16vw, 48vw" className="object-cover object-top transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]" />}
+              <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/15 to-transparent" />
+              <span aria-hidden className={`absolute inset-x-0 top-0 h-1.5 ${MOOD_BAND[m.tone]}`} />
+              <span className="absolute inset-x-0 bottom-0 p-4 sm:p-5 text-cream">
+                <span className="block text-[10px] tracking-[0.26em] uppercase text-cream/70">{m.sub}</span>
+                <span className="block font-display italic text-[28px] sm:text-[32px] leading-none mt-2">
+                  {m.title}
                 </span>
-              )}
-              <span className={`relative z-10 inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-[12px] shadow-sm ${m.tone === "shade" ? "bg-sun text-ink" : "bg-paper text-ink"}`}>
-                {m.total} styles <ArrowUpRight className="size-3.5 transition-transform group-hover:rotate-45" />
+                <span className="mt-3 flex items-center justify-between text-[12px] tracking-[0.06em] text-cream/85">
+                  {m.total} styles
+                  <span aria-hidden className="transition-transform duration-500 group-hover:translate-x-1">→</span>
+                </span>
               </span>
             </Link>
           ))}
@@ -316,24 +382,6 @@ export default async function Home() {
         </div>
       </Panel>
 
-      {/* Journal */}
-      {posts.length > 0 && (
-        <Container className="pt-16 sm:pt-24">
-          <SectionHeading eyebrow="The Journal" title="Style" accent="notes" href="/blogs/news" linkLabel="Read the journal" />
-          <Reveal stagger className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-5">
-            {posts.map((p) => (
-              <Link key={p.id} href={`/blogs/news/${p.handle}`} className="group">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-card bg-sand">
-                  {p.coverUrl && <Image src={p.coverUrl} alt="" fill sizes="(min-width:768px) 33vw, 100vw" className="object-cover object-top transition-transform duration-700 group-hover:scale-105" />}
-                  {p.publishedAt && <span className="glass absolute left-3 top-3 rounded-full px-3 py-1 text-[11px] tracking-[0.12em] uppercase">{formatDate(p.publishedAt)}</span>}
-                </div>
-                <h3 className="font-display text-[28px] leading-tight mt-5 group-hover:text-sea">{p.title}</h3>
-                <p className="text-sm text-muted mt-2 line-clamp-2">{p.excerpt}</p>
-              </Link>
-            ))}
-          </Reveal>
-        </Container>
-      )}
 
       {/* Promises */}
       <Container className="pt-16 sm:pt-20">

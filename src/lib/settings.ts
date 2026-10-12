@@ -96,10 +96,11 @@ export type IntegrationSettings = {
  * One hero slide. `layout` picks the composition:
  * motion = full-bleed campaign video · banner = a finished wide artwork shown whole + shoppable strip · scenic = full-bleed landscape photo ·
  * runway = catwalk loops side by side · split = photo beside a cream copy panel ·
- * duo = a brand-coloured copy panel beside two tall media panes (catwalk loops or photos).
+ * duo = a brand-coloured copy panel beside two tall media panes (catwalk loops or photos) ·
+ * art = finished campaign artwork with the title painted in, shown whole with its buttons beneath.
  */
 export type HeroSlide = {
-  layout?: "motion" | "banner" | "duo" | "scenic" | "runway" | "split";
+  layout?: "motion" | "banner" | "duo" | "scenic" | "runway" | "split" | "art";
   /** banner: collection whose pieces are shown in the shoppable strip; `featured` handles lead it */
   collection?: string;
   featured?: string[];
@@ -197,6 +198,7 @@ export const DEFAULTS = {
     clarityId: "",
   } satisfies IntegrationSettings,
   navigation: [
+    { label: "Home", href: "/" },
     {
       label: "Shop",
       href: "/collections/all",
@@ -209,21 +211,8 @@ export const DEFAULTS = {
         { label: "Co-ord Sets", href: "/collections/co-ord-sets" },
       ],
     },
-    {
-      label: "Edits",
-      href: "/collections",
-      children: [
-        { label: "Moodboard Essentials", href: "/collections/main-character-energy" },
-        { label: "Nine to Thrive", href: "/collections/in-her-element" },
-        { label: "Wander x Wear", href: "/collections/wander-x-wear" },
-        { label: "After the Rain", href: "/collections/after-the-rain" },
-        { label: "Free Spirited", href: "/collections/free-spirited" },
-        { label: "Nomadic Escapes", href: "/collections/escape-edit" },
-      ],
-    },
-    { label: "Bestsellers", href: "/collections/all?sort=best-selling" },
-    { label: "Journal", href: "/blogs/news" },
-    { label: "About", href: "/pages/about-us" },
+    { label: "About us", href: "/pages/about-us" },
+    { label: "Contact us", href: "/contact" },
   ] satisfies NavLink[],
   home: {
     heroSlides: [

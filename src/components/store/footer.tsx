@@ -31,7 +31,6 @@ const COLS = [
     title: "Trumee",
     links: [
       ["About us", "/pages/about-us"],
-      ["Journal", "/blogs/news"],
       ["Terms & conditions", "/pages/terms-and-conditions"],
       ["Privacy policy", "/pages/privacy-policy"],
     ],

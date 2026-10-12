@@ -44,3 +44,6 @@ next-env.d.ts
 
 # admin uploads (product photos) — back these up on the server
 /uploads/
+
+# raw campaign artwork (the site uses the WebP copies in public/images/campaign)
+/banners/

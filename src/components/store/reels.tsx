@@ -46,13 +46,15 @@ export function ReelRail({ clips }: { clips: HeroClip[] }) {
   );
 }
 
-/** Rounded bento tile for a category — still image, catwalk loop on hover, glass label. */
+/**
+ * Rounded bento tile for a category — the catwalk loop plays on its own while the tile is on screen
+ * (still image underneath as the poster/fallback), glass label.
+ */
 export function CategoryTile({ href, title, image, video, poster, className, sizes = "(min-width:1024px) 25vw, 50vw" }: { href: string; title: string; image: string; video?: string; poster?: string; className?: string; sizes?: string }) {
-  const [hover, setHover] = useState(false);
   return (
-    <Link href={href} className={cn("group relative block overflow-hidden rounded-card bg-sand isolate", className)} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
-      <Image src={image} alt={title} fill sizes={sizes} className={cn("object-cover object-[50%_25%] transition duration-700", video ? "group-hover:opacity-0" : "group-hover:scale-105")} />
-      {video && <LoopVideo src={video} poster={poster} playing={hover} className="absolute inset-0 size-full object-[50%_25%] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />}
+    <Link href={href} className={cn("group relative block overflow-hidden rounded-card bg-sand isolate", className)}>
+      <Image src={image} alt={title} fill sizes={sizes} className="object-cover object-[50%_25%] transition-transform duration-700 group-hover:scale-105" />
+      {video && <LoopVideo src={video} poster={poster} className="absolute inset-0 size-full object-[50%_25%] transition-transform duration-700 group-hover:scale-105" />}
       <span className="glass absolute left-3 bottom-3 inline-flex items-center gap-2 rounded-full pl-4 pr-1.5 py-1.5 text-[13px] sm:text-sm tracking-[0.02em]">
         {title}
         <span className="size-7 rounded-full bg-ink text-cream grid place-items-center transition-transform group-hover:rotate-45">
@@ -64,17 +66,17 @@ export function CategoryTile({ href, title, image, video, poster, className, siz
 }
 
 /** A single word with a photograph showing through the letters. */
-export function ImageWord({ word, image, href, className }: { word: string; image: string; href: string; className?: string }) {
+export function ImageWord({ word, image, href, className, textClass = "text-[27vw] sm:text-[18vw] lg:text-[12vw] xl:text-[190px]" }: { word: string; image: string; href: string; className?: string; textClass?: string }) {
   return (
     <Link href={href} className={cn("group relative flex flex-col items-center justify-center rounded-card overflow-hidden", className)} aria-label={`Shop ${word.toLowerCase()} styles`}>
       <span
-        className="text-image font-sans font-extrabold uppercase tracking-[-0.04em] text-[27vw] sm:text-[18vw] lg:text-[12vw] xl:text-[190px] leading-[0.85] transition-[background-position] duration-[2000ms] bg-[position:50%_30%] group-hover:bg-[position:50%_60%]"
+        className={cn("text-image font-sans font-extrabold uppercase tracking-[-0.04em] leading-[0.85] transition-[background-position] duration-[2000ms] bg-[position:50%_30%] group-hover:bg-[position:50%_60%]", textClass)}
         // `image` may be a photo path or a CSS gradient
         style={{ backgroundImage: image.includes("gradient(") ? image : `url(${image})`, backgroundSize: image.includes("gradient(") ? "200% 200%" : undefined }}
       >
         {word}
       </span>
-      <span className="mt-2 text-[11px] tracking-[0.3em] uppercase text-sea">Shop the mood →</span>
+      <span className="mt-5 text-[11px] tracking-[0.3em] uppercase text-sea">Shop the mood →</span>
     </Link>
   );
 }

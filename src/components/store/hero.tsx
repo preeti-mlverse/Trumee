@@ -66,6 +66,8 @@ export function Hero({ slides, clips, shop = [] }: { slides: HeroSlide[]; clips:
               <Runway s={s} clips={clips} active={k === i} />
             ) : s.layout === "split" ? (
               <Split s={s} active={k === i} />
+            ) : s.layout === "art" ? (
+              <Art s={s} active={k === i} />
             ) : (
               <Scenic s={s} active={k === i} priority={k === 0} />
             )}
@@ -143,6 +145,43 @@ function Ctas({ s, active, dark }: { s: HeroSlide; active: boolean; dark?: boole
           {s.secondary.label}
         </Link>
       )}
+    </div>
+  );
+}
+
+/**
+ * Campaign artwork with its title painted in. Fills the whole hero (cropped from the right on
+ * narrower screens so the painted title is never cut), with its buttons under the title.
+ */
+function Art({ s, active }: { s: HeroSlide; active: boolean }) {
+  return (
+    <div className="absolute inset-0 overflow-hidden bg-ink">
+      {/* Desktop/tablet: the artwork fills the hero; anchored left so the painted title stays in frame */}
+      <div className="hidden sm:block absolute inset-0">
+        <Link href={s.href} tabIndex={active ? 0 : -1} aria-label={`${s.title} — ${s.text ?? s.cta}`} className="absolute inset-0">
+          <Image src={s.image} alt={`${s.title}: ${s.text ?? ""}`.trim()} fill priority sizes="100vw" className={cn("object-cover object-left", active && "animate-kenburns")} />
+        </Link>
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ink/55 to-transparent pointer-events-none" />
+        {active && (
+          <div className="absolute left-[4.5%] top-[62%] [&>div]:mt-0">
+            <Ctas s={s} active={active} />
+          </div>
+        )}
+      </div>
+      {/* Phones: the painted title is too small, so fill the screen on the model and set the title as text */}
+      <div className="sm:hidden absolute inset-0 text-cream">
+        <Image src={s.image} alt="" fill sizes="100vw" className={cn("object-cover object-[78%_50%]", active && "animate-kenburns")} />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
+        {active && (
+          <div className="absolute inset-x-0 bottom-0 px-5 pb-16">
+            <p className="text-[11px] tracking-[0.3em] uppercase text-sun-soft animate-word">{s.eyebrow}</p>
+            <Title s={s} className="mt-2 text-[44px]" />
+            <div className="[&>div]:mt-4 [&_a+a]:hidden">
+              <Ctas s={s} active={active} />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
