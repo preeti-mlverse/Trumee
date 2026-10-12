@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Flame, Sparkles, Tag } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import type { CardProduct } from "@/lib/catalog";
@@ -9,7 +9,18 @@ import { ProductCard } from "./product-card";
 import { useAutoAdvance } from "./use-auto-advance";
 import { DotLink, PillLink } from "./ui";
 
-export type RailTab = { label: string; items: CardProduct[]; href: string };
+export type RailTab = {
+  label: string;
+  items: CardProduct[];
+  href: string;
+  /** One-line promise shown on the tab card */
+  sub?: string;
+  /** Total pieces in this list (shown as "24 styles") */
+  count?: number;
+  icon?: "flame" | "sparkles" | "tag";
+};
+
+const ICONS = { flame: Flame, sparkles: Sparkles, tag: Tag };
 export type RailLead = { image: string; eyebrow: string; title: string; href: string; cta: string };
 
 /**
@@ -19,45 +30,56 @@ export type RailLead = { image: string; eyebrow: string; title: string; href: st
 export function ProductRail({ tabs, lead, list }: { tabs: RailTab[]; lead?: RailLead; list: string }) {
   const [t, setT] = useState(0);
   const rail = useRef<HTMLDivElement>(null);
-  useAutoAdvance(rail, 3000, t);
+  useAutoAdvance(rail, 2600, t);
   const scroll = (dir: 1 | -1) => rail.current?.scrollBy({ left: dir * rail.current.clientWidth * 0.75, behavior: "smooth" });
   const tab = tabs[t];
   const item = "shrink-0 snap-start w-[64vw] sm:w-[40vw] md:w-[30vw] lg:w-[calc((100%-3*20px)/4)] xl:w-[calc((100%-4*20px)/5)]";
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
-        <div role="tablist" className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none -mx-1 px-1">
-          {tabs.map((x, k) => (
+      {/* Shelf tabs: three big, clear choices — the active one is solid ink */}
+      <div role="tablist" className="grid grid-flow-col auto-cols-[78%] sm:auto-cols-auto sm:grid-flow-row sm:grid-cols-3 gap-3 sm:gap-4 overflow-x-auto scrollbar-none snap-x -mx-4 px-4 sm:mx-0 sm:px-0">
+        {tabs.map((x, k) => {
+          const I = ICONS[x.icon ?? "sparkles"];
+          const on = k === t;
+          return (
             <button
               key={x.label}
               role="tab"
-              aria-selected={k === t}
+              aria-selected={on}
               onClick={() => {
                 setT(k);
                 rail.current?.scrollTo({ left: 0, behavior: "smooth" });
               }}
               className={cn(
-                "shrink-0 rounded-full px-4 sm:px-5 py-2 sm:py-2.5 text-[13px] sm:text-sm tracking-[0.02em] border transition-colors",
-                k === t ? "bg-ink text-cream border-ink" : "border-ink/15 bg-paper/60 hover:border-ink/50",
+                "group snap-start text-left rounded-card border px-5 py-4 sm:px-6 sm:py-5 flex items-center gap-4 transition-all duration-300",
+                on ? "bg-ink text-cream border-ink shadow-[0_18px_40px_-24px_rgba(22,22,22,0.7)]" : "bg-paper/80 border-ink/10 hover:border-ink/40 hover:-translate-y-0.5",
               )}
             >
-              {x.label}
+              <span className={cn("size-11 sm:size-12 shrink-0 rounded-full grid place-items-center transition-colors", on ? "bg-sun text-ink" : "bg-sand text-sea")}>
+                <I className="size-5" strokeWidth={1.6} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-display text-[26px] sm:text-[30px] leading-none">{x.label}</span>
+                {x.sub && <span className={cn("block mt-1.5 text-[13px] truncate", on ? "text-cream/70" : "text-muted")}>{x.sub}</span>}
+              </span>
+              {x.count != null && (
+                <span className={cn("hidden md:inline-flex shrink-0 rounded-full px-3 py-1 text-[12px] tabular-nums", on ? "bg-cream/15 text-cream" : "bg-sand text-ink-soft")}>{x.count} styles</span>
+              )}
             </button>
-          ))}
-        </div>
-        <div className="flex items-center gap-3">
-          <DotLink href={tab.href} className="hidden sm:inline-flex">
-            View all
-          </DotLink>
-          <div className="hidden lg:flex gap-2">
-            <RoundArrow onClick={() => scroll(-1)} label="Previous products">
-              <ArrowLeft className="size-4" />
-            </RoundArrow>
-            <RoundArrow onClick={() => scroll(1)} label="More products">
-              <ArrowRight className="size-4" />
-            </RoundArrow>
-          </div>
+          );
+        })}
+      </div>
+
+      <div className="flex items-center justify-between gap-4 mt-6 mb-4 sm:mt-8 sm:mb-5">
+        <DotLink href={tab.href}>Shop all {tab.label.toLowerCase()}</DotLink>
+        <div className="hidden lg:flex gap-2">
+          <RoundArrow onClick={() => scroll(-1)} label="Previous products">
+            <ArrowLeft className="size-4" />
+          </RoundArrow>
+          <RoundArrow onClick={() => scroll(1)} label="More products">
+            <ArrowRight className="size-4" />
+          </RoundArrow>
         </div>
       </div>
 

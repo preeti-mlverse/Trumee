@@ -13,12 +13,14 @@ export function useAutoAdvance(ref: RefObject<HTMLElement | null>, everyMs = 300
     if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let visible = false;
     let holdUntil = 0;
-    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.4 });
+    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.15 });
     io.observe(el);
     const hold = () => (holdUntil = Date.now() + 5000);
     el.addEventListener("pointerdown", hold);
     el.addEventListener("touchstart", hold, { passive: true });
-    el.addEventListener("wheel", hold, { passive: true });
+    // Only a sideways swipe on a trackpad counts; scrolling the page down past the rail must not pause it
+    const onWheel = (e: WheelEvent) => Math.abs(e.deltaX) > Math.abs(e.deltaY) && hold();
+    el.addEventListener("wheel", onWheel, { passive: true });
 
     const tick = setInterval(() => {
       if (!visible || Date.now() < holdUntil || document.hidden) return;
@@ -34,7 +36,7 @@ export function useAutoAdvance(ref: RefObject<HTMLElement | null>, everyMs = 300
       io.disconnect();
       el.removeEventListener("pointerdown", hold);
       el.removeEventListener("touchstart", hold);
-      el.removeEventListener("wheel", hold);
+      el.removeEventListener("wheel", onWheel);
     };
   }, [ref, everyMs, resetKey]);
 }

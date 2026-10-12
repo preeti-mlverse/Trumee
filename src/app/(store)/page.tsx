@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { db, schema } from "@/db";
-import { EditSpotlight } from "@/components/store/edit-spotlight";
+import { EditPanels, type EditPanel } from "@/components/store/edit-panels";
 import { Lookbook, type Look } from "@/components/store/lookbook";
 import { Hero, type HeroClip, type HeroProduct } from "@/components/store/hero";
 import { LoopVideo } from "@/components/store/loop-video";
@@ -67,6 +67,16 @@ const EDIT_TILES = [
   { handle: "free-spirited", image: "/images/lifestyle/terrace-red.webp" },
   { handle: "in-her-element", image: "/images/lifestyle/stone-rust.webp" },
 ];
+
+/** Edit panels: location photography and a two-word vibe for each moodboard. */
+const EDIT_ART: Record<string, { image: string; vibe: string; focus?: string }> = {
+  "main-character-energy": { image: "/images/lifestyle/hero-pink-wall.webp", vibe: "Bold & playful" },
+  "in-her-element": { image: "/images/lifestyle/stone-wall.webp", vibe: "Desk to dinner" },
+  "wander-x-wear": { image: "/images/campaign/summer-checks.webp", vibe: "Travel light", focus: "72% 40%" },
+  "after-the-rain": { image: "/images/lifestyle/forest-walk.webp", vibe: "Monsoon mood" },
+  "free-spirited": { image: "/images/campaign/summer-bloom.webp", vibe: "Boho & breezy", focus: "74% 35%" },
+  "escape-edit": { image: "/images/campaign/new-arrivals.webp", vibe: "Getaway ready", focus: "62% 35%" },
+};
 
 const CRAFT_WORDS = ["Crochet lace", "Schiffli embroidery", "Sanganeri prints", "Breathable cotton", "Designed in India", "Made for getaways", "Cash on delivery"];
 
@@ -160,10 +170,20 @@ export default async function Home() {
     if (pick) used.add(pick.id);
     return { ...m, total: moodLists[i].total, image: pick?.images[0]?.url ?? null };
   });
+  // Edits: location photography + live style counts
+  const editCounts = await Promise.all(spotlightEdits.map((e) => listProducts({ collectionId: edits.find((x) => x.handle === e.handle)?.id, limit: 1 })));
+  const editPanels: EditPanel[] = spotlightEdits.map((e, k) => ({
+    ...e,
+    title: e.title.replace(/\s+-\s+.*$/, ""),
+    image: EDIT_ART[e.handle]?.image ?? e.image ?? "/images/lifestyle/lake-wide.webp",
+    vibe: EDIT_ART[e.handle]?.vibe ?? "The edit",
+    focus: EDIT_ART[e.handle]?.focus,
+    count: editCounts[k].total,
+  }));
   const tabs = [
-    { label: "Bestsellers", items: bestsellers.items, href: "/collections/all?sort=best-selling" },
-    { label: "New in", items: fresh.items, href: "/collections/all?sort=newest" },
-    { label: "Under ₹999", items: underPrice.items, href: "/collections/all?max=999" },
+    { label: "Bestsellers", sub: "The pieces everyone’s wearing", icon: "flame" as const, count: bestsellers.total, items: bestsellers.items, href: "/collections/all?sort=best-selling" },
+    { label: "New in", sub: "Fresh off the studio rail", icon: "sparkles" as const, count: fresh.total, items: fresh.items, href: "/collections/all?sort=newest" },
+    { label: "Under ₹999", sub: "Big style, small price", icon: "tag" as const, count: underPrice.total, items: underPrice.items, href: "/collections/all?max=999" },
   ].filter((t) => t.items.length);
 
   return (
@@ -233,7 +253,7 @@ export default async function Home() {
 
       {/* Shop by mood — full-photo cards in a staggered (mirrored) rhythm; the brand tone is a slim band */}
       <Container className="pt-16 sm:pt-24">
-        <SectionHeading eyebrow="Find your vibe" title="Shop by" accent="mood" />
+        <SectionHeading eyebrow="Plans & details" title="Shop by" accent="occasion & craft" />
         <Reveal stagger className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 lg:pb-10">
           {moods.map((m, i) => (
             <Link
@@ -262,7 +282,7 @@ export default async function Home() {
       {/* Products — tabbed rail */}
       {tabs.length > 0 && (
         <Container className="pt-16 sm:pt-24">
-          <SectionHeading eyebrow="Fresh picks" title="Just dropped," accent="made for repeat wear" />
+          <SectionHeading eyebrow="Shop the favourites" title="Most-wanted," accent="right now" />
           <ProductRail
             list="Home"
             lead={{ image: "/images/lifestyle/cafe-chair.webp", eyebrow: "Most loved", title: "The pieces everyone’s wearing", href: "/collections/all?sort=best-selling", cta: "Shop bestsellers" }}
@@ -282,8 +302,8 @@ export default async function Home() {
       {/* The Edits — moodboard index */}
       {spotlightEdits.length > 0 && (
         <Container className="pt-16 sm:pt-24">
-          <SectionHeading eyebrow="Moodboards" title="The" accent="Edits" />
-          <EditSpotlight edits={spotlightEdits} />
+          <SectionHeading eyebrow="Moodboards" title="The" accent="Edits" text="Six moods, one wardrobe — pick the story you’re living this week." href="/collections" linkLabel="All edits" />
+          <EditPanels edits={editPanels} />
         </Container>
       )}
 
