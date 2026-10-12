@@ -85,7 +85,7 @@ export function Hero({ slides, clips, shop = [] }: { slides: HeroSlide[]; clips:
                 aria-label={`Show ${s.tab ?? s.eyebrow}`}
                 onClick={() => setI(k)}
                 // Light (duo) slides need dark tabs to stay visible
-                className={cn("group text-left w-12 sm:w-36 transition-colors duration-700", slides[i].layout === "duo" ? "text-ink" : "text-cream")}
+                className={cn("group text-left w-12 sm:w-36 py-3 sm:py-0 transition-colors duration-700", slides[i].layout === "duo" ? "text-ink" : "text-cream")}
               >
                 <span className="hidden sm:block text-[11px] tracking-[0.2em] uppercase mb-2 opacity-60 group-aria-selected:opacity-100 transition-opacity truncate">{s.tab ?? s.eyebrow}</span>
                 <span className="relative block h-[3px] rounded-full bg-current/25 overflow-hidden">

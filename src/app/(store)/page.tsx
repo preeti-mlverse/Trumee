@@ -235,7 +235,7 @@ export default async function Home() {
           {editTiles.slice(0, 2).map((t) => (
             <CategoryTile key={t.handle} href={`/collections/${t.handle}`} title={t.c!.title.replace(/\s+-\s+.*$/, "")} image={t.image} className="aspect-[3/4] lg:aspect-auto lg:col-span-3" />
           ))}
-          <ImageWord word="Boho" image="/images/lifestyle/pink-stairs.webp" href="/collections/free-spirited" className="col-span-2 sm:col-span-1 lg:col-span-3 py-10 lg:py-0 bg-paper border border-line" textClass="text-[24vw] sm:text-[11vw] lg:text-[6vw] xl:text-[92px]" />
+          <ImageWord word="Boho" image="/images/lifestyle/pink-stairs.webp" href="/collections/free-spirited" className="aspect-[3/4] sm:aspect-auto lg:col-span-3 py-6 lg:py-0 bg-paper border border-line" textClass="text-[12vw] sm:text-[11vw] lg:text-[6vw] xl:text-[92px]" />
           {editTiles.slice(2, 3).map((t) => (
             <CategoryTile key={t.handle} href={`/collections/${t.handle}`} title={t.c!.title.replace(/\s+-\s+.*$/, "")} image={t.image} className="aspect-[3/4] lg:aspect-auto lg:col-span-3" />
           ))}
@@ -340,10 +340,10 @@ export default async function Home() {
                   {c.image && <Image src={c.image} alt="" fill sizes="(min-width:1024px) 18vw, 45vw" className="object-cover object-top transition-transform duration-700 group-hover:scale-105" />}
                   <span aria-hidden className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/35 to-transparent" />
                 </span>
-                <span className="relative flex items-center gap-3 px-4 pb-4 pt-0">
-                  <span className="-mt-6 size-12 shrink-0 rounded-full ring-4 ring-paper shadow-md" style={{ background: c.swatch }} />
+                <span className="relative flex items-start gap-2.5 sm:gap-3 px-3 sm:px-4 pb-3.5 sm:pb-4 pt-0">
+                  <span className="-mt-5 sm:-mt-6 size-10 sm:size-12 shrink-0 rounded-full ring-4 ring-paper shadow-md" style={{ background: c.swatch }} />
                   <span className="min-w-0 pt-2.5">
-                    <span className="block font-display text-[20px] sm:text-[22px] leading-tight truncate">{c.label}</span>
+                    <span className="block font-display text-[17px] sm:text-[22px] leading-tight">{c.label}</span>
                     <span className="block text-[12px] text-muted">{c.total} styles →</span>
                   </span>
                 </span>

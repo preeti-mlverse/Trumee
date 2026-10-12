@@ -51,16 +51,16 @@ export function Footer({ store, shipping, payments }: { store: StoreSettings; sh
     <footer className="bg-ink text-cream">
       {/* Thin trust strip, attached to the top of the footer */}
       <div className="bg-sun text-ink">
-        <ul className="mx-auto max-w-[1400px] px-4 sm:px-10 lg:px-14 py-2.5 sm:py-3 flex flex-wrap items-center justify-center lg:justify-between gap-x-6 gap-y-1.5 text-[12px] sm:text-[13px] font-medium">
+        <ul className="mx-auto max-w-[1400px] px-4 sm:px-10 lg:px-14 py-3 grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center sm:justify-center lg:justify-between gap-x-4 sm:gap-x-6 gap-y-2 text-[12px] sm:text-[13px] font-medium">
           {perks.map(([I, t]) => (
-            <li key={t} className="flex items-center gap-2 whitespace-nowrap">
-              <I className="size-4" strokeWidth={1.7} /> {t}
+            <li key={t} className="flex items-center gap-2 sm:whitespace-nowrap leading-tight">
+              <I className="size-4 shrink-0" strokeWidth={1.7} /> {t}
             </li>
           ))}
         </ul>
       </div>
-      <div className="mx-auto max-w-[1400px] overflow-hidden px-5 sm:px-10 lg:px-14 pt-16 pb-8">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.3fr)_2fr]">
+      <div className="mx-auto max-w-[1400px] overflow-hidden px-5 sm:px-10 lg:px-14 pt-12 sm:pt-16 pb-8">
+        <div className="grid gap-10 sm:gap-12 lg:grid-cols-[minmax(0,1.3fr)_2fr]">
           <div>
             <p className="font-display text-4xl sm:text-5xl leading-[1]">
               Dressed for days that <em className="font-normal text-sun-soft">don’t follow a plan.</em>
@@ -72,14 +72,14 @@ export function Footer({ store, shipping, payments }: { store: StoreSettings; sh
               <NewsletterForm />
             </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
+          <div className="grid grid-cols-3 gap-x-4 gap-y-8 sm:gap-8">
             {COLS.map((c) => (
               <div key={c.title}>
-                <p className="text-[11px] tracking-[0.26em] uppercase mb-5 text-sun">{c.title}</p>
+                <p className="text-[11px] tracking-[0.2em] sm:tracking-[0.26em] uppercase mb-4 sm:mb-5 text-sun">{c.title}</p>
                 <ul className="space-y-1">
                   {c.links.map(([label, href]) => (
                     <li key={href}>
-                      <Link href={href} className="inline-block py-1 text-sm text-cream/75 hover:text-sun">
+                      <Link href={href} className="inline-block py-1.5 sm:py-1 text-[13px] sm:text-sm leading-snug text-cream/75 hover:text-sun">
                         {label}
                       </Link>
                     </li>
@@ -87,11 +87,11 @@ export function Footer({ store, shipping, payments }: { store: StoreSettings; sh
                 </ul>
               </div>
             ))}
-            <div className="col-span-2 sm:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-cream/15 text-sm">
+            <div className="col-span-3 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1 pt-6 border-t border-cream/15 text-[13px] sm:text-sm">
               <a href={`tel:${store.phone.replace(/\s/g, "")}`} className="flex items-center gap-2 py-2 text-cream/75">
                 <Phone className="size-4" strokeWidth={1.5} /> {store.phone}
               </a>
-              <a href={`mailto:${store.email}`} className="flex items-center gap-2 py-2 text-cream/75">
+              <a href={`mailto:${store.email}`} className="col-span-2 sm:col-span-1 order-last sm:order-none flex items-center gap-2 py-2 text-cream/75 min-w-0">
                 <Mail className="size-4" strokeWidth={1.5} /> {store.email}
               </a>
               <a href={`https://wa.me/${store.whatsapp}`} target="_blank" rel="noopener" className="flex items-center gap-2 py-2 text-cream/75">
@@ -100,10 +100,10 @@ export function Footer({ store, shipping, payments }: { store: StoreSettings; sh
             </div>
           </div>
         </div>
-        <Link href="/" aria-label="Trumee home" className="block mt-16 -mb-[0.08em] text-center select-none">
+        <Link href="/" aria-label="Trumee home" className="block mt-10 sm:mt-16 -mb-[0.08em] text-center select-none">
           <Wordmark className="block text-[17vw] lg:text-[208px] tracking-[0.12em] [padding-left:0.12em] text-cream/95 hover:text-sun transition-colors duration-500" />
         </Link>
-        <div className="mt-8 pt-6 border-t border-cream/15 flex flex-col sm:flex-row gap-4 items-center justify-between text-xs text-cream/50">
+        <div className="mt-8 pt-6 border-t border-cream/15 flex flex-col sm:flex-row gap-4 items-center justify-between text-center sm:text-left text-xs text-cream/50">
           <p>
             © {new Date().getFullYear()} {store.legalName}. All rights reserved. ·{" "}
             <Link href="/credits" className="inline-block py-1.5 hover:text-cream">

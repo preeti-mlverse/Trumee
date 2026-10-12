@@ -33,7 +33,13 @@ export function Header({ nav, announcement }: { nav: NavLink[]; announcement: { 
     <>
       {announcement.enabled && (
         <div className="bg-sun text-ink text-[9.5px] sm:text-[11px] tracking-[0.14em] sm:tracking-[0.24em] uppercase text-center py-2.5 px-3 whitespace-nowrap overflow-hidden text-ellipsis">
-          {announcement.href ? <Link href={announcement.href} className="inline-block py-1.5 -my-1.5">{announcement.text}</Link> : announcement.text}
+          {announcement.href ? (
+            <Link href={announcement.href} className="inline-block py-1.5 -my-1.5">
+              <AnnouncementText text={announcement.text} />
+            </Link>
+          ) : (
+            <AnnouncementText text={announcement.text} />
+          )}
         </div>
       )}
       {/* Full-width bar, edge to edge; the page content always starts below it. */}
@@ -158,4 +164,16 @@ function isActive(item: NavLink, pathname: string) {
   if (item.href.includes("?")) return false;
   if (item.children?.some((c) => path(c.href) === pathname)) return true;
   return path(item.href) === pathname || (path(item.href) !== "/" && item.href !== "/collections" && pathname.startsWith(path(item.href) + "/"));
+}
+
+/** Phones show only the first two "·"-separated parts so the bar stays on one line. */
+function AnnouncementText({ text }: { text: string }) {
+  const parts = text.split("·").map((x) => x.trim());
+  if (parts.length < 3) return <>{text}</>;
+  return (
+    <>
+      <span className="sm:hidden">{parts.slice(0, 2).join(" · ")}</span>
+      <span className="hidden sm:inline">{text}</span>
+    </>
+  );
 }
