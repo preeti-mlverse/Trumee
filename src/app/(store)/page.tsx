@@ -87,9 +87,9 @@ const PROMISES = [
 ] as const;
 
 /** Edge-to-edge colour band; content keeps the page width unless `full`. */
-function Panel({ bg, className, style, full, children }: { bg: string; className?: string; style?: React.CSSProperties; full?: boolean; children: React.ReactNode }) {
+function Panel({ bg, className, style, full, tight, children }: { bg: string; className?: string; style?: React.CSSProperties; full?: boolean; tight?: boolean; children: React.ReactNode }) {
   return (
-    <section className={`relative mt-16 sm:mt-24 ${bg}`} style={style}>
+    <section className={`relative ${tight ? "mt-8 sm:mt-12" : "mt-16 sm:mt-24"} ${bg}`} style={style}>
       <div className={`relative mx-auto ${full ? "" : "max-w-[1400px]"} ${className ?? ""}`}>{children}</div>
     </section>
   );
@@ -286,8 +286,8 @@ export default async function Home() {
 
       {/* The Edits — moodboard index */}
       {spotlightEdits.length > 0 && (
-        <Container className="pt-16 sm:pt-24">
-          <SectionHeading eyebrow="Moodboards" title="The" accent="Edits" text="Six moods, one wardrobe — pick the story you’re living this week." href="/collections" linkLabel="All edits" />
+        <Container className="pt-8 sm:pt-12">
+          <SectionHeading eyebrow="Moodboards" title="The" accent="Edits" href="/collections" linkLabel="Explore all edits" className="sm:flex-row sm:items-end" />
           <EditPanels edits={editPanels} />
         </Container>
       )}
@@ -363,13 +363,13 @@ export default async function Home() {
         </Reveal>
       </Panel>
 
-      {/* Love notes — lace-edged sun panel with a slow ribbon of cards */}
-      <Panel bg="bg-sun text-ink overflow-hidden" full className="pt-16 sm:pt-20 pb-14 sm:pb-16" style={blockPrint("#161616", 0.06)}>
-        <p className="text-[11px] tracking-[0.3em] uppercase text-center">Love notes</p>
-        <p className="font-display text-center text-[40px] sm:text-[60px] leading-[1] mt-3 px-4">
-          Words from <em className="font-normal">our girls</em>
-        </p>
-        <div className="mt-12 overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]">
+      {/* Customer reviews — sun band with a slow ribbon of cards */}
+      <Panel bg="bg-sun text-ink overflow-hidden" full tight className="pt-10 sm:pt-12 pb-10 sm:pb-12" style={blockPrint("#161616", 0.06)}>
+        <p className="text-[11px] tracking-[0.3em] uppercase text-center">Customer reviews</p>
+        <h2 className="font-display text-center text-[40px] sm:text-[60px] leading-[1] mt-3 px-4">
+          Real reviews, <em className="font-normal">real love</em>
+        </h2>
+        <div className="mt-8 sm:mt-10 overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]">
           <div className="flex w-max gap-4 animate-ribbon hover:[animation-play-state:paused]">
             {[0, 1, 2].flatMap((k) =>
               home.testimonials.map((t) => (
@@ -389,7 +389,7 @@ export default async function Home() {
 
 
       {/* Promises */}
-      <Container className="pt-16 sm:pt-20">
+      <Container className="pt-8 sm:pt-10">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
           {PROMISES.map(([I, title, text]) => (
             <div key={title} className="rounded-3xl bg-paper/70 flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center p-5 sm:p-6">
