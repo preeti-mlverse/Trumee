@@ -4,7 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { cn, inr } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useAutoAdvance } from "./use-auto-advance";
 
 export type EditPiece = { handle: string; title: string; price: number; image: string };
@@ -71,25 +71,6 @@ export function EditPanels({ edits }: { edits: EditPanel[] }) {
                 {e.title}
               </span>
 
-              {/* Open: the featured piece */}
-              {e.piece && (
-                <span
-                  className={cn(
-                    "absolute right-5 top-5 flex items-center gap-3 rounded-2xl bg-paper/90 backdrop-blur text-ink p-2 pr-4 shadow-lg transition-all duration-700",
-                    on ? "opacity-100 translate-y-0 delay-500" : "opacity-0 -translate-y-3",
-                  )}
-                >
-                  <span className="relative size-12 rounded-xl overflow-hidden bg-sand shrink-0">
-                    <Image src={e.piece.image} alt="" fill sizes="48px" className="object-cover object-top" />
-                  </span>
-                  <span className="max-w-[13rem]">
-                    <span className="block text-[10px] tracking-[0.22em] uppercase text-sea">Featured piece</span>
-                    <span className="block text-[13px] leading-snug line-clamp-1 mt-0.5">{e.piece.title}</span>
-                    <span className="block text-[13px] font-medium tabular-nums">{inr(e.piece.price)}</span>
-                  </span>
-                </span>
-              )}
-
               {/* Open: the story */}
               <div className={cn("absolute inset-x-0 bottom-0 p-7 lg:p-9 transition-all duration-700", on ? "opacity-100 translate-y-0 delay-300" : "opacity-0 translate-y-6 pointer-events-none")}>
                 <span className="inline-flex items-center gap-2 rounded-full bg-cream/15 backdrop-blur px-3 py-1 text-[11px] tracking-[0.2em] uppercase">
@@ -119,11 +100,6 @@ export function EditPanels({ edits }: { edits: EditPanel[] }) {
               <span className="text-[10px] tracking-[0.24em] uppercase text-sun-soft">{e.vibe}</span>
               <p className="font-display text-[34px] leading-none mt-2">{e.title}</p>
               <p className="mt-2 text-[13px] text-cream/80 line-clamp-2">{e.text}</p>
-              {e.piece && (
-                <p className="mt-2 text-[12px] text-cream/90">
-                  Featured: {e.piece.title} · {inr(e.piece.price)}
-                </p>
-              )}
               <span className="mt-4 inline-flex items-center gap-2 text-sm">
                 Explore {e.count} styles <ArrowUpRight className="size-4" />
               </span>

@@ -40,17 +40,13 @@ export function ProductRail({ tabs, list }: { tabs: RailTab[]; list: string }) {
 
   return (
     <div>
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 sm:mb-8">
-        {/* Segmented switch with a sliding indicator */}
-        <div
-          role="tablist"
-          className="relative grid w-full lg:w-auto rounded-full bg-paper border border-ink/10 p-1.5 shadow-[0_10px_30px_-22px_rgba(22,22,22,0.6)]"
-          style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
-        >
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6 sm:mb-8">
+        {/* Tabs: big serif labels on a hairline, a mustard bar slides under the active one */}
+        <div role="tablist" className="relative grid w-full lg:max-w-3xl border-b border-ink/15" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
           <span
             aria-hidden
-            className="absolute top-1.5 bottom-1.5 left-1.5 rounded-full bg-ink transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)]"
-            style={{ width: `calc((100% - 12px) / ${tabs.length})`, transform: `translateX(${t * 100}%)` }}
+            className="absolute -bottom-px left-0 h-[3px] rounded-full bg-sun transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)]"
+            style={{ width: `${100 / tabs.length}%`, transform: `translateX(${t * 100}%)` }}
           />
           {tabs.map((x, k) => (
             <button
@@ -61,11 +57,12 @@ export function ProductRail({ tabs, list }: { tabs: RailTab[]; list: string }) {
                 setT(k);
                 rail.current?.scrollTo({ left: 0, behavior: "smooth" });
               }}
-              className={cn("relative z-10 flex items-center justify-center gap-2 rounded-full px-3 sm:px-7 py-3 sm:py-3.5 transition-colors duration-500", k === t ? "text-cream" : "text-ink/70 hover:text-ink")}
+              className={cn(
+                "pb-3 sm:pb-4 pt-1 font-display text-[22px] sm:text-[32px] leading-none whitespace-nowrap transition-colors duration-500",
+                k === t ? "text-sea" : "text-ink/40 hover:text-ink/70",
+              )}
             >
-              <span className={cn("size-2 rounded-full shrink-0", TONE[x.tone].dot, k === t && "ring-2 ring-cream/60")} />
-              <span className="font-display text-[19px] sm:text-[24px] leading-none whitespace-nowrap">{x.label}</span>
-              {x.count != null && <span className={cn("hidden sm:inline text-[12px] tabular-nums", k === t ? "text-cream/60" : "text-muted")}>{x.count}</span>}
+              {x.label}
             </button>
           ))}
         </div>

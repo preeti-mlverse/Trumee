@@ -241,7 +241,7 @@ export default async function Home() {
       </Container>
 
       {/* Shop by mood — full-photo cards in a staggered (mirrored) rhythm; the brand tone is a slim band */}
-      <Container className="pt-16 sm:pt-24">
+      <Container className="pt-8 sm:pt-12">
         <SectionHeading eyebrow="Plans & details" title="Shop by" accent="occasion & craft" />
         <Reveal stagger className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 lg:pb-10">
           {moods.map((m, i) => (

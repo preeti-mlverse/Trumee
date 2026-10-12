@@ -1,6 +1,6 @@
 "use client";
 
-import { SlidersHorizontal, X } from "lucide-react";
+import { ChevronDown, SlidersHorizontal, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { SORTS } from "@/lib/sorts";
@@ -108,12 +108,12 @@ export function Filters({ facets, total }: { facets: { sizes: string[]; types: s
         <button onClick={() => setOpen(true)} className="flex items-center gap-2 py-2 text-xs tracking-[0.16em] uppercase">
           <SlidersHorizontal className="size-4" strokeWidth={1.5} /> Filter {activeCount > 0 && <span className="text-sea">({activeCount})</span>}
         </button>
-        <label className="flex items-center gap-2 text-xs tracking-[0.16em] uppercase">
+        <label className="flex items-center gap-1.5 text-xs tracking-[0.16em] uppercase">
           <span className="hidden sm:inline">Sort</span>
           <select
             value={sp.get("sort") ?? "featured"}
             onChange={(e) => set({ sort: e.target.value === "featured" ? null : e.target.value })}
-            className="bg-transparent normal-case tracking-normal text-sm outline-none cursor-pointer py-2 max-w-[9.5rem] sm:max-w-none"
+            className="appearance-none [field-sizing:content] bg-transparent normal-case tracking-normal text-sm outline-none cursor-pointer py-2 max-w-[9.5rem] sm:max-w-none"
           >
             {SORTS.map((s) => (
               <option key={s.value} value={s.value}>
@@ -121,6 +121,7 @@ export function Filters({ facets, total }: { facets: { sizes: string[]; types: s
               </option>
             ))}
           </select>
+          <ChevronDown aria-hidden className="size-3.5 -ml-0.5 pointer-events-none" strokeWidth={2} />
         </label>
       </div>
       </div>
