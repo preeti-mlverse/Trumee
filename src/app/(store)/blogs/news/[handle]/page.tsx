@@ -7,7 +7,7 @@ import { ProductGrid } from "@/components/store/product-card";
 import { Breadcrumbs, Container, SectionHeading } from "@/components/store/ui";
 import { listProducts } from "@/lib/catalog";
 import { redirectOrNotFound } from "@/lib/redirects";
-import { articleLd, breadcrumbLd } from "@/lib/seo";
+import { articleLd, breadcrumbLd, fitTitle } from "@/lib/seo";
 import { formatDate, truncate } from "@/lib/utils";
 
 export const revalidate = 600;
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps<"/blogs/news/[handl
   const p = await getPost((await params).handle);
   if (!p) return {};
   return {
-    title: p.seoTitle || p.title,
+    title: fitTitle(p.seoTitle, p.title),
     description: p.seoDescription || truncate(p.excerpt, 160),
     alternates: { canonical: `/blogs/news/${p.handle}` },
     openGraph: { type: "article", title: p.title, images: p.coverUrl ? [p.coverUrl] : undefined, publishedTime: p.publishedAt?.toISOString() },

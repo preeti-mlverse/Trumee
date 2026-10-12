@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { JsonLd } from "@/components/store/json-ld";
 import { EventOnMount } from "@/components/store/list-tracker";
-import { breadcrumbLd, productLd } from "@/lib/seo";
+import { breadcrumbLd, fitTitle, productLd } from "@/lib/seo";
 import { ProductGrid } from "@/components/store/product-card";
 import { ProductForm } from "@/components/store/product-form";
 import { ProductGallery } from "@/components/store/product-gallery";
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps<"/products/[handle]
   const range = sizes.length > 1 ? `${sizes[0]}–${sizes[sizes.length - 1]}` : sizes[0];
   const kind = p.productType ? p.productType.toLowerCase().replace(/sses$/, "ss").replace(/(?<!s)s$/, "") : "piece";
   // Title: product name + intent keywords; description: facts shoppers compare on (price, fabric, sizes, COD, returns)
-  const title = p.seoTitle && !p.seoTitle.endsWith("| Trumee") ? p.seoTitle : `${p.title} for Women`;
+  const title = fitTitle(p.seoTitle && !p.seoTitle.endsWith("| Trumee") ? p.seoTitle : null, `${p.title} for Women`, p.title);
   const description =
     p.seoDescription ||
     truncate(
@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: PageProps<"/products/[handle]
     title,
     description,
     alternates: { canonical: `/products/${p.handle}` },
-    openGraph: { type: "website", title: p.title, description, images: p.images.slice(0, 4).map((i) => ({ url: i.url, width: i.width ?? undefined, height: i.height ?? undefined, alt: i.alt || p.title })) },
+    openGraph: { type: "website", title: `${p.title} | Trumee`, description, images: p.images.slice(0, 4).map((i) => ({ url: i.url, width: i.width ?? undefined, height: i.height ?? undefined, alt: i.alt || p.title })) },
     other: { "product:price:amount": (min / 100).toFixed(2), "product:price:currency": "INR" },
   };
 }

@@ -6,7 +6,7 @@ import { Listing } from "@/components/store/listing";
 import { Container } from "@/components/store/ui";
 import { getCollection, listProducts } from "@/lib/catalog";
 import { redirectOrNotFound } from "@/lib/redirects";
-import { breadcrumbLd, collectionLd, faqLd } from "@/lib/seo";
+import { breadcrumbLd, collectionLd, faqLd, fitTitle } from "@/lib/seo";
 import { stripHtml, truncate } from "@/lib/utils";
 
 const FILTER_KEYS = ["size", "type", "min", "max", "instock", "sort", "fabric", "occasion", "detail", "colour"];
@@ -33,7 +33,7 @@ export async function generateMetadata({ params, searchParams }: PageProps<"/col
   const sp = await searchParams;
   const c = await load(handle);
   if (!c) return {};
-  const title = c.seoTitle?.replace(/ \| Trumee$/, "") || `${c.title} for Women`;
+  const title = fitTitle(c.seoTitle, `${c.title} for Women`, c.title);
   const description = c.seoDescription || truncate(stripHtml(c.descriptionHtml) || `Shop ${c.title} at Trumee.`, 160);
   // Filtered/sorted views are near-duplicates: keep them out of the index, follow their links.
   const filtered = FILTER_KEYS.some((k) => sp[k] != null);
@@ -43,7 +43,7 @@ export async function generateMetadata({ params, searchParams }: PageProps<"/col
     description,
     alternates: { canonical: `/collections/${handle}${page > 1 && !filtered ? `?page=${page}` : ""}` },
     robots: filtered ? { index: false, follow: true } : undefined,
-    openGraph: { title, description, url: `/collections/${handle}`, images: c.imageUrl ? [c.imageUrl] : undefined },
+    openGraph: { title: typeof title === "string" ? `${title} | Trumee` : title.absolute, description, url: `/collections/${handle}`, images: [c.imageUrl ?? "/opengraph-image.jpg"] },
   };
 }
 

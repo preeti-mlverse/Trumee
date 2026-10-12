@@ -1,10 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { updateStock, type CatalogResult } from "@/app/actions/catalog";
 
-type Row = { id: number; size: string | null; sku: string | null; qty: number; track: boolean; backorder: boolean; productId: number; title: string; status: string };
+type Row = { id: number; size: string | null; sku: string | null; qty: number; track: boolean; backorder: boolean; productId: number; title: string; status: string; image: string | null };
 
 const ORDER = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "3XL", "FREE SIZE", "ONE SIZE"];
 const rank = (s: string) => {
@@ -26,9 +27,9 @@ export function StockForm({ rows }: { rows: Row[] }) {
 
   const { sizes, products } = useMemo(() => {
     const sizes = [...new Set(rows.map((r) => r.size ?? "—"))].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
-    const map = new Map<number, { id: number; title: string; status: string; cells: Record<string, Row> }>();
+    const map = new Map<number, { id: number; title: string; status: string; image: string | null; cells: Record<string, Row> }>();
     for (const r of rows) {
-      const p = map.get(r.productId) ?? { id: r.productId, title: r.title, status: r.status, cells: {} };
+      const p = map.get(r.productId) ?? { id: r.productId, title: r.title, status: r.status, image: r.image, cells: {} };
       p.cells[r.size ?? "—"] = r;
       map.set(r.productId, p);
     }
@@ -80,9 +81,16 @@ export function StockForm({ rows }: { rows: Row[] }) {
               const total = cells.reduce((n, r) => n + (r.track ? (edits[r.id] ?? r.qty) : 0), 0);
               return (
                 <tr key={p.id} className="align-top">
-                  <td className="px-5 py-2.5 min-w-56">
-                    <Link href={`/admin/products/${p.id}`} className="hover:underline">{p.title}</Link>
-                    {p.status === "draft" && <span className="ml-2 text-xs text-admin-yellow">draft</span>}
+                  <td className="px-5 py-2.5 min-w-72">
+                    <Link href={`/admin/products/${p.id}`} className="group flex items-center gap-3">
+                      <span className="relative w-12 h-16 shrink-0 rounded-md overflow-hidden bg-admin-bg border border-admin-line">
+                        {p.image ? <Image src={p.image} alt="" fill sizes="48px" className="object-cover object-top" /> : <span className="grid size-full place-items-center text-[10px] text-admin-muted">No photo</span>}
+                      </span>
+                      <span>
+                        <span className="group-hover:underline">{p.title}</span>
+                        {p.status === "draft" && <span className="ml-2 text-xs text-admin-yellow">draft</span>}
+                      </span>
+                    </Link>
                   </td>
                   {sizes.map((s) => {
                     const r = p.cells[s];

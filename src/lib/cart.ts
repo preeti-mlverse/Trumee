@@ -141,7 +141,7 @@ async function automaticDiscount(lines: CartLine[], ctx: Parameters<typeof price
     if (a.usageLimit != null && a.usedCount >= a.usageLimit) continue;
     const d: PricingDiscount = { code: a.code, kind: a.kind, value: a.value, buyQty: a.buyQty, getQty: a.getQty, minSubtotal: a.minSubtotal, appliesTo: a.appliesTo, targetIds: a.targetIds };
     const t = priceCart(lines, { ...ctx, discount: d });
-    const saved = t.discountTotal + (t.shipping === 0 && lines.length ? ctx.shipping.flatRate : 0);
+    const saved = t.discountTotal;
     if (t.discountApplied && (!best || saved > best.saved)) best = { d, saved };
   }
   return best?.d ?? null;

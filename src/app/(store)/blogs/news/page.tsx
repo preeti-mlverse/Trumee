@@ -7,7 +7,11 @@ import { Container, SectionHeading } from "@/components/store/ui";
 import { formatDate } from "@/lib/utils";
 
 export const revalidate = 600;
-export const metadata: Metadata = { title: "The Journal", description: "Style guides, lookbooks and vacation-dressing notes from Trumee." };
+export const metadata: Metadata = {
+  title: "The Journal — Style Guides & Outfit Ideas",
+  description: "Style guides, lookbooks and outfit ideas from Trumee: how to style crochet tops and co-ords, what to wear in Goa and the hills, office looks and more.",
+  alternates: { canonical: "/blogs/news" },
+};
 
 export default async function Journal() {
   const posts = await db.select().from(schema.blogPosts).where(eq(schema.blogPosts.published, true)).orderBy(desc(schema.blogPosts.publishedAt));

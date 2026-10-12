@@ -15,6 +15,8 @@ const client = postgres(process.env.DATABASE_URL!, { max: 1 });
 const db = drizzle(client, { schema });
 
 const COD_FEE = 10000; // paise
+const OLD_COPY = "flat ₹29 shipping and easy 7-day returns";
+const NEW_COPY = "free shipping and easy 7-day returns";
 const PREPAID = 5; // percent
 const COD_NOTE = "Easy 7-day returns & size exchanges on COD orders too — refunds go straight to your UPI or bank account.";
 
@@ -64,7 +66,12 @@ async function main() {
     await db.update(schema.pages).set({ bodyHtml: faqs.bodyHtml + "\n" + add, updatedAt: new Date() }).where(eq(schema.pages.id, faqs.id));
     console.log("✓ pages.faqs");
   }
-  await db.execute(sql`select 1`);
+  // Any remaining "₹29 shipping" wording in collection guides / FAQs
+  const fixed = await db.execute(
+    sql`update collections set faqs = replace(faqs::text, ${OLD_COPY}, ${NEW_COPY})::jsonb, guide_html = replace(guide_html, ${OLD_COPY}, ${NEW_COPY}) where faqs::text like '%₹29%' or guide_html like '%₹29%'`,
+  );
+  console.log(`✓ collections copy (${fixed.count ?? 0} updated)`);
+  await db.execute(sql`update pages set seo_title = 'About Trumee — Boho Western Wear Designed in Gurgaon' where handle = 'about-us' and coalesce(seo_title, '') = ''`);
   console.log("Done. Restart the app so cached settings refresh.");
 }
 

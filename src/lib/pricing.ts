@@ -155,7 +155,10 @@ export function priceCart(
 
   const s = opts.shipping;
   const meetsFree = s.freeShippingThreshold != null && afterDiscount >= s.freeShippingThreshold;
-  const shipping = !lines.length || freeShipping || meetsFree ? 0 : s.flatRate;
+  // Free shipping on every order (store policy); flatRate is kept only for old saved settings
+  void freeShipping;
+  void meetsFree;
+  const shipping = 0;
   const codFee = opts.paymentMethod === "cod" ? s.codFee : 0;
   const total = afterDiscount - prepaidDiscount + shipping + codFee + (opts.tax.pricesIncludeTax ? 0 : tax);
   const onlineTotal =

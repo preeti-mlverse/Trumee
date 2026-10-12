@@ -7,7 +7,7 @@ import { requireStaff } from "@/lib/auth";
 export const metadata = { title: "Inventory" };
 export const dynamic = "force-dynamic";
 
-const { products: P, variants: V, inventoryAdjustments: A, staff: S } = schema;
+const { products: P, variants: V, inventoryAdjustments: A, staff: S, productImages: I } = schema;
 const VIEWS = { all: "All", low: "Low (≤ 3)", out: "Sold out" } as const;
 
 export default async function InventoryPage({ searchParams }: PageProps<"/admin/inventory">) {
@@ -18,7 +18,7 @@ export default async function InventoryPage({ searchParams }: PageProps<"/admin/
 
   const [rows, history] = await Promise.all([
     db
-      .select({ id: V.id, size: V.option1, sku: V.sku, qty: V.inventoryQty, track: V.trackInventory, backorder: V.allowBackorder, productId: P.id, title: P.title, status: P.status })
+      .select({ id: V.id, size: V.option1, sku: V.sku, qty: V.inventoryQty, track: V.trackInventory, backorder: V.allowBackorder, productId: P.id, title: P.title, status: P.status, image: sql<string | null>`(select ${I.url} from ${I} where ${I.productId} = ${P.id} order by ${I.position} limit 1)` })
       .from(V)
       .innerJoin(P, eq(V.productId, P.id))
       .where(

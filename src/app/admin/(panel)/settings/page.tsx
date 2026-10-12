@@ -168,8 +168,7 @@ export default async function SettingsPage() {
         <Section id="shipping" title="Shipping & delivery" hint="Feeds the product pages, checkout, Google Shopping feed and structured data.">
           <SettingsForm section="shipping">
             <div className="grid sm:grid-cols-3 gap-4">
-              <Field label="Flat shipping" name="flatRate" type="number" prefix="₹" defaultValue={rs(shipping.flatRate)} />
-              <Field label="Free shipping over" name="freeShippingThreshold" type="number" prefix="₹" defaultValue={rs(shipping.freeShippingThreshold)} help="Blank = never free" />
+              <div><span className="block text-sm font-medium mb-1">Shipping charge</span><p className="rounded-lg bg-admin-green-bg text-admin-green px-3 py-2 text-sm">Free on every order across India</p></div>
               <Field label="Dispatch time" name="processingDays" defaultValue={shipping.processingDays} help="e.g. 1–2 business days" />
             </div>
             <div className="grid sm:grid-cols-3 gap-4">

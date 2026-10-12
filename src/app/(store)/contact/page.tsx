@@ -7,7 +7,7 @@ import { getSettings } from "@/lib/settings";
 
 export const revalidate = 600;
 export const metadata: Metadata = {
-  title: "Contact us",
+  title: "Contact Us — WhatsApp, Phone & Email Support",
   description: "Questions about sizing, an order or styling? Reach Trumee by WhatsApp, phone or email — Mon–Sat, 10 AM to 6 PM IST.",
   alternates: { canonical: "/contact" },
 };

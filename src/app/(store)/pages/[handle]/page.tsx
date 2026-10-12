@@ -7,7 +7,7 @@ import { db, schema } from "@/db";
 import { Breadcrumbs, Container } from "@/components/store/ui";
 import { JsonLd } from "@/components/store/json-ld";
 import { redirectOrNotFound } from "@/lib/redirects";
-import { breadcrumbLd, faqLd, faqsFromHtml } from "@/lib/seo";
+import { breadcrumbLd, fitTitle, faqLd, faqsFromHtml } from "@/lib/seo";
 import { stripHtml, truncate } from "@/lib/utils";
 
 export const revalidate = 600;
@@ -18,7 +18,7 @@ const getPage = (handle: string) =>
 export async function generateMetadata({ params }: PageProps<"/pages/[handle]">): Promise<Metadata> {
   const p = await getPage((await params).handle);
   if (!p) return {};
-  return { title: p.seoTitle || p.title, description: p.seoDescription || truncate(stripHtml(p.bodyHtml), 160), alternates: { canonical: `/pages/${p.handle}` } };
+  return { title: fitTitle(p.seoTitle, p.title), description: p.seoDescription || truncate(stripHtml(p.bodyHtml), 160), alternates: { canonical: `/pages/${p.handle}` } };
 }
 
 export default async function ContentPage({ params }: PageProps<"/pages/[handle]">) {

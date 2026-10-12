@@ -74,8 +74,8 @@ const SCHEMAS = {
     codNote: z.string().trim().max(200),
   }),
   shipping: z.object({
-    flatRate: rupees,
-    freeShippingThreshold: optRupees,
+    flatRate: rupees.optional(),
+    freeShippingThreshold: optRupees.optional(),
     processingDays: z.string().trim().min(3).max(60),
     est0: z.string().trim().max(40),
     est1: z.string().trim().max(40),
@@ -177,7 +177,7 @@ export async function saveSettings(section: SettingsSection, _: unknown, form: F
     else {
       const labels = DEFAULTS.shipping.deliveryEstimates.map((e) => e.label);
       Object.assign(next, {
-        flatRate: d.flatRate,
+        flatRate: 0,
         freeShippingThreshold: d.freeShippingThreshold,
         processingDays: d.processingDays,
         deliveryEstimates: [d.est0, d.est1, d.est2].map((days, i) => ({ label: cur.deliveryEstimates[i]?.label ?? labels[i], days: String(days) })).filter((e) => e.days),
@@ -293,4 +293,14 @@ export async function shiprocketOrderAction(orderId: number, op: "push" | "ship"
   } finally {
     revalidatePath("/admin/orders");
   }
+}
+
+// ───────────────────────────── inbox
+
+/** Marks a contact-form message new / read / replied. */
+export async function setMessageStatus(id: number, status: "new" | "read" | "replied") {
+  const staff = await requireStaff("customers");
+  await db.update(schema.contactMessages).set({ status }).where(eq(schema.contactMessages.id, id));
+  await logAudit(staff.id, "message.status", "contact_message", id, { status });
+  revalidatePath("/admin/inbox");
 }

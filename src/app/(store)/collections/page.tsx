@@ -6,7 +6,11 @@ import { listCollections } from "@/lib/catalog";
 import { stripHtml } from "@/lib/utils";
 
 export const revalidate = 300;
-export const metadata: Metadata = { title: "Collections", description: "Explore Trumee’s edits and categories." };
+export const metadata: Metadata = {
+  title: "All Collections — Dresses, Tops, Co-ords & Edits",
+  description: "Browse every Trumee collection: boho dresses, crochet tops, skirts, shirts, jumpsuits and co-ord sets, plus vacation and office edits. Free shipping across India.",
+  alternates: { canonical: "/collections" },
+};
 
 export default async function CollectionsIndex() {
   const [edits, cats] = await Promise.all([listCollections("edit"), listCollections("category")]);

@@ -138,7 +138,7 @@ export function shippingLd(s: ShippingSettings) {
   const tMax = transit.length ? Math.max(...transit.map((t) => t[1])) : 8;
   return {
     "@type": "OfferShippingDetails",
-    shippingRate: { "@type": "MonetaryAmount", value: (s.flatRate / 100).toFixed(2), currency: "INR" },
+    shippingRate: { "@type": "MonetaryAmount", value: "0.00", currency: "INR" },
     shippingDestination: { "@type": "DefinedRegion", addressCountry: "IN" },
     ...(s.freeShippingThreshold != null
       ? { freeShippingThreshold: { "@type": "MonetaryAmount", value: (s.freeShippingThreshold / 100).toFixed(2), currency: "INR" } }
@@ -295,4 +295,20 @@ export function articleLd(p: { title: string; handle: string; excerpt: string; c
 /** Extracts Q&A pairs from CMS HTML laid out as <h4>question</h4><p>answer</p>. */
 export function faqsFromHtml(html: string) {
   return [...html.matchAll(/<h4>([\s\S]*?)<\/h4>\s*<p>([\s\S]*?)<\/p>/g)].map((m) => ({ q: stripHtml(m[1]), a: stripHtml(m[2]) }));
+}
+
+/**
+ * Page title that fits search results (≤ 65 chars with the " | Trumee" suffix). Tries the
+ * candidates in order; if none fit, drops the brand, then trims at a word boundary.
+ */
+export function fitTitle(...candidates: (string | null | undefined)[]): string | { absolute: string } {
+  const list = candidates.filter((c): c is string => !!c?.trim()).map((c) => c.replace(/\s*\|\s*Trumee$/, "").trim());
+  const fit = list.find((c) => c.length + 9 <= 65);
+  if (fit) return fit;
+  const short = list.find((c) => c.length <= 65);
+  if (short) return { absolute: short };
+  const words = list[list.length - 1].split(" ");
+  let out = "";
+  for (const w of words) if ((out + " " + w).trim().length <= 62) out = (out + " " + w).trim();
+  return { absolute: out };
 }

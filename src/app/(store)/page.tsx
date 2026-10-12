@@ -18,7 +18,7 @@ import { stripHtml } from "@/lib/utils";
 
 export const revalidate = 300;
 export const metadata: Metadata = {
-  title: { absolute: "Trumee | Boho Dresses, Crochet Tops & Western Wear for Women in India" },
+  title: { absolute: "Trumee | Boho Dresses, Crochet Tops & Western Wear Online" },
   description:
     "Shop Trumee’s boho dresses, crochet & embroidered tops, schiffli jumpsuits, skirts and co-ord sets in breathable fabrics. Designed in Gurgaon · COD · 7-day returns.",
   alternates: { canonical: "/" },

@@ -62,7 +62,7 @@ export async function GET() {
           ["g:material", p.fabric ?? undefined],
           ...craftOf(p.title, p.tags).map((c) => ["g:product_highlight", c] as [string, string]),
         ];
-        const ship = `<g:shipping><g:country>IN</g:country><g:service>Standard</g:service><g:price>${money(shipping.flatRate)}</g:price><g:min_handling_time>${hMin}</g:min_handling_time><g:max_handling_time>${hMax}</g:max_handling_time><g:min_transit_time>${tMin}</g:min_transit_time><g:max_transit_time>${tMax}</g:max_transit_time></g:shipping>`;
+        const ship = `<g:shipping><g:country>IN</g:country><g:service>Standard</g:service><g:price>0.00 INR</g:price><g:min_handling_time>${hMin}</g:min_handling_time><g:max_handling_time>${hMax}</g:max_handling_time><g:min_transit_time>${tMin}</g:min_transit_time><g:max_transit_time>${tMax}</g:max_transit_time></g:shipping>`;
         return `<item>${fields.filter(([, val]) => val).map(([k, val]) => `<${k}>${esc(val!)}</${k}>`).join("")}${ship}</item>`;
       }),
   );
