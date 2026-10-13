@@ -14,7 +14,14 @@ export const metadata: Metadata = {
     "Boho dresses, crochet tops, schiffli jumpsuits and co-ord sets made for getaways and everyday magic. Shop Trumee — easygoing, feel-good fashion, delivered across India.",
   openGraph: { type: "website", siteName: "Trumee", locale: "en_IN" },
   twitter: { card: "summary_large_image" },
-  icons: { icon: "/favicon.svg" },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
