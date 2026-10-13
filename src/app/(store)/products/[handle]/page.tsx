@@ -1,5 +1,6 @@
 import { BadgeCheck, MessageCircle, Sparkles, Star } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { JsonLd } from "@/components/store/json-ld";
 import { EventOnMount } from "@/components/store/list-tracker";
@@ -13,7 +14,7 @@ import { DeliveryChecker, TrustBadges } from "@/components/store/trust";
 import { colorOf, craftOf } from "@/lib/product-facts";
 import { craftNotes } from "@/lib/trust";
 import { Breadcrumbs, Container, SectionHeading } from "@/components/store/ui";
-import { getProduct, listProducts } from "@/lib/catalog";
+import { getProduct, guidesForProduct, listProducts } from "@/lib/catalog";
 import { redirectOrNotFound } from "@/lib/redirects";
 import { getSettings } from "@/lib/settings";
 import { cn, formatDate, stripHtml, truncate } from "@/lib/utils";
@@ -50,7 +51,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
   const p = await getProduct(handle);
   if (!p) return redirectOrNotFound(`/products/${handle}`);
 
-  const [shipping, store, payments] = await Promise.all([getSettings("shipping"), getSettings("store"), getSettings("payments")]);
+  const [shipping, store, payments, guides] = await Promise.all([getSettings("shipping"), getSettings("store"), getSettings("payments"), guidesForProduct(p)]);
   const notes = craftNotes(p);
   const variants = p.variants.map((v) => {
     const available = !v.trackInventory || v.allowBackorder || v.inventoryQty > 0;
@@ -123,15 +124,17 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
               <MessageCircle className="size-4" strokeWidth={1.5} /> Not sure about the fit? Ask our stylist on WhatsApp
             </a>
           </div>
-          <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-3 rounded-3xl border border-line/70 bg-paper/60 p-5 text-sm">
-            <p className="col-span-2 text-[11px] tracking-[0.24em] uppercase text-sea">At a glance</p>
-            {glance.map(([k, v]) => (
-              <div key={k}>
-                <dt className="text-[11px] tracking-[0.12em] uppercase text-muted">{k}</dt>
-                <dd className="mt-0.5 text-ink">{v}</dd>
-              </div>
-            ))}
-          </dl>
+          <div className="mt-8 rounded-3xl border border-line/70 bg-paper/60 p-5 text-sm">
+            <p className="text-[11px] tracking-[0.24em] uppercase text-sea">At a glance</p>
+            <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-3">
+              {glance.map(([k, v]) => (
+                <div key={k}>
+                  <dt className="text-[11px] tracking-[0.12em] uppercase text-muted">{k}</dt>
+                  <dd className="mt-0.5 text-ink">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
           <div className="mt-2 divide-y divide-line">
             {details.map((d) => (
               <details key={d.title} open={d.open} className="group py-4">
@@ -152,6 +155,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
             <p className="flex items-center gap-3 text-[11px] tracking-[0.3em] uppercase text-sea">
               <Sparkles className="size-3.5" /> Why you’ll love it
             </p>
+            <h2 className="sr-only">Why you’ll love the {p.title}</h2>
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {notes.map((n) => (
                 <div key={n.title} className="rounded-3xl border border-ink/10 p-6">
@@ -162,6 +166,26 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
             </div>
           </div>
         </section>
+      )}
+
+      {guides.length > 0 && (
+        <Container className="pt-20">
+          <SectionHeading eyebrow="From the journal" title="Style" accent="it your way" href="/blogs/news" linkLabel="All guides" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            {guides.map((g) => (
+              <Link key={g.handle} href={`/blogs/news/${g.handle}`} className="group grid grid-cols-[112px_minmax(0,1fr)] sm:grid-cols-[160px_minmax(0,1fr)] gap-4 sm:gap-5 items-center rounded-card border border-line bg-paper p-3 sm:p-4 transition-colors hover:border-ink/30">
+                <span className="relative block aspect-[4/5] overflow-hidden rounded-2xl bg-sand">
+                  {g.coverUrl && <Image src={g.coverUrl} alt="" fill sizes="160px" className="object-cover transition-transform duration-700 group-hover:scale-105" />}
+                </span>
+                <span className="min-w-0">
+                  <span className="block font-display text-[22px] sm:text-[26px] leading-tight">{g.title}</span>
+                  {g.excerpt && <span className="mt-2 block text-sm text-ink-soft leading-relaxed line-clamp-2">{g.excerpt}</span>}
+                  <span className="mt-3 block text-xs tracking-[0.16em] uppercase text-sea">Read the guide →</span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </Container>
       )}
 
       <Container className="pt-24">

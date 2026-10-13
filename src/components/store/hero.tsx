@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { HeroSlide } from "@/lib/settings";
+import { usePageReady } from "@/lib/page-ready";
 import { cn, inr } from "@/lib/utils";
 import { LoopVideo } from "./loop-video";
 import { PillLink } from "./ui";
@@ -25,6 +26,8 @@ export function Hero({ slides, clips, shop = [] }: { slides: HeroSlide[]; clips:
   const touch = useRef<number | null>(null);
 
   const go = useCallback((d: number) => setI((x) => (x + d + n) % n), [n]);
+  // Slides after the first render once the page has loaded, so their artwork doesn't compete with the first paint.
+  const pageReady = usePageReady();
 
   useEffect(() => {
     if (n < 2) return;
@@ -56,18 +59,18 @@ export function Hero({ slides, clips, shop = [] }: { slides: HeroSlide[]; clips:
             aria-hidden={k !== i}
             className={cn("absolute inset-0 transition-opacity duration-1000", k === i ? "opacity-100 z-10" : "opacity-0 pointer-events-none")}
           >
-            {s.layout === "motion" ? (
+            {k !== 0 && k !== i && !pageReady ? null : s.layout === "motion" ? (
               <Motion s={s} active={k === i} priority={k === 0} />
             ) : s.layout === "duo" ? (
               <Duo s={s} active={k === i} products={shop[k] ?? []} />
             ) : s.layout === "banner" ? (
-              <Banner s={s} active={k === i} products={shop[k] ?? []} />
+              <Banner s={s} active={k === i} priority={k === 0} products={shop[k] ?? []} />
             ) : s.layout === "runway" ? (
               <Runway s={s} clips={clips} active={k === i} />
             ) : s.layout === "split" ? (
               <Split s={s} active={k === i} />
             ) : s.layout === "art" ? (
-              <Art s={s} active={k === i} />
+              <Art s={s} active={k === i} priority={k === 0} />
             ) : (
               <Scenic s={s} active={k === i} priority={k === 0} />
             )}
@@ -153,13 +156,13 @@ function Ctas({ s, active, dark }: { s: HeroSlide; active: boolean; dark?: boole
  * Campaign artwork with its title painted in. Fills the whole hero (cropped from the right on
  * narrower screens so the painted title is never cut), with its buttons under the title.
  */
-function Art({ s, active }: { s: HeroSlide; active: boolean }) {
+function Art({ s, active, priority }: { s: HeroSlide; active: boolean; priority?: boolean }) {
   return (
     <div className="absolute inset-0 overflow-hidden bg-ink">
       {/* Desktop/tablet: the artwork fills the hero; anchored left so the painted title stays in frame */}
       <div className="hidden sm:block absolute inset-0">
         <Link href={s.href} tabIndex={active ? 0 : -1} aria-label={`${s.title} — ${s.text ?? s.cta}`} className="absolute inset-0">
-          <Image src={s.image} alt={`${s.title}: ${s.text ?? ""}`.trim()} fill priority sizes="100vw" className={cn("object-cover object-left", active && "animate-kenburns")} />
+          <Image src={s.image} alt={`${s.title}: ${s.text ?? ""}`.trim()} fill priority={priority} sizes="100vw" className={cn("object-cover object-left", active && "animate-kenburns")} />
         </Link>
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ink/55 to-transparent pointer-events-none" />
         {active && (
@@ -203,9 +206,11 @@ function Motion({ s, active, priority }: { s: HeroSlide; active: boolean; priori
 
   return (
     <div className="absolute inset-0 text-ink">
-      <Image src={s.image} alt="" fill priority={priority} sizes="100vw" className={cn("object-cover", s.mobileImage && "hidden sm:block")} />
-      {s.mobileImage && <Image src={s.mobileImage} alt="" fill priority={priority} sizes="(min-width:640px) 1px, 100vw" className="object-cover sm:hidden" />}
-      {src && <LoopVideo key={src.video} src={src.video} poster={src.poster} playing={active} priority={priority} className="absolute inset-0 size-full object-center" />}
+      {/* Two art-directed stills: each requests a 1px variant at the other breakpoint, so a phone only downloads its own */}
+      <Image src={s.image} alt="" fill loading={priority ? "eager" : undefined} fetchPriority={priority ? "high" : undefined} sizes={s.mobileImage ? "(min-width:640px) 100vw, 1px" : "100vw"} className={cn("object-cover", s.mobileImage && "hidden sm:block")} />
+      {s.mobileImage && <Image src={s.mobileImage} alt="" fill loading={priority ? "eager" : undefined} fetchPriority={priority ? "high" : undefined} sizes="(min-width:640px) 1px, 100vw" className="object-cover sm:hidden" />}
+      {/* No poster: the still above shows through until the first frame */}
+      {src && <LoopVideo key={src.video} src={src.video} playing={active} className="absolute inset-0 size-full object-center" />}
       <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/45 to-transparent pointer-events-none" />
       {active && (
         <div className="absolute inset-x-3 bottom-14 sm:inset-x-auto sm:left-8 lg:left-10 sm:bottom-28 sm:w-[500px] glass rounded-[1.5rem] sm:rounded-[1.75rem] border border-white/70 p-5 sm:p-8 shadow-[0_20px_50px_-20px_rgba(22,22,22,0.45)]">
@@ -226,18 +231,18 @@ function Motion({ s, active, priority }: { s: HeroSlide; active: boolean; priori
  * ambient, blurred copy of itself, with the collection's pieces in a shoppable strip below.
  * Phones get the model-panel crop with the headline as live text.
  */
-function Banner({ s, active, products }: { s: HeroSlide; active: boolean; products: HeroProduct[] }) {
+function Banner({ s, active, priority, products }: { s: HeroSlide; active: boolean; priority?: boolean; products: HeroProduct[] }) {
   const tab = active ? 0 : -1;
   return (
     <div className="absolute inset-0 text-cream overflow-hidden">
       {/* Ambient glow */}
-      <Image src={s.image} alt="" fill priority sizes="30vw" className="object-cover scale-125 blur-3xl saturate-150" />
+      <Image src={s.image} alt="" fill priority={priority} sizes="30vw" className="object-cover scale-125 blur-3xl saturate-150" />
       <div className="absolute inset-0 bg-ink/45" />
 
       {/* Desktop: the banner, whole */}
       <div className="hidden sm:flex absolute inset-0 flex-col px-6 lg:px-12 pt-6 lg:pt-10 pb-24 sm:pb-28">
         <Link href={s.href} tabIndex={tab} className="group relative block w-full aspect-[1920/500] rounded-3xl overflow-hidden shadow-[0_30px_60px_-25px_rgba(0,0,0,0.6)] ring-1 ring-white/15">
-          <Image src={s.image} alt={`${s.title} ${s.accent ?? ""}`.trim()} fill priority sizes="(min-width:1400px) 1300px, 92vw" className={cn("object-cover transition-transform duration-[1500ms] group-hover:scale-[1.02]", active && "animate-kenburns")} />
+          <Image src={s.image} alt={`${s.title} ${s.accent ?? ""}`.trim()} fill priority={priority} sizes="(min-width:1400px) 1300px, 92vw" className={cn("object-cover transition-transform duration-[1500ms] group-hover:scale-[1.02]", active && "animate-kenburns")} />
         </Link>
         {active && (
           <div className="flex-1 flex items-center gap-8 xl:gap-12 pt-6 lg:pt-8 min-h-0">
@@ -279,7 +284,7 @@ function Banner({ s, active, products }: { s: HeroSlide; active: boolean; produc
       {/* Phones: model panel + live headline */}
       <div className="sm:hidden absolute inset-0 flex flex-col px-3 pt-3 pb-16">
         <Link href={s.href} tabIndex={tab} className="relative flex-1 min-h-0 rounded-[1.5rem] overflow-hidden ring-1 ring-white/15">
-          <Image src={s.mobileImage ?? s.image} alt="" fill priority sizes="(min-width:640px) 1px, 94vw" style={{ objectPosition: s.mobileFocus ?? "50% 0%" }} className={cn("object-cover", active && "animate-kenburns")} />
+          <Image src={s.mobileImage ?? s.image} alt="" fill priority={priority} sizes="(min-width:640px) 1px, 94vw" style={{ objectPosition: s.mobileFocus ?? "50% 0%" }} className={cn("object-cover", active && "animate-kenburns")} />
         </Link>
         {active && (
           <div className="px-2 pt-5">

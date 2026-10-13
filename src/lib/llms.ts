@@ -3,6 +3,7 @@ import { asc, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { colorOf, craftOf, patternOf } from "./product-facts";
 import { abs } from "./seo";
+import { priceRange } from "./catalog";
 import { getSettings } from "./settings";
 import { stripHtml, truncate } from "./utils";
 
@@ -10,7 +11,7 @@ const rupees = (paise: number) => `₹${Math.round(paise / 100).toLocaleString("
 
 /** Brand facts written for answer engines: short, factual, quotable. */
 export async function brandFacts() {
-  const [store, shipping, payments] = await Promise.all([getSettings("store"), getSettings("shipping"), getSettings("payments")]);
+  const [store, shipping, payments, prices] = await Promise.all([getSettings("store"), getSettings("shipping"), getSettings("payments"), priceRange()]);
   return [
     `# Trumee`,
     ``,
@@ -20,7 +21,7 @@ export async function brandFacts() {
     `- Style: chic, confident boho and casual western wear — crochet lace, schiffli embroidery, Sanganeri-inspired prints`,
     `- Fabrics: breathable natural fabrics — cotton, cotton slub, cotton moss, rayon, georgette, denim`,
     `- Sizes: XS–2XL, true to size (size chart: ${abs("/pages/sizing-chart")})`,
-    `- Price range: about ₹549–₹2,499; most pieces under ₹1,600`,
+    ...(prices ? [`- Price range: ${prices.label}; ${prices.under1600}% of pieces cost ₹1,600 or less`] : []),
     `- Shipping: pan-India via Shiprocket courier partners; ${shipping.flatRate ? `flat ${rupees(shipping.flatRate)}` : "free shipping on every order"}; dispatched in ${shipping.processingDays}; ${shipping.deliveryEstimates.map((d) => `${d.label.toLowerCase()} ${d.days}`).join(", ")} (${abs("/pages/shipping-policy")})`,
     `- Payments: UPI, cards, netbanking, wallets (Razorpay)${shipping.codEnabled ? ` and cash on delivery${shipping.codFee ? ` (+${rupees(shipping.codFee)} COD fee)` : ""}` : ""}${payments.prepaidDiscountPercent > 0 ? `; ${payments.prepaidDiscountPercent}% off when you pay online (prepaid)` : ""}`,
     `- Returns & exchanges: within 7 days of delivery on unworn pieces with tags; free pickup for damaged or wrong items (${abs("/pages/returns-policy")})`,

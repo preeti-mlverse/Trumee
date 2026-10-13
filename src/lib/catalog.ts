@@ -1,6 +1,7 @@
 import "server-only";
 import { COLOUR_FAMILIES, colourTag } from "./product-facts";
 import { and, asc, desc, eq, exists, gte, ilike, inArray, lte, max, min, or, sql, sum } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
 import { db, schema } from "@/db";
 
 const { products, variants, productImages, collections, collectionProducts, orderItems, reviews } = schema;
@@ -271,4 +272,56 @@ export async function getFacets(collectionId?: number) {
     colours: COLOUR_FAMILIES.filter((f) => tags.has(colourTag(f.key))).map((f) => ({ value: f.key, label: f.label, swatch: f.swatch })),
     details: present(DETAILS),
   };
+}
+
+/** Live selling-price range of active products (each product's cheapest size), for schema and llms.txt. */
+export const priceRange = unstable_cache(
+  async () => {
+    const rows = await db
+      .select({ price: sql<number>`min(${variants.price})::int` })
+      .from(variants)
+      .innerJoin(products, eq(products.id, variants.productId))
+      .where(eq(products.status, "active"))
+      .groupBy(variants.productId);
+    const prices = rows.map((r) => r.price).sort((a, b) => a - b);
+    if (!prices.length) return null;
+    const rupees = (p: number) => `₹${Math.round(p / 100).toLocaleString("en-IN")}`;
+    const under1600 = Math.round((prices.filter((p) => p <= 160000).length / prices.length) * 100);
+    return { min: prices[0], max: prices[prices.length - 1], label: `${rupees(prices[0])}–${rupees(prices[prices.length - 1])}`, under1600 };
+  },
+  ["price-range"],
+  { revalidate: 3600, tags: ["catalog"] },
+);
+
+const GUIDE_RULES: { test: RegExp; handle: string; weight: number }[] = [
+  { test: /crochet/i, handle: "how-to-style-a-crochet-top", weight: 3 },
+  { test: /schiffli/i, handle: "what-is-schiffli-embroidery", weight: 3 },
+  { test: /co-?ord|cord set/i, handle: "how-to-style-a-co-ord-set", weight: 3 },
+  { test: /\bdress(es)?\b/i, handle: "boho-dresses-for-every-body-type", weight: 2 },
+  { test: /\bshirts?\b|denim|office|peplum/i, handle: "office-outfits-for-women-western-looks", weight: 2 },
+  { test: /vacation|beach|getaway|resort|holiday|halter|sleeveless/i, handle: "what-to-wear-in-goa-vacation-outfits-for-women", weight: 2 },
+  { test: /cotton|rayon/i, handle: "monsoon-outfit-guide-fabrics-that-dry-fast", weight: 1 },
+  { test: /./, handle: "what-to-wear-in-the-hills-in-summer", weight: 0.5 },
+];
+
+const publishedGuides = unstable_cache(
+  () =>
+    db
+      .select({ handle: schema.blogPosts.handle, title: schema.blogPosts.title, excerpt: schema.blogPosts.excerpt, coverUrl: schema.blogPosts.coverUrl })
+      .from(schema.blogPosts)
+      .where(eq(schema.blogPosts.published, true)),
+  ["published-guides"],
+  { revalidate: 3600, tags: ["blog"] },
+);
+
+/** The two style guides that best match a product (by type, title and details), to link shop pages into the journal. */
+export async function guidesForProduct(p: { title: string; productType: string | null; tags?: string[] }, limit = 2) {
+  const text = [p.title, p.productType ?? "", ...(p.tags ?? [])].join(" ");
+  const guides = await publishedGuides();
+  const score = new Map<string, number>();
+  for (const r of GUIDE_RULES) if (r.test.test(text)) score.set(r.handle, (score.get(r.handle) ?? 0) + r.weight);
+  return guides
+    .filter((g) => score.has(g.handle))
+    .sort((a, b) => score.get(b.handle)! - score.get(a.handle)!)
+    .slice(0, limit);
 }

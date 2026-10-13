@@ -76,7 +76,7 @@ export async function CollectionBanner({
           const inner = (
             <>
               {m.video ? (
-                <LoopVideo src={m.video.url} poster={m.video.poster} priority={i === 0} className="absolute inset-0 size-full object-[50%_30%]" />
+                <LoopVideo src={m.video.url} poster={m.video.poster} priority={i === 0} small className="absolute inset-0 size-full object-[50%_30%]" />
               ) : (
                 <Image src={m.image!} alt="" fill priority={i === 0} sizes="(min-width:1024px) 20vw, 33vw" className="object-cover object-[50%_30%]" />
               )}
@@ -88,7 +88,7 @@ export async function CollectionBanner({
             </>
           );
           return m.href ? (
-            <Link key={m.key} href={m.href} className="group relative overflow-hidden">
+            <Link key={m.key} href={m.href} aria-label={m.label} className="group relative overflow-hidden">
               {inner}
             </Link>
           ) : (

@@ -81,9 +81,9 @@ const CRAFT_WORDS = ["Crochet lace", "Schiffli embroidery", "Sanganeri prints", 
 
 
 /** Edge-to-edge colour band; content keeps the page width unless `full`. */
-function Panel({ bg, className, style, full, tight, flush, children }: { bg: string; className?: string; style?: React.CSSProperties; full?: boolean; tight?: boolean; flush?: boolean; children: React.ReactNode }) {
+function Panel({ bg, className, style, full, tight, flush, defer, children }: { bg: string; className?: string; style?: React.CSSProperties; full?: boolean; tight?: boolean; flush?: boolean; /** below the fold: skip rendering until near the viewport */ defer?: boolean; children: React.ReactNode }) {
   return (
-    <section data-flush-end={flush || undefined} className={`relative ${flush ? "mt-0" : tight ? "mt-8 sm:mt-12" : "mt-16 sm:mt-24"} ${bg}`} style={style}>
+    <section data-flush-end={flush || undefined} className={`relative ${flush ? "mt-0" : tight ? "mt-8 sm:mt-12" : "mt-16 sm:mt-24"} ${defer ? "cv-auto" : ""} ${bg}`} style={style}>
       <div className={`relative mx-auto ${full ? "" : "max-w-[1400px]"} ${className ?? ""}`}>{children}</div>
     </section>
   );
@@ -107,7 +107,7 @@ const TONES = {
   sea: { card: "bg-gradient-to-br from-sea-soft via-[#c3dbe9] to-[#9cc2d9] text-ink", sub: "text-sea-dark", print: "#1d6188" },
   sand: { card: "bg-gradient-to-br from-paper via-sand to-[#e5d4b6] text-ink", sub: "text-muted", print: "#161616" },
   shade: { card: "bg-gradient-to-br from-ink via-ink-soft to-ink text-cream", sub: "text-sun", print: "#f5e0a3" },
-  sun: { card: "bg-gradient-to-br from-[#fbf0d2] via-sun-soft to-[#e9bf55] text-ink", sub: "text-ink/70", print: "#161616" },
+  sun: { card: "bg-gradient-to-br from-[#fbf0d2] via-sun-soft to-[#e9bf55] text-ink", sub: "text-ink/85", print: "#161616" },
 } as const;
 
 export default async function Home() {
@@ -272,7 +272,7 @@ export default async function Home() {
 
       {/* Products — tabbed rail */}
       {tabs.length > 0 && (
-        <Container className="pt-16 sm:pt-24">
+        <Container className="pt-16 sm:pt-24 cv-auto">
           <SectionHeading eyebrow="Under ₹999 · Bestsellers · New in" title="Shop the" accent="shelf" />
           <ProductRail list="Home" tabs={tabs} />
         </Container>
@@ -280,7 +280,7 @@ export default async function Home() {
 
       {/* Try-on videos — dark rounded panel */}
       {clips.length > 0 && (
-        <Panel bg="bg-ink text-cream overflow-hidden" className="pt-8 sm:pt-11 pb-8 sm:pb-11 px-4 sm:px-6 lg:px-10" style={blockPrint("#f5e0a3", 0.05)}>
+        <Panel defer bg="bg-ink text-cream overflow-hidden" className="pt-8 sm:pt-11 pb-8 sm:pb-11 px-4 sm:px-6 lg:px-10" style={blockPrint("#f5e0a3", 0.05)}>
           <SectionHeading dark eyebrow="Real fit · real fabric" title="Try-on videos," accent="see the fit" className="mb-6 sm:mb-8" />
           <ReelRail clips={clips} />
         </Panel>
@@ -288,14 +288,14 @@ export default async function Home() {
 
       {/* The Edits — moodboard index */}
       {spotlightEdits.length > 0 && (
-        <Container className="pt-8 sm:pt-12">
+        <Container className="pt-8 sm:pt-12 cv-auto">
           <SectionHeading eyebrow="Moodboards" title="The" accent="Edits" href="/collections" linkLabel="Explore all edits" className="sm:flex-row sm:items-end" />
           <EditPanels edits={editPanels} />
         </Container>
       )}
 
       {/* Editorial split */}
-      <Panel bg="bg-ink text-cream overflow-hidden isolate" full className="grid lg:grid-cols-2">
+      <Panel defer bg="bg-ink text-cream overflow-hidden isolate" full className="grid lg:grid-cols-2">
         <div className="relative aspect-[4/5] lg:aspect-auto lg:min-h-[760px]">
           {escape ? (
             <LoopVideo src={escape.video} poster={escape.poster} className="absolute inset-0 size-full object-[50%_40%]" />
@@ -327,7 +327,7 @@ export default async function Home() {
 
       {/* Shop by colour — one card per colour family, swatch + a piece in that colour */}
       {colours.length > 0 && (
-        <Container className="pt-8 sm:pt-12">
+        <Container className="pt-8 sm:pt-12 cv-auto">
           <SectionHeading eyebrow="Find your shade" title="Shop by" accent="colour" />
           <Reveal stagger className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
             {colours.map((c) => (
@@ -353,7 +353,7 @@ export default async function Home() {
       )}
 
       {/* Details */}
-      <Container className="pt-16 sm:pt-24">
+      <Container className="pt-16 sm:pt-24 cv-auto">
         <SectionHeading eyebrow="In the spotlight" title="Details that" accent="do the talking" />
         <Reveal stagger className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
           {home.spotlight.map((s) => (
@@ -374,7 +374,7 @@ export default async function Home() {
       </Container>
 
       {/* The Trumee promise — craft & quality */}
-      <Panel bg="bg-paper/75" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-10" style={blockPrint("#1d6188", 0.07)}>
+      <Panel defer bg="bg-paper/75" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-10" style={blockPrint("#1d6188", 0.07)}>
         <SectionHeading eyebrow="The Trumee promise" title="Crafted to be worn, loved," accent="and worn again" />
         <Reveal stagger className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {CRAFT_IMAGES.map((c) => (

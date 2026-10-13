@@ -18,7 +18,7 @@
   --color-sea-soft: #dcebf3;
   --color-sun: #d9a21b; /* mustard — on dark, or as a fill under black text */
   --color-sun-soft: #f5e0a3;
-  --color-sage: #3f7a4f; /* status: success */
+  --color-sage: #336a41; /* status: success */
   --color-sale: #b23a2a; /* status: errors, sale price */
 
   /* Admin palette */
@@ -110,6 +110,9 @@ body {
   -webkit-backdrop-filter: blur(18px) saturate(1.2);
   backdrop-filter: blur(18px) saturate(1.2);
 }
+
+/* Below-the-fold sections: the browser skips their style/layout/paint until they near the viewport */
+.cv-auto { content-visibility: auto; contain-intrinsic-size: auto 900px; }
 
 /* Scroll reveal (see components/store/reveal.tsx) */
 .reveal { transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }

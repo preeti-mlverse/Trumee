@@ -7,6 +7,7 @@ import { Header } from "@/components/store/header";
 import { JsonLd } from "@/components/store/json-ld";
 import { ScrollTop } from "@/components/store/scroll-top";
 import { SkyBackdrop } from "@/components/store/sky";
+import { priceRange } from "@/lib/catalog";
 import { organizationLd, websiteLd } from "@/lib/seo";
 import type { Metadata } from "next";
 import { getSettings } from "@/lib/settings";
@@ -19,11 +20,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function StoreLayout({ children }: LayoutProps<"/">) {
-  const [store, nav, integrations, shipping, payments] = await Promise.all([getSettings("store"), getSettings("navigation"), getSettings("integrations"), getSettings("shipping"), getSettings("payments")]);
+  const [store, nav, integrations, shipping, payments, prices] = await Promise.all([getSettings("store"), getSettings("navigation"), getSettings("integrations"), getSettings("shipping"), getSettings("payments"), priceRange()]);
   return (
     <div className="font-sans flex flex-col min-h-dvh">
       <SkyBackdrop />
-      <JsonLd data={[organizationLd(store), websiteLd()]} />
+      <JsonLd data={[organizationLd(store, prices?.label), websiteLd()]} />
       <CartProvider>
         <WishlistProvider>
           <Header nav={nav} announcement={store.announcement} />

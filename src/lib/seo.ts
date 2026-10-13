@@ -7,7 +7,7 @@ import { stripHtml } from "./utils";
 export const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
 export const abs = (path: string) => (path.startsWith("http") ? path : SITE + path);
 
-export function organizationLd(store: StoreSettings) {
+export function organizationLd(store: StoreSettings, priceRange?: string) {
   return {
     "@context": "https://schema.org",
     "@type": ["OnlineStore", "ClothingStore"],
@@ -16,7 +16,7 @@ export function organizationLd(store: StoreSettings) {
     legalName: store.legalName,
     alternateName: "Trumee Studio",
     url: SITE,
-    logo: { "@type": "ImageObject", url: abs("/favicon.svg") },
+    logo: { "@type": "ImageObject", url: abs("/icon-512.png"), width: 512, height: 512 },
     image: abs("/videos/hero-motion.webp"),
     slogan: store.tagline,
     description:
@@ -24,7 +24,7 @@ export function organizationLd(store: StoreSettings) {
     foundingLocation: { "@type": "Place", name: "Gurgaon, Haryana, India" },
     areaServed: { "@type": "Country", name: "India" },
     knowsAbout: ["Boho dresses", "Crochet tops", "Schiffli embroidery", "Co-ord sets", "Women's western wear", "Vacation outfits", "Breathable cotton clothing"],
-    priceRange: "₹549–₹2,499",
+    ...(priceRange ? { priceRange } : {}),
     currenciesAccepted: "INR",
     paymentAccepted: "UPI, Credit Card, Debit Card, Net Banking, Wallets, Cash on Delivery",
     email: store.email,

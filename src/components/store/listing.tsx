@@ -54,7 +54,10 @@ export async function Listing({ sp, collectionId, q, listName, basePath }: { sp:
       </Suspense>
       <ListTracker listName={listName} items={items.map((p, i) => ({ item_id: p.id, item_name: p.title, price: p.price / 100, index: i }))} />
       {items.length ? (
-        <ProductGrid items={items} list={listName} />
+        <>
+          <h2 className="sr-only">{listName.startsWith("Collection – ") ? `${listName.slice(13)} products` : listName}</h2>
+          <ProductGrid items={items} list={listName} />
+        </>
       ) : (
         <div className="py-24 text-center">
           <p className="font-display text-3xl">Nothing matches just yet</p>

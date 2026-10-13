@@ -45,6 +45,7 @@ export function ProductCard({ p, list, index = 0, priority }: { p: CardProduct; 
           {p.video ? (
             <LoopVideo
               src={p.video.url}
+              small
               poster={p.video.poster}
               playing={hover}
               className="absolute inset-0 size-full opacity-0 transition-opacity duration-500 group-hover:opacity-100"

@@ -20,7 +20,7 @@ export type RailTab = {
 };
 
 const TONE = {
-  sun: { tile: "bg-sun text-ink", kicker: "text-ink/70", btn: "bg-ink text-cream", dot: "bg-sun" },
+  sun: { tile: "bg-sun text-ink", kicker: "text-ink/85", btn: "bg-ink text-cream", dot: "bg-sun" },
   ink: { tile: "bg-ink text-cream", kicker: "text-sun-soft", btn: "bg-sun text-ink", dot: "bg-ink" },
   sea: { tile: "bg-sea-bright text-cream", kicker: "text-sea-soft", btn: "bg-cream text-ink", dot: "bg-sea-bright" },
 } as const;
@@ -71,7 +71,7 @@ export function ProductRail({ tabs, list }: { tabs: RailTab[]; list: string }) {
               }}
               className={cn(
                 "pb-3 sm:pb-4 pt-1 font-display text-[22px] sm:text-[32px] leading-none whitespace-nowrap transition-colors duration-500",
-                k === t ? "text-sea" : "text-ink/40 hover:text-ink/70",
+                k === t ? "text-sea" : "text-ink/60 hover:text-ink/80",
               )}
             >
               {x.label}

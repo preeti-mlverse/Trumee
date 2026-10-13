@@ -6,6 +6,12 @@ const SOCIAL = [
   "youtube.", "youtu.be", "whatsapp.", "wa.me", "reddit.", "snapchat.", "threads.net", "quora.", "tiktok.",
 ];
 const EMAIL = ["mail.google.", "outlook.", "mail.yahoo.", "mail."];
+// AI assistants and answer engines (checked before search: gemini.google.com would otherwise count as Google search).
+// ChatGPT also tags outbound links with utm_source=chatgpt.com.
+const AI = [
+  "chatgpt.com", "chat.openai.com", "openai.com", "perplexity.ai", "gemini.google.com", "bard.google.com", "copilot.microsoft.com",
+  "claude.ai", "meta.ai", "you.com", "phind.com", "deepseek.com", "grok.com", "mistral.ai",
+];
 const PAID_MEDIUMS = /^(cpc|ppc|paid|paidsearch|paid_search|cpm|cpv|cpa|display|banner|retargeting|paid_social|paidsocial|ads?)$/i;
 
 const matches = (host: string, list: string[]) => list.some((d) => host.includes(d));
@@ -18,6 +24,7 @@ export function sourceFromHost(host: string) {
   if (h.includes("youtube") || h.includes("youtu.be")) return "youtube";
   if (h.includes("pinterest") || h.includes("pin.it")) return "pinterest";
   if (h.includes("whatsapp") || h === "wa.me") return "whatsapp";
+  if (matches(h, AI)) return h.replace(/^chat\.openai\.com$/, "chatgpt.com");
   if (h.includes("google.")) return "google";
   if (h.includes("bing.")) return "bing";
   return h;
@@ -61,7 +68,9 @@ export function attribute(params: {
     const isSearch = matches(source + ".", SEARCH) || ["google", "bing", "yahoo"].includes(source);
     const isSocial = matches(source + ".", SOCIAL) || ["instagram", "facebook", "ig", "fb", "whatsapp", "youtube", "pinterest", "twitter"].includes(source);
     let channel = "Referral";
-    if (PAID_MEDIUMS.test(medium)) channel = isSocial ? "Paid Social" : isSearch ? "Paid Search" : medium === "display" || medium === "banner" ? "Display" : "Paid Other";
+    const isAi = matches(source, AI) || ["chatgpt", "perplexity", "gemini", "copilot", "claude"].includes(source);
+    if (isAi && !PAID_MEDIUMS.test(medium)) channel = "AI Assistants";
+    else if (PAID_MEDIUMS.test(medium)) channel = isSocial ? "Paid Social" : isSearch ? "Paid Search" : medium === "display" || medium === "banner" ? "Display" : "Paid Other";
     else if (medium === "email" || medium === "newsletter") channel = "Email";
     else if (medium === "sms") channel = "SMS";
     else if (medium === "affiliate") channel = "Affiliates";
@@ -79,6 +88,7 @@ export function attribute(params: {
   // 3. Referrer
   if (refHost) {
     const source = sourceFromHost(refHost);
+    if (matches(refHost, AI)) return { source, medium: "referral", campaign, term, content, channel: "AI Assistants", referrerHost: refHost };
     if (matches(refHost, SEARCH)) return { source, medium: "organic", campaign, term, content, channel: "Organic Search", referrerHost: refHost };
     if (matches(refHost, SOCIAL) || params.fbclid) return { source, medium: "social", campaign, term, content, channel: "Organic Social", referrerHost: refHost };
     if (matches(refHost, EMAIL)) return { source, medium: "email", campaign, term, content, channel: "Email", referrerHost: refHost };

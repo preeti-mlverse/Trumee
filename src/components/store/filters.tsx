@@ -132,6 +132,7 @@ export function Filters({ facets, total }: { facets: { sizes: string[]; types: s
         <label className="flex items-center gap-1.5 text-xs tracking-[0.16em] uppercase">
           <span className="hidden sm:inline">Sort</span>
           <select
+            aria-label="Sort products"
             value={sp.get("sort") ?? "featured"}
             onChange={(e) => set({ sort: e.target.value === "featured" ? null : e.target.value })}
             className="appearance-none [field-sizing:content] bg-transparent normal-case tracking-normal text-sm outline-none cursor-pointer py-2 max-w-[9.5rem] sm:max-w-none"
