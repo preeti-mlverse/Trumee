@@ -159,7 +159,7 @@ export function CheckoutForm({
         <fieldset className="space-y-3">
           <legend className="font-display text-2xl mb-4">Contact</legend>
           <input name="email" type="email" autoComplete="email" required defaultValue={prefill.email} placeholder="Email" className={input("email")} onBlur={(e) => checkoutStarted(e.target.value)} />
-          <input name="phone" type="tel" inputMode="numeric" autoComplete="tel-national" required defaultValue={prefill.phone} placeholder="Mobile number (for delivery updates)" className={input("phone")} />
+          <input name="phone" type="tel" inputMode="numeric" autoComplete="tel-national" required defaultValue={prefill.phone} placeholder="Mobile number * (needed by the courier)" aria-label="Mobile number (required)" className={input("phone")} />
           <label className="flex items-center gap-2.5 text-sm text-ink-soft">
             <input type="checkbox" name="acceptsMarketing" defaultChecked className="accent-[var(--color-ink)] size-4" /> Email me new drops and offers
           </label>
