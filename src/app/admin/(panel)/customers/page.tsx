@@ -8,6 +8,8 @@ export const metadata = { title: "Customers" };
 export const dynamic = "force-dynamic";
 
 const { customers: C, orders: O, subscribers: S } = schema;
+// Drizzle leaves columns unqualified in single-table selects; name the outer table so subqueries correlate.
+const cid = sql.raw(`"customers"."id"`);
 
 export default async function CustomersPage({ searchParams }: PageProps<"/admin/customers">) {
   await requireStaff("customers");
@@ -21,9 +23,9 @@ export default async function CustomersPage({ searchParams }: PageProps<"/admin/
         name: sql<string>`trim(coalesce(${C.firstName}, '') || ' ' || coalesce(${C.lastName}, ''))`,
         marketing: C.acceptsMarketing,
         createdAt: C.createdAt,
-        orders: sql<number>`(select count(*) from ${O} where ${O.customerId} = ${C.id} and ${O.status} <> 'cancelled')::int`,
-        spent: sql<number>`(select coalesce(sum(${O.total} - ${O.refundedTotal}), 0) from ${O} where ${O.customerId} = ${C.id} and ${O.status} <> 'cancelled' and ${O.financialStatus} in ('paid','partially_refunded'))::int`,
-        lastOrder: sql<Date | null>`(select max(${O.createdAt}) from ${O} where ${O.customerId} = ${C.id})`,
+        orders: sql<number>`(select count(*) from ${O} where ${O.customerId} = ${cid} and ${O.status} <> 'cancelled')::int`,
+        spent: sql<number>`(select coalesce(sum(${O.total} - ${O.refundedTotal}), 0) from ${O} where ${O.customerId} = ${cid} and ${O.status} <> 'cancelled' and ${O.financialStatus} in ('paid','partially_refunded'))::int`,
+        lastOrder: sql<Date | null>`(select max(${O.createdAt}) from ${O} where ${O.customerId} = ${cid})`,
       })
       .from(C)
       .where(q ? or(ilike(C.email, `%${q}%`), ilike(C.phone, `%${q}%`), ilike(C.firstName, `%${q}%`), ilike(C.lastName, `%${q}%`)) : undefined)

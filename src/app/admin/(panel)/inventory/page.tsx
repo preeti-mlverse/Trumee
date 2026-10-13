@@ -18,7 +18,7 @@ export default async function InventoryPage({ searchParams }: PageProps<"/admin/
 
   const [rows, history] = await Promise.all([
     db
-      .select({ id: V.id, size: V.option1, sku: V.sku, qty: V.inventoryQty, track: V.trackInventory, backorder: V.allowBackorder, productId: P.id, title: P.title, status: P.status, image: sql<string | null>`(select ${I.url} from ${I} where ${I.productId} = ${P.id} order by ${I.position} limit 1)` })
+      .select({ id: V.id, size: V.option1, sku: V.sku, qty: V.inventoryQty, track: V.trackInventory, backorder: V.allowBackorder, productId: P.id, title: P.title, status: P.status, image: sql<string | null>`(select ${I.url} from ${I} where ${I.productId} = ${sql.raw(`"products"."id"`)} order by ${I.position} limit 1)` })
       .from(V)
       .innerJoin(P, eq(V.productId, P.id))
       .where(

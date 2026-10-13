@@ -9,6 +9,7 @@ const NAV = [
   { href: "/admin/inventory", label: "Inventory" },
   { href: "/admin/customers", label: "Customers" },
   { href: "/admin/inbox", label: "Inbox" },
+  { href: "/admin/analytics", label: "Analytics" },
   { href: "/admin/settings", label: "Settings" },
 ];
 

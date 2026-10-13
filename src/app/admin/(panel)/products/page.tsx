@@ -9,6 +9,8 @@ export const metadata = { title: "Products" };
 export const dynamic = "force-dynamic";
 
 const { products: P, variants: V, productImages: I } = schema;
+// Drizzle leaves columns unqualified in single-table selects; name the outer table so subqueries correlate.
+const pid = sql.raw(`"products"."id"`);
 const STATUS = ["all", "active", "draft", "archived"] as const;
 
 export default async function ProductsPage({ searchParams }: PageProps<"/admin/products">) {
@@ -25,17 +27,17 @@ export default async function ProductsPage({ searchParams }: PageProps<"/admin/p
       status: P.status,
       type: P.productType,
       updatedAt: P.updatedAt,
-      stock: sql<number>`coalesce((select sum(${V.inventoryQty}) from ${V} where ${V.productId} = ${P.id} and ${V.trackInventory}), 0)::int`,
-      sizes: sql<number>`(select count(*) from ${V} where ${V.productId} = ${P.id})::int`,
-      soldOut: sql<number>`(select count(*) from ${V} where ${V.productId} = ${P.id} and ${V.trackInventory} and not ${V.allowBackorder} and ${V.inventoryQty} <= 0)::int`,
-      minPrice: sql<number>`(select min(${V.price}) from ${V} where ${V.productId} = ${P.id})::int`,
-      image: sql<string | null>`(select ${I.url} from ${I} where ${I.productId} = ${P.id} order by ${I.position} limit 1)`,
+      stock: sql<number>`coalesce((select sum(${V.inventoryQty}) from ${V} where ${V.productId} = ${pid} and ${V.trackInventory}), 0)::int`,
+      sizes: sql<number>`(select count(*) from ${V} where ${V.productId} = ${pid})::int`,
+      soldOut: sql<number>`(select count(*) from ${V} where ${V.productId} = ${pid} and ${V.trackInventory} and not ${V.allowBackorder} and ${V.inventoryQty} <= 0)::int`,
+      minPrice: sql<number>`(select min(${V.price}) from ${V} where ${V.productId} = ${pid})::int`,
+      image: sql<string | null>`(select ${I.url} from ${I} where ${I.productId} = ${pid} order by ${I.position} limit 1)`,
     })
     .from(P)
     .where(
       and(
         status === "all" ? undefined : eq(P.status, status as "active" | "draft" | "archived"),
-        q ? or(ilike(P.title, `%${q}%`), ilike(P.handle, `%${q}%`), sql`exists (select 1 from ${V} where ${V.productId} = ${P.id} and ${V.sku} ilike ${`%${q}%`})`) : undefined,
+        q ? or(ilike(P.title, `%${q}%`), ilike(P.handle, `%${q}%`), sql`exists (select 1 from ${V} where ${V.productId} = ${pid} and ${V.sku} ilike ${`%${q}%`})`) : undefined,
       ),
     )
     .orderBy(asc(sql`case ${P.status} when 'active' then 0 when 'draft' then 1 else 2 end`), desc(P.updatedAt));
