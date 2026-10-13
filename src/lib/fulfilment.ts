@@ -71,7 +71,7 @@ export async function pushOrderToShiprocket(orderId: number, staffId?: number | 
         sku: i.sku || `TRM-${i.variantId ?? i.id}`,
         units: i.quantity,
         selling_price: i.price / 100,
-        hsn: "6204",
+        hsn: i.hsn ?? "6204",
       })),
       payment_method: o.paymentMethod === "cod" ? "COD" : "Prepaid",
       shipping_charges: o.shippingTotal / 100,

@@ -45,6 +45,7 @@ export const templates = {
     total: number;
     paymentMethod: string;
     url: string;
+    invoiceUrl?: string;
   }) {
     const rows = o.items
       .map(
@@ -59,7 +60,8 @@ export const templates = {
         `<p style="font-size:14px;line-height:1.6">We’ve received your order <b>#${o.number}</b> and are getting it ready. We’ll email you tracking details as soon as it ships.</p>
          <table style="width:100%;border-collapse:collapse;margin:16px 0">${rows}
          <tr><td style="padding-top:12px;border-top:1px solid #e3d8c8;font-weight:bold">Total ${o.paymentMethod === "cod" ? "(pay on delivery)" : "paid"}</td><td style="padding-top:12px;border-top:1px solid #e3d8c8;text-align:right;font-weight:bold">₹${(o.total / 100).toLocaleString("en-IN")}</td></tr></table>
-         <a href="${o.url}" style="display:inline-block;background:#1f1b16;color:#fbf8f3;padding:12px 22px;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase">View your order</a>`,
+         <a href="${o.url}" style="display:inline-block;background:#1f1b16;color:#fbf8f3;padding:12px 22px;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase">View your order</a>
+         ${o.invoiceUrl ? `<p style="font-size:13px;margin-top:16px"><a href="${o.invoiceUrl}" style="color:#1d6188">Download your GST invoice</a></p>` : ""}`,
       ),
     };
   },

@@ -72,6 +72,8 @@ export const products = pgTable(
     tags: text("tags").array().notNull().default(sql`'{}'::text[]`),
     options: jsonb("options").$type<ProductOption[]>().notNull().default([]),
     fabric: text("fabric"),
+    /** HSN code for GST invoices (defaults by product type when empty) */
+    hsn: varchar("hsn", { length: 10 }),
     care: text("care"),
     seoTitle: text("seo_title"),
     seoDescription: text("seo_description"),
@@ -390,6 +392,7 @@ export const orderItems = pgTable(
     quantity: integer("quantity").notNull(),
     discount: integer("discount").notNull().default(0),
     taxRate: integer("tax_rate").notNull().default(5), // percent
+    hsn: varchar("hsn", { length: 10 }),
     fulfilledQty: integer("fulfilled_qty").notNull().default(0),
     refundedQty: integer("refunded_qty").notNull().default(0),
   },

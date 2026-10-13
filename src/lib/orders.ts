@@ -125,6 +125,7 @@ export async function createOrderFromCart(input: {
           quantity: l.quantity,
           discount: pl.discount,
           taxRate: pl.taxRate,
+          hsn: l.hsn,
         };
       }),
     );
@@ -187,6 +188,7 @@ async function afterConfirmed(orderId: number) {
     total: o.total,
     paymentMethod: o.paymentMethod,
     url: `${site}/orders/${o.token}`,
+    invoiceUrl: `${site}/invoice/${o.token}`,
   });
   await Promise.allSettled([
     sendEmail({ to: o.email, ...mail }),

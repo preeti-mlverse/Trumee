@@ -1,4 +1,5 @@
 import "server-only";
+import { hsnFor } from "./invoice";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { cookies } from "next/headers";
@@ -21,6 +22,7 @@ export type CartLine = {
   quantity: number;
   maxQty: number;
   collectionIds: number[];
+  hsn: string;
 };
 
 export type CartState = {
@@ -58,6 +60,8 @@ export async function loadLines(cartId: string): Promise<CartLine[]> {
       handle: schema.products.handle,
       title: schema.products.title,
       status: schema.products.status,
+      productType: schema.products.productType,
+      hsn: schema.products.hsn,
       variantTitle: schema.variants.title,
       sku: schema.variants.sku,
       price: schema.variants.price,
@@ -92,6 +96,7 @@ export async function loadLines(cartId: string): Promise<CartLine[]> {
         quantity: Math.min(r.qty, maxQty || r.qty),
         maxQty,
         collectionIds: r.collectionIds ?? [],
+        hsn: hsnFor(r.productType, r.hsn),
       };
     });
 }

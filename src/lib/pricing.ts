@@ -151,7 +151,7 @@ export function priceCart(
       ? Math.round((net * l.taxRate) / (100 + l.taxRate))
       : Math.round((net * l.taxRate) / 100);
   }
-  const tax = lines.reduce((s, l) => s + l.tax, 0);
+  const goodsTax = lines.reduce((s, l) => s + l.tax, 0);
 
   const s = opts.shipping;
   const meetsFree = s.freeShippingThreshold != null && afterDiscount >= s.freeShippingThreshold;
@@ -160,7 +160,11 @@ export function priceCart(
   void meetsFree;
   const shipping = 0;
   const codFee = opts.paymentMethod === "cod" ? s.codFee : 0;
-  const total = afterDiscount - prepaidDiscount + shipping + codFee + (opts.tax.pricesIncludeTax ? 0 : tax);
+  // The COD fee is part of the supply, taxed at the goods' (highest) rate — matches the invoice
+  const chargeRate = Math.max(5, ...lines.map((l) => l.taxRate));
+  const codTax = codFee ? Math.round((codFee * chargeRate) / (100 + chargeRate)) : 0;
+  const tax = goodsTax + codTax;
+  const total = afterDiscount - prepaidDiscount + shipping + codFee + (opts.tax.pricesIncludeTax ? 0 : goodsTax);
   const onlineTotal =
     opts.paymentMethod === "razorpay" || !prepaidAvailable ? (opts.paymentMethod === "cod" ? total - codFee : total) : priceCart(input, { ...opts, paymentMethod: "razorpay" }).total;
 

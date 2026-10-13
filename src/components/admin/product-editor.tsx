@@ -28,6 +28,7 @@ export type EditorProduct = {
   tags: string;
   descriptionHtml: string;
   fabric: string;
+  hsn: string;
   care: string;
   seoTitle: string;
   seoDescription: string;
@@ -79,6 +80,10 @@ export function ProductEditor({ p, collections, types }: { p: EditorProduct; col
             <label className="block">
               <Label>Fabric</Label>
               <input name="fabric" defaultValue={p.fabric} placeholder="e.g. 100% cotton slub" className={input} />
+            </label>
+            <label className="block">
+              <Label>HSN code (for GST invoices)</Label>
+              <input name="hsn" defaultValue={p.hsn} placeholder="e.g. 6204 dresses/skirts, 6206 tops, 6211 jumpsuits" className={input} />
             </label>
             <label className="block">
               <Label>Care</Label>

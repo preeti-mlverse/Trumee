@@ -3,11 +3,23 @@
 import { Lock, Minus, Plus, RotateCcw, Truck, Wallet } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef } from "react";
+import { track } from "@/lib/analytics/client";
 import { cn, inr } from "@/lib/utils";
 import { useCart } from "./cart-context";
 
 export function CartPageView() {
   const { cart, update, pending } = useCart();
+  // The bag page counts as viewing the cart (once per visit, after the cart has loaded)
+  const sent = useRef(false);
+  useEffect(() => {
+    if (sent.current || !cart?.lines.length) return;
+    sent.current = true;
+    track("view_cart", {
+      value: cart.totals.total / 100,
+      items: cart.lines.map((l) => ({ item_id: l.productId, item_name: l.title, item_variant: l.variantTitle, price: l.unitPrice / 100, quantity: l.quantity })),
+    });
+  }, [cart]);
   if (!cart) return <p className="mt-10 text-muted">Loading your bag…</p>;
   if (!cart.lines.length)
     return (

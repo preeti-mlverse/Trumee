@@ -1,3 +1,4 @@
+import { invoiceAvailable } from "@/lib/invoice";
 import { desc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -65,6 +66,11 @@ export default async function AccountPage({ searchParams }: PageProps<"/account"
                       <p className="text-xs text-muted">{o.status === "cancelled" ? "Cancelled" : STATUS[o.fulfillmentStatus]}</p>
                     </div>
                   </Link>
+                  {invoiceAvailable(o) && (
+                    <a href={`/invoice/${o.token}`} target="_blank" rel="noopener" className="inline-block mb-4 text-xs underline underline-offset-4">
+                      Download invoice
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>

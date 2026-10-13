@@ -62,6 +62,9 @@ export default async function OrderPage({ params }: PageProps<"/admin/orders/[id
       <div className="flex flex-wrap items-center gap-3">
         <Link href="/admin/orders" className="text-sm text-admin-muted hover:text-admin-text">← Orders</Link>
         <h1 className="text-2xl font-semibold">#{o.number}</h1>
+        <a href={`/admin/invoice/${o.id}`} target="_blank" rel="noopener" className="rounded-lg border border-admin-line bg-white px-3 py-1.5 text-sm font-medium hover:border-admin-accent">
+          GST invoice
+        </a>
         {payPill}
         {cancelled ? pill("Cancelled", "red") : o.fulfillmentStatus === "fulfilled" ? pill(m?.status ?? "Shipped", "blue") : pill("Unfulfilled", "yellow")}
         <span className="text-sm text-admin-muted">{time(o.createdAt)} · {o.source}</span>
@@ -177,7 +180,7 @@ export default async function OrderPage({ params }: PageProps<"/admin/orders/[id
                 />
                 {m?.awb && !m.pickupScheduled && <OrderButton orderId={o.id} op="pickup" label="Request pickup" />}
                 {m?.awb && <OrderButton orderId={o.id} op="label" label="Shipping label (PDF)" />}
-                {m?.srOrderId && <OrderButton orderId={o.id} op="invoice" label="Invoice (PDF)" />}
+                {m?.srOrderId && <OrderButton orderId={o.id} op="invoice" label="Shiprocket invoice (PDF)" />}
                 {m?.awb && !onWay && <OrderButton orderId={o.id} op="cancelShipment" label="Cancel shipment" confirm="Cancel the courier booking? The order stays and can be shipped again." />}
               </div>
             )}

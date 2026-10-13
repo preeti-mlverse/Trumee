@@ -1,3 +1,4 @@
+import { invoiceAvailable } from "@/lib/invoice";
 import { Check, MessageCircle, Package, Truck } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -91,6 +92,15 @@ export default async function OrderStatusPage({ params, searchParams }: PageProp
               Track package
             </a>
           )}
+        </div>
+      )}
+
+      {invoiceAvailable(o) && (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-paper/80 border border-line/70 px-5 py-4">
+          <p className="text-sm">GST tax invoice for this order</p>
+          <a href={`/invoice/${o.token}`} target="_blank" rel="noopener" className="rounded-full bg-ink text-cream px-5 py-2.5 text-[12px] tracking-[0.12em] uppercase hover:bg-sea transition-colors">
+            Download invoice
+          </a>
         </div>
       )}
 
