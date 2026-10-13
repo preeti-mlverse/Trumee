@@ -40,7 +40,7 @@ export async function pushOrderToShiprocket(orderId: number, staffId?: number | 
   if (!shiprocketConfigured()) throw new ShiprocketError("Add SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD to connect Shiprocket.");
   const o = await db.query.orders.findFirst({ where: eq(schema.orders.id, orderId), with: { items: true } });
   if (!o) throw new ShiprocketError("Order not found");
-  if (o.shippingMeta?.srOrderId) return o.shippingMeta;
+  if (o.shippingMeta?.srOrderId && o.shippingMeta?.shipmentId) return o.shippingMeta;
   if (o.status === "cancelled") throw new ShiprocketError("Cancelled orders can’t be shipped.");
   if (o.paymentMethod !== "cod" && o.financialStatus !== "paid") throw new ShiprocketError("This prepaid order isn’t paid yet.");
 

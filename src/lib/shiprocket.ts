@@ -59,10 +59,11 @@ async function call<T>(path: string, init: RequestInit = {}, retried = false): P
   } catch {
     body = { message: text };
   }
-  if (!res.ok) {
+  const bodyStatus = Number((body as { status_code?: unknown })?.status_code) || 0;
+  if (!res.ok || bodyStatus >= 400) {
     const b = body as { message?: string; errors?: Record<string, string[]> };
     const detail = b.errors ? Object.values(b.errors).flat().join(" ") : "";
-    throw new ShiprocketError([b.message, detail].filter(Boolean).join(" — ") || `Shiprocket error ${res.status}`, res.status, body);
+    throw new ShiprocketError([b.message, detail].filter(Boolean).join(" — ") || `Shiprocket error ${bodyStatus || res.status}`, bodyStatus || res.status, body);
   }
   return body as T;
 }
@@ -151,11 +152,22 @@ export type AdhocOrder = {
 };
 
 export async function createOrder(o: AdhocOrder) {
-  return call<{ order_id: number; shipment_id: number; status: string; awb_code?: string; courier_name?: string }>(`/orders/create/adhoc`, {
-    method: "POST",
-    body: JSON.stringify(o),
-  });
+  try {
+    const r = await call<{ order_id?: number; shipment_id?: number; status?: string; message?: string; awb_code?: string; courier_name?: string }>(`/orders/create/adhoc`, {
+      method: "POST",
+      body: JSON.stringify(o),
+    });
+    if (!r.order_id || !r.shipment_id) throw new ShiprocketError(r.message || "Shiprocket didn’t create the order (no order id returned).", 422, r);
+    return r as { order_id: number; shipment_id: number; status: string; awb_code?: string; courier_name?: string };
+  } catch (e) {
+    if (e instanceof ShiprocketError && /pickup location/i.test(e.message)) {
+      const names = (await pickupLocations().catch(() => [])).map((p) => p.name);
+      if (names.length) throw new ShiprocketError(`Pickup location "${o.pickup_location}" not found in Shiprocket. Use one of: ${names.join(", ")} (Admin → Settings → Shiprocket).`, 422, e.body);
+    }
+    throw e;
+  }
 }
+
 
 /** Books the courier (Shiprocket's recommended one unless `courierId` is given) and returns the AWB. */
 export async function assignAwb(shipmentId: number, courierId?: number) {

@@ -12,7 +12,7 @@ import { cancelShipment, pushOrderToShiprocket, refreshTracking, requestPickup, 
 import { addNote, cancelOrder, markPaid, OrderActionError, refundOrder } from "@/lib/order-admin";
 import { testRazorpay } from "@/lib/razorpay";
 import { DEFAULTS, getSettings, PAYMENT_METHODS, type SettingsMap } from "@/lib/settings";
-import { serviceability, shiprocketConfigured } from "@/lib/shiprocket";
+import { serviceability, shiprocketConfigured, pickupLocations } from "@/lib/shiprocket";
 
 // ───────────────────────────── session
 
@@ -205,7 +205,14 @@ export async function testShiprocket(_: unknown, form: FormData): Promise<{ ok?:
     const s = await serviceability(sr.pickupPostcode, pin, { weightKg: sr.weightKg, cod: false });
     if (!s.serviceable) return { ok: `Connected ✓ — but no courier serves ${pin} from ${sr.pickupPostcode}.` };
     const q = await deliveryQuote(pin);
-    return { ok: `Connected ✓ — ${s.courier ?? "courier"} delivers to ${pin} in ~${s.days} days (customers see ${q?.from} – ${q?.to}); COD ${s.codAvailable ? "available" : "not available"}.` };
+    const names = (await pickupLocations().catch(() => [])).map((p) => p.name);
+    const pickupNote = !names.length
+      ? " Couldn’t read pickup addresses."
+      : names.includes(sr.pickupLocation)
+        ? ` Pickup location "${sr.pickupLocation}" ✓.`
+        : ` ⚠ Pickup location "${sr.pickupLocation}" doesn’t exist in Shiprocket — orders can’t be created. Use one of: ${names.join(", ")}.`;
+    const msg = `Connected ✓ — ${s.courier ?? "courier"} delivers to ${pin} in ~${s.days} days (customers see ${q?.from} – ${q?.to}); COD ${s.codAvailable ? "available" : "not available"}.${pickupNote}`;
+    return names.length && !names.includes(sr.pickupLocation) ? { error: msg } : { ok: msg };
   } catch (e) {
     return { error: `Shiprocket said: ${e instanceof Error ? e.message : String(e)}` };
   }
