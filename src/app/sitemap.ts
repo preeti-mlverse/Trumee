@@ -10,7 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [products, collections, pages, posts] = await Promise.all([
     db.query.products.findMany({
       where: eq(schema.products.status, "active"),
-      columns: { handle: true, updatedAt: true, videoUrl: true },
+      columns: { handle: true, title: true, updatedAt: true, videoUrl: true },
       with: { images: { columns: { url: true }, limit: 6 } },
     }),
     db.select({ handle: schema.collections.handle, updatedAt: schema.collections.updatedAt }).from(schema.collections).where(eq(schema.collections.published, true)),
@@ -30,7 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
       images: p.images.map((i) => abs(i.url)),
       videos: p.videoUrl
-        ? [{ title: p.handle.replace(/-/g, " "), thumbnail_loc: abs(p.images[0]?.url ?? ""), description: "Catwalk video", content_loc: abs(p.videoUrl) }]
+        ? [{ thumbnail_loc: abs(p.images[0]?.url ?? ""), title: p.title, description: `${p.title} — try-on video by Trumee`, content_loc: abs(p.videoUrl) }]
         : undefined,
     })),
     { url: abs("/blogs/news"), lastModified: now, changeFrequency: "weekly", priority: 0.6 },
