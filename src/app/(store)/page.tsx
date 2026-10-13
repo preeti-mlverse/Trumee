@@ -261,7 +261,7 @@ export default async function Home() {
                   {m.title}
                 </span>
                 <span className="mt-3 flex items-center justify-between text-[12px] tracking-[0.06em] text-cream/85">
-                  {m.total} styles
+                  Shop now
                   <span aria-hidden className="transition-transform duration-500 group-hover:translate-x-1">→</span>
                 </span>
               </span>
@@ -344,7 +344,7 @@ export default async function Home() {
                   <span className="-mt-5 sm:-mt-6 size-10 sm:size-12 shrink-0 rounded-full ring-4 ring-paper shadow-md" style={{ background: c.swatch }} />
                   <span className="min-w-0 pt-2.5">
                     <span className="block font-display text-[17px] sm:text-[22px] leading-tight">{c.label}</span>
-                    <span className="block text-[12px] text-muted">{c.total} styles →</span>
+                    <span className="block text-[12px] text-muted">Shop now →</span>
                   </span>
                 </span>
               </Link>

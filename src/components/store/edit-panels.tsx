@@ -79,7 +79,7 @@ export function EditPanels({ edits }: { edits: EditPanel[] }) {
                 <p className="font-display text-[44px] lg:text-[56px] leading-[0.95] mt-4 max-w-xl">{e.title}</p>
                 {e.text && <p className="mt-3 text-[15px] text-cream/80 leading-relaxed max-w-md line-clamp-2">{e.text}</p>}
                 <span className="mt-6 inline-flex items-center gap-4 rounded-full bg-cream text-ink pl-6 pr-1.5 py-1.5 text-sm font-medium">
-                  Explore {e.count} styles
+                  Explore the edit
                   <span className="size-9 rounded-full bg-ink text-cream grid place-items-center transition-transform duration-300 group-hover:rotate-45">
                     <ArrowUpRight className="size-4" />
                   </span>
@@ -101,7 +101,7 @@ export function EditPanels({ edits }: { edits: EditPanel[] }) {
               <p className="font-display text-[34px] leading-none mt-2">{e.title}</p>
               <p className="mt-2 text-[13px] text-cream/80 line-clamp-2">{e.text}</p>
               <span className="mt-4 inline-flex items-center gap-2 text-sm">
-                Explore {e.count} styles <ArrowUpRight className="size-4" />
+                Explore the edit <ArrowUpRight className="size-4" />
               </span>
             </div>
           </Link>

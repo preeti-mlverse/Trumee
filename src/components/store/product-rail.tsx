@@ -103,7 +103,7 @@ export function ProductRail({ tabs, list }: { tabs: RailTab[]; list: string }) {
             <span className="block mt-4 text-[15px] leading-snug opacity-85 max-w-[16rem]">{tab.feature.line}</span>
           </span>
           <span className={cn("relative inline-flex w-fit items-center gap-3 rounded-full pl-5 pr-1.5 py-1.5 text-sm font-medium", tone.btn)}>
-            Shop all{tab.count != null ? ` ${tab.count}` : ""}
+            Shop all
             <span className="size-8 rounded-full bg-white/20 grid place-items-center transition-transform duration-300 group-hover:rotate-45">
               <ArrowUpRight className="size-4" />
             </span>
