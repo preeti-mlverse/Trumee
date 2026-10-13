@@ -334,18 +334,17 @@ export default async function Home() {
               <Link
                 key={c.key}
                 href={`/collections/all?colour=${c.key}`}
-                className="group relative block overflow-hidden rounded-card bg-paper border border-ink/[0.06] isolate transition-transform duration-500 hover:-translate-y-1"
+                className="group relative block aspect-[3/4] overflow-hidden rounded-card bg-sand isolate"
               >
-                <span className="relative block aspect-[4/5] overflow-hidden bg-sand">
-                  {c.image && <Image src={c.image} alt="" fill sizes="(min-width:1024px) 18vw, 45vw" className="object-cover object-top transition-transform duration-700 group-hover:scale-105" />}
-                  <span aria-hidden className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/35 to-transparent" />
-                </span>
-                <span className="relative flex items-start gap-2.5 sm:gap-3 px-3 sm:px-4 pb-3.5 sm:pb-4 pt-0">
-                  <span className="-mt-5 sm:-mt-6 size-10 sm:size-12 shrink-0 rounded-full ring-4 ring-paper shadow-md" style={{ background: c.swatch }} />
-                  <span className="min-w-0 pt-2.5">
-                    <span className="block font-display text-[17px] sm:text-[22px] leading-tight">{c.label}</span>
-                    <span className="block text-[12px] text-muted">Shop now →</span>
+                {c.image && <Image src={c.image} alt="" fill sizes="(min-width:1024px) 18vw, 45vw" className="object-cover object-top transition-transform duration-700 group-hover:scale-105" />}
+                <span aria-hidden className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/55 via-ink/15 to-transparent" />
+                <span className="absolute inset-x-2.5 bottom-2.5 sm:inset-x-3 sm:bottom-3 flex items-center gap-2 rounded-full bg-paper/90 backdrop-blur-md pl-2 pr-3 py-1.5 sm:py-2 shadow-sm">
+                  <span aria-hidden className="size-3.5 sm:size-4 shrink-0 rounded-full ring-1 ring-ink/15" style={{ background: c.swatch }} />
+                  <span className="min-w-0 flex-1 truncate text-[11px] sm:text-xs tracking-[0.08em] uppercase">
+                    <span className="sm:hidden">{c.label.split(" & ")[0]}</span>
+                    <span className="hidden sm:inline">{c.label}</span>
                   </span>
+                  <span aria-hidden className="text-xs transition-transform duration-300 group-hover:translate-x-0.5">→</span>
                 </span>
               </Link>
             ))}
