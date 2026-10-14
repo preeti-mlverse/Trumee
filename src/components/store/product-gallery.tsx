@@ -198,17 +198,23 @@ function Viewer({ slides, start, title, onClose }: { slides: Slide[]; start: num
           touchX.current = null;
         }}
       >
-        <Image
-          key={s.url}
-          src={s.url}
-          alt={(s.kind === "image" && s.alt) || `${title} – image ${i + 1}`}
-          fill
-          sizes="100vw"
-          quality={90}
-          className="object-contain transition-transform duration-300 ease-out select-none"
-          style={{ transform: zoom ? "scale(2.5)" : "none", transformOrigin: origin }}
-          draggable={false}
-        />
+        {/* Every photo is mounted (and downloading) as soon as the viewer opens; next/previous only swaps which one shows */}
+        {slides.map((t, k) => (
+          <Image
+            key={t.url}
+            src={t.url}
+            alt={k === i ? (t.kind === "image" && t.alt) || `${title} – image ${k + 1}` : ""}
+            aria-hidden={k !== i}
+            fill
+            loading="eager"
+            fetchPriority={k === i ? "high" : "low"}
+            // Photos are portrait and fit the viewer's height, so ~80vh of width is plenty (enough for the 2.5× zoom too)
+            sizes="(orientation: landscape) 80vh, 100vw"
+            className={cn("object-contain select-none", k === i ? "opacity-100 transition-transform duration-300 ease-out" : "opacity-0 pointer-events-none")}
+            style={k === i ? { transform: zoom ? "scale(2.5)" : "none", transformOrigin: origin } : undefined}
+            draggable={false}
+          />
+        ))}
       </div>
 
       {n > 1 && (
