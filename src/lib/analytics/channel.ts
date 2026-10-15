@@ -47,6 +47,8 @@ export function attribute(params: {
   utm_term?: string | null;
   utm_content?: string | null;
   gclid?: string | null;
+  /** ChatGPT ads append oppref/olref to the landing URL, even when the ad has no UTM tags */
+  oppref?: string | null;
   fbclid?: string | null;
   referrer?: string | null;
   siteHost?: string | null;
@@ -61,6 +63,9 @@ export function attribute(params: {
   const term = params.utm_term || null;
   const content = params.utm_content || null;
 
+  // 0. ChatGPT ad click without UTM tags (oppref is only added to ad clicks)
+  if (params.oppref && !params.utm_source) return { source: "chatgpt", medium: "paid", campaign, term, content, channel: "Paid AI", referrerHost: refHost };
+
   // 1. Explicit UTM tagging
   if (params.utm_source || params.utm_medium) {
     const source = (params.utm_source || (refHost ? sourceFromHost(refHost) : "(direct)")).toLowerCase();
@@ -69,7 +74,7 @@ export function attribute(params: {
     const isSocial = matches(source + ".", SOCIAL) || ["instagram", "facebook", "ig", "fb", "whatsapp", "youtube", "pinterest", "twitter"].includes(source);
     let channel = "Referral";
     const isAi = matches(source, AI) || ["chatgpt", "perplexity", "gemini", "copilot", "claude"].includes(source);
-    if (isAi && !PAID_MEDIUMS.test(medium)) channel = "AI Assistants";
+    if (isAi) channel = PAID_MEDIUMS.test(medium) ? "Paid AI" : "AI Assistants";
     else if (PAID_MEDIUMS.test(medium)) channel = isSocial ? "Paid Social" : isSearch ? "Paid Search" : medium === "display" || medium === "banner" ? "Display" : "Paid Other";
     else if (medium === "email" || medium === "newsletter") channel = "Email";
     else if (medium === "sms") channel = "SMS";

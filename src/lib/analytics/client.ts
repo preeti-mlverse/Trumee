@@ -91,6 +91,10 @@ export function track(name: string, params: TrackParams = {}, opts: { thirdParty
   if (opts.thirdPartyOnly) return sendThirdParty(name, params);
   const { vid, sid, isNewVisitor, isNewSession } = ids();
   const url = new URL(location.href);
+  const oppref = url.searchParams.has("oppref") ? "1" : null;
+  // ChatGPT's oppref/olref click tokens are long and unique per click: keep them out of stored paths
+  url.searchParams.delete("oppref");
+  url.searchParams.delete("olref");
   const payload = {
     name,
     vid,
@@ -100,7 +104,7 @@ export function track(name: string, params: TrackParams = {}, opts: { thirdParty
     path: url.pathname + (url.search && name === "page_view" ? url.search : ""),
     title: document.title,
     referrer: isNewSession ? document.referrer : undefined,
-    utm: isNewSession ? Object.fromEntries(["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "fbclid"].map((k) => [k, url.searchParams.get(k)])) : undefined,
+    utm: isNewSession ? { ...Object.fromEntries(["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "fbclid"].map((k) => [k, url.searchParams.get(k)])), oppref } : undefined,
     screen: `${screen.width}x${screen.height}`,
     lang: navigator.language,
     engagementMs: takeEngagement(),
