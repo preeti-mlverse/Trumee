@@ -55,6 +55,8 @@ export async function ingest(p: CollectPayload, headers: Headers) {
   const isPageView = p.name === "page_view";
 
   const existing = await db.query.analyticsSessions.findFirst({ where: eq(schema.analyticsSessions.id, p.sid), columns: { id: true } });
+  // Two first events of a session can arrive together; the one that loses the insert race is counted as an update instead of dropped.
+  let existingAfterInsert = true;
   if (!existing) {
     const host = headers.get("host");
     const a = attribute({ ...(p.utm ?? {}), referrer: p.referrer, siteHost: host });
@@ -63,7 +65,7 @@ export async function ingest(p: CollectPayload, headers: Headers) {
     const prior = p.newVisitor
       ? null
       : await db.query.analyticsSessions.findFirst({ where: eq(schema.analyticsSessions.visitorId, p.vid), columns: { id: true } });
-    await db
+    const inserted = await db
       .insert(schema.analyticsSessions)
       .values({
         id: p.sid,
@@ -93,8 +95,11 @@ export async function ingest(p: CollectPayload, headers: Headers) {
         events: 1,
         engagementMs: engagement,
       })
-      .onConflictDoNothing();
-  } else {
+      .onConflictDoNothing()
+      .returning({ id: schema.analyticsSessions.id });
+    if (inserted.length) existingAfterInsert = false;
+  }
+  if (existing || existingAfterInsert) {
     await db
       .update(schema.analyticsSessions)
       .set({

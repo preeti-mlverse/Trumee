@@ -1,7 +1,8 @@
 "use client";
 
 /**
- * Browser-side event tracking. Every event goes to our own collector (/api/collect)
+ * Browser-side event tracking. Every event goes to our own collector (/api/ev — not "/api/collect",
+ * which ad-block lists block)
  * and — when the visitor consented — is mirrored to GA4 (gtag) and Meta Pixel (fbq)
  * using GA4's recommended e-commerce event names.
  */
@@ -108,8 +109,8 @@ export function track(name: string, params: TrackParams = {}, opts: { thirdParty
     props: params,
   };
   const body = JSON.stringify(payload);
-  if (!navigator.sendBeacon?.("/api/collect", new Blob([body], { type: "application/json" }))) {
-    fetch("/api/collect", { method: "POST", body, keepalive: true, headers: { "content-type": "application/json" } }).catch(() => {});
+  if (!navigator.sendBeacon?.("/api/ev", new Blob([body], { type: "application/json" }))) {
+    fetch("/api/ev", { method: "POST", body, keepalive: true, headers: { "content-type": "application/json" } }).catch(() => {});
   }
 
   if (name === "page_view") return; // GA4/Meta record page views on their own
